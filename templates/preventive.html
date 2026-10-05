@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cancer Prevention & Early Detection — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container">
+
+    <!-- Universal Header Navigation Bar -->
+    <header class="header-bar">
+      <a href="/" class="brand-section">
+        <div class="brand-logo" style="background: linear-gradient(135deg, #10b981 0%, #35d0b8 100%);">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1>Preventive Oncology &amp; Ambulatory Screening Clinic</h1>
+            <span class="brand-status-chip" style="color: #10b981; background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.3);"><span class="dot" style="background: #10b981; box-shadow: 0 0 8px #10b981;"></span> OUTPATIENT RADAR LIVE</span>
+          </div>
+          <p>Outpatient Cancer Screening Roadmaps, Organ Vulnerability Telemetry &amp; USPSTF/ACS Guidelines</p>
+        </div>
+      </a>
+      <div class="header-nav-wrap">
+        <nav class="nav-actions">
+          <a class="nav-link" href="/"><i class="fa-solid fa-stethoscope"></i> <span>Diagnostic</span></a>
+          <a class="nav-link active" href="/preventive"><i class="fa-solid fa-shield-halved"></i> <span>Preventive</span></a>
+          <a class="nav-link" href="/monitoring"><i class="fa-solid fa-chart-line"></i> <span>Monitoring</span></a>
+          <a class="nav-link" href="/workflows"><i class="fa-solid fa-network-wired"></i> <span>Workflows</span></a>
+          <a class="nav-link" href="/wellbeing"><i class="fa-solid fa-heart-pulse"></i> <span>Wellbeing</span></a>
+          <a class="nav-link" href="/interactions"><i class="fa-solid fa-pills"></i> <span>Interactions</span></a>
+        </nav>
+        <button class="theme-toggle-btn" id="themeToggle" type="button" title="Switch Theme (Light / Dark)">
+          <i class="fa-solid fa-moon"></i> <span>Dark</span>
+        </button>
+        {% if session.get('doctor_logged_in') %}
+          <a class="nav-portal-btn active" href="/dashboard"><i class="fa-solid fa-user-doctor"></i> <span>Dashboard</span></a>
+          <a class="nav-portal-btn" href="/logout" style="color: var(--danger); border-color: rgba(255, 77, 109, 0.4);" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></a>
+        {% else %}
+          <a class="nav-portal-btn" href="/login"><i class="fa-solid fa-user-doctor"></i> <span>Doctor Portal</span></a>
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- Cancer Focus Filter Selector -->
+    <div style="background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.85rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">
+          <i class="fa-solid fa-crosshairs"></i> Target Cancer Focus:
+        </span>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="cancerTypeFilterPills">
+        <button class="a11y-opt-btn cancer-pill active" data-type="all"><i class="fa-solid fa-dna"></i> All 4 Cancers</button>
+        <button class="a11y-opt-btn cancer-pill" data-type="lung"><i class="fa-solid fa-lungs"></i> Lung Cancer</button>
+        <button class="a11y-opt-btn cancer-pill" data-type="breast"><i class="fa-solid fa-ribbon"></i> Breast Cancer</button>
+        <button class="a11y-opt-btn cancer-pill" data-type="skin"><i class="fa-solid fa-sun"></i> Skin / Melanoma</button>
+        <button class="a11y-opt-btn cancer-pill" data-type="brain"><i class="fa-solid fa-brain"></i> Brain Tumors</button>
+      </div>
+    </div>
+
+    <!-- Top KPI Highlights -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+          <i class="fa-solid fa-lungs"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Annual LDCT</h3>
+          <p>Lung Cancer Early Nodule Protocol</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">
+          <i class="fa-solid fa-ribbon"></i>
+        </div>
+        <div class="stat-info">
+          <h3>3D Tomo + MRI</h3>
+          <p>Breast Cancer Detection at Stage 0/I</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(53, 208, 184, 0.15); color: #35d0b8;">
+          <i class="fa-solid fa-sun"></i>
+        </div>
+        <div class="stat-info">
+          <h3>ABCDE Mapping</h3>
+          <p>Melanoma Excision In Situ (>98% Cure)</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+        <div class="stat-info">
+          <h3>3T Contrast MRI</h3>
+          <p>Glioma & Meningioma Surveillance</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Two-Column Layout -->
+    <div class="main-grid">
+
+      <!-- Column Left: Oncology Intake & Assessment Form -->
+      <div>
+        <div class="panel-card mb-4">
+          <div class="panel-header">
+            <span class="panel-tag">Cancer Etiology Engine</span>
+            <h2 class="panel-heading" id="formHeaderTitle">Oncologic Risk & Carcinogen Exposure Intake</h2>
+            <p class="panel-subtext">Evaluate genetic mutations, carcinogen exposures, and clinical warning signs for the 4 core cancer types.</p>
+          </div>
+
+          <div class="panel-body">
+            <!-- Patient Selector -->
+            <div class="form-group">
+              <label class="form-label"><i class="fa-solid fa-user-tag text-accent"></i> Autofill From Existing Patient Scan (Optional)</label>
+              <select id="patientSelect" class="form-select">
+                <option value="">-- Or enter individual patient parameters below --</option>
+                {% for p in patients %}
+                  <option value="{{ p.patient_id }}" data-name="{{ p.patient_name }}" data-age="{{ p.age }}" data-gender="{{ p.gender }}" data-cancer="{{ p.cancer_type }}">
+                    {{ p.patient_name }} (ID: {{ p.patient_id }} | {{ p.cancer_type|title }} Cancer)
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <form id="preventiveForm">
+              <div class="form-row-2">
+                <div>
+                  <label class="form-label">Patient Name</label>
+                  <input type="text" id="pName" class="form-input" placeholder="e.g. Eleanor Vance" required />
+                </div>
+                <div>
+                  <label class="form-label">Age</label>
+                  <input type="number" id="pAge" class="form-input" min="18" max="100" value="48" required />
+                </div>
+              </div>
+
+              <div class="form-row-2" style="margin-top: 12px;">
+                <div>
+                  <label class="form-label">Biological Sex</label>
+                  <select id="pGender" class="form-select">
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label">Cancer Focus Scope</label>
+                  <select id="pCancerType" class="form-select">
+                    <option value="all">All 4 Target Cancers</option>
+                    <option value="lung">Lung Cancer</option>
+                    <option value="breast">Breast Cancer</option>
+                    <option value="skin">Skin Cancer (Melanoma)</option>
+                    <option value="brain">Brain Tumor (Glioma/Meningioma)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Cancer-Specific Factor Sections -->
+
+              <!-- Lung Cancer Section -->
+              <div id="lungFactorGroup" style="margin-top: 14px; padding: 12px; border-radius: 8px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2);">
+                <h4 style="font-size: 0.85rem; color: #3b82f6; margin-bottom: 8px;"><i class="fa-solid fa-lungs"></i> Lung Cancer Etiology:</h4>
+                <div class="form-row-2">
+                  <div>
+                    <label class="form-label">Smoking Status</label>
+                    <select id="pSmoking" class="form-select">
+                      <option value="never">Never Smoked</option>
+                      <option value="former">Former Smoker (Quit)</option>
+                      <option value="current">Current Smoker</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">Smoking Pack-Years</label>
+                    <input type="number" id="pPackYears" class="form-input" placeholder="e.g. 20" value="0" />
+                  </div>
+                </div>
+                <label class="caution-item" style="margin-top: 8px; padding: 6px 10px;">
+                  <input type="checkbox" id="pRadon" />
+                  <span style="font-size: 0.8rem;">Occupational Asbestos, Silica, or Residential Radon Gas Exposure</span>
+                </label>
+              </div>
+
+              <!-- Breast Cancer Section -->
+              <div id="breastFactorGroup" style="margin-top: 14px; padding: 12px; border-radius: 8px; background: rgba(236, 72, 153, 0.05); border: 1px solid rgba(236, 72, 153, 0.2);">
+                <h4 style="font-size: 0.85rem; color: #ec4899; margin-bottom: 8px;"><i class="fa-solid fa-ribbon"></i> Breast Cancer Etiology:</h4>
+                <div class="form-row-2">
+                  <div>
+                    <label class="form-label">BRCA1 / BRCA2 Mutation</label>
+                    <select id="pBRCA" class="form-select">
+                      <option value="negative">Negative / Normal</option>
+                      <option value="positive">BRCA1/2 Mutation Positive</option>
+                      <option value="untested">Unknown / Untested</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">Mammographic Tissue Density</label>
+                    <select id="pDensity" class="form-select">
+                      <option value="average">Almost entirely fatty / Scattered (BI-RADS A/B)</option>
+                      <option value="dense">Heterogeneously / Extremely dense (BI-RADS C/D)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Skin Cancer Section -->
+              <div id="skinFactorGroup" style="margin-top: 14px; padding: 12px; border-radius: 8px; background: rgba(53, 208, 184, 0.05); border: 1px solid rgba(53, 208, 184, 0.2);">
+                <h4 style="font-size: 0.85rem; color: #35d0b8; margin-bottom: 8px;"><i class="fa-solid fa-sun"></i> Skin / Melanoma Etiology:</h4>
+                <div class="form-row-2">
+                  <div>
+                    <label class="form-label">Skin Phototype & Sunburns</label>
+                    <select id="pSunburn" class="form-select">
+                      <option value="rare">Fitzpatrick III-VI (Rarely burns / tans easily)</option>
+                      <option value="occasional" selected>Fitzpatrick II (Burns easily, moderate sunburn history)</option>
+                      <option value="frequent">Fitzpatrick I (Always burns, childhood blistering sunburns)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="form-label">Dysplastic / Atypical Moles Count</label>
+                    <input type="number" id="pMoles" class="form-input" min="0" value="2" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Brain Cancer Section -->
+              <div id="brainFactorGroup" style="margin-top: 14px; padding: 12px; border-radius: 8px; background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.2);">
+                <h4 style="font-size: 0.85rem; color: #8b5cf6; margin-bottom: 8px;"><i class="fa-solid fa-brain"></i> Brain Tumor / CNS Etiology:</h4>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                  <label class="caution-item" style="padding: 6px 10px;">
+                    <input type="checkbox" id="pCranialRadiation" />
+                    <span style="font-size: 0.8rem;">History of Prior Therapeutic Cranial Radiation Therapy</span>
+                  </label>
+                  <label class="caution-item" style="padding: 6px 10px;">
+                    <input type="checkbox" id="pNeuroHeadaches" />
+                    <span style="font-size: 0.8rem;">Persistent Morning Headaches or Unexplained Adult-Onset Seizures</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Family Oncology History -->
+              <div class="form-group" style="margin-top: 14px;">
+                <label class="form-label"><i class="fa-solid fa-dna text-accent"></i> First-Degree Family History of These Cancers:</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                  <label class="caution-item" style="padding: 8px 12px;">
+                    <input type="checkbox" name="familyHistory" value="lung" /> 🫁 Lung Cancer
+                  </label>
+                  <label class="caution-item" style="padding: 8px 12px;">
+                    <input type="checkbox" name="familyHistory" value="breast" /> 🎗️ Breast Cancer
+                  </label>
+                  <label class="caution-item" style="padding: 8px 12px;">
+                    <input type="checkbox" name="familyHistory" value="skin" /> ☀️ Melanoma
+                  </label>
+                  <label class="caution-item" style="padding: 8px 12px;">
+                    <input type="checkbox" name="familyHistory" value="brain" /> 🧠 Brain Tumor
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px; padding: 14px; font-size: 0.95rem;">
+                <i class="fa-solid fa-microchip"></i> Compute Cancer Vulnerability & Prevention Roadmap
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Cancer Warning Signs Checklist -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <span class="panel-tag" style="background: rgba(255, 77, 109, 0.15); color: #ff4d6d;">Clinical Red Flags</span>
+            <h2 class="panel-heading"><i class="fa-solid fa-triangle-exclamation text-danger"></i> Specific Cancer Warning Signs Checklist</h2>
+            <p class="panel-subtext">Clinical oncologic warning signs for Brain, Breast, Lung, and Skin cancers. Check any currently present.</p>
+          </div>
+          <div class="panel-body">
+            <div class="caution-checklist-grid" id="cautionChecklist">
+              <!-- Lung -->
+              <label class="caution-item">
+                <input type="checkbox" value="lung_cough" />
+                <div>
+                  <strong>🫁 Chronic Cough or Hemoptysis</strong>
+                  <p style="font-size: 0.78rem; color: var(--muted-light);">Persistent coughing >3 weeks or blood in sputum (Lung cancer red flag).</p>
+                </div>
+              </label>
+              <!-- Breast -->
+              <label class="caution-item">
+                <input type="checkbox" value="breast_lump" />
+                <div>
+                  <strong>🎗️ Palpable Breast Lump or Dimpling</strong>
+                  <p style="font-size: 0.78rem; color: var(--muted-light);">Hard painless lump, peau d'orange skin, or bloody nipple discharge.</p>
+                </div>
+              </label>
+              <!-- Skin -->
+              <label class="caution-item">
+                <input type="checkbox" value="skin_abcde" />
+                <div>
+                  <strong>☀️ Asymmetric / Evolving Mole (ABCDE)</strong>
+                  <p style="font-size: 0.78rem; color: var(--muted-light);">Uneven borders, color variegation, or rapid growth >6mm.</p>
+                </div>
+              </label>
+              <!-- Brain -->
+              <label class="caution-item">
+                <input type="checkbox" value="brain_neuro" />
+                <div>
+                  <strong>🧠 Morning Projectile Headaches / Seizures</strong>
+                  <p style="font-size: 0.78rem; color: var(--muted-light);">Headaches worsening with bending/coughing, focal motor weakness, or adult seizure.</p>
+                </div>
+              </label>
+            </div>
+
+            <div id="cautionAlertBox" style="display: none; margin-top: 16px; padding: 14px; border-radius: var(--radius-sm); background: rgba(255, 77, 109, 0.15); border: 1px solid var(--danger);">
+              <h4 style="color: var(--danger); font-size: 0.95rem; margin-bottom: 4px;">
+                <i class="fa-solid fa-bell"></i> Potential Oncology Warning Signs Flagged
+              </h4>
+              <p style="font-size: 0.84rem; color: var(--text);">
+                You selected one or more hallmark cancer symptoms. Immediate clinical evaluation with imaging (Brain MRI, Chest CT, Mammography, or Dermoscopy) is strongly advised.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column Right: Cancer Results & Preventive Action Plan -->
+      <div>
+        <div class="panel-card mb-4" id="resultsPanel">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span class="panel-tag">Oncology Assessment</span>
+              <h2 class="panel-heading">Cancer Vulnerability Profile</h2>
+            </div>
+            <button class="speak-text-btn" id="speakResultsBtn" type="button" aria-label="Read Cancer Preventive Assessment Aloud">
+              <i class="fa-solid fa-volume-high"></i> Read Aloud
+            </button>
+          </div>
+
+          <div class="panel-body">
+            <!-- Overall Score Circle Gauge -->
+            <div class="risk-meter-container">
+              <div class="risk-circle-gauge" id="riskGauge" style="border-color: #10b981;">
+                <div class="gauge-val" id="gaugeVal">24%</div>
+                <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--muted-light);">Cancer Index</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                <span style="font-size: 0.9rem; color: var(--muted-light);">Oncology Risk:</span>
+                <span class="badge badge-success" id="riskLevelBadge">Low Risk Profile</span>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--muted-light); margin-top: 8px; max-width: 420px;" id="riskSummaryText">
+                Baseline oncologic vulnerability is favorable. Following recommended guideline screening intervals preserves early curative detection.
+              </p>
+            </div>
+
+            <!-- Organ Specific Scores Breakdown for the 4 Cancers -->
+            <div style="margin-top: 22px;">
+              <h3 style="font-size: 0.95rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-chart-simple text-accent"></i> 4 Target Cancer Vulnerability Indices
+              </h3>
+              
+              <!-- Lung -->
+              <div class="organ-bar-item">
+                <div class="organ-bar-label">
+                  <span><i class="fa-solid fa-lungs text-primary-blue"></i> Lung Cancer Risk</span>
+                  <span id="lungScoreVal">14%</span>
+                </div>
+                <div class="organ-progress-track">
+                  <div class="organ-progress-fill" id="lungBar" style="width: 14%; background: #3b82f6;"></div>
+                </div>
+              </div>
+
+              <!-- Breast -->
+              <div class="organ-bar-item" id="breastOrganRow">
+                <div class="organ-bar-label">
+                  <span><i class="fa-solid fa-ribbon" style="color: #ec4899;"></i> Breast Cancer Risk</span>
+                  <span id="breastScoreVal">18%</span>
+                </div>
+                <div class="organ-progress-track">
+                  <div class="organ-progress-fill" id="breastBar" style="width: 18%; background: #ec4899;"></div>
+                </div>
+              </div>
+
+              <!-- Skin -->
+              <div class="organ-bar-item">
+                <div class="organ-bar-label">
+                  <span><i class="fa-solid fa-sun text-accent"></i> Skin Cancer / Melanoma Risk</span>
+                  <span id="skinScoreVal">22%</span>
+                </div>
+                <div class="organ-progress-track">
+                  <div class="organ-progress-fill" id="skinBar" style="width: 22%; background: #35d0b8;"></div>
+                </div>
+              </div>
+
+              <!-- Brain -->
+              <div class="organ-bar-item">
+                <div class="organ-bar-label">
+                  <span><i class="fa-solid fa-brain" style="color: #8b5cf6;"></i> Brain Tumor / Glioma Risk</span>
+                  <span id="brainScoreVal">10%</span>
+                </div>
+                <div class="organ-progress-track">
+                  <div class="organ-progress-fill" id="brainBar" style="width: 10%; background: #8b5cf6;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modifiable Oncology Risk Reduction Target -->
+            <div style="margin-top: 24px; padding: 16px; border-radius: var(--radius-sm); background: rgba(53, 208, 184, 0.08); border: 1px solid rgba(53, 208, 184, 0.25);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="font-size: 0.95rem; color: var(--accent);">
+                  <i class="fa-solid fa-arrow-trend-down"></i> Modifiable Cancer Risk Reduction Potential
+                </h4>
+                <span class="badge badge-success" id="reductionPotentialBadge">-35% Achievable</span>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 6px;">
+                Targeted elimination of known carcinogens and genetic surveillance substantially lowers lifetime oncogenesis odds.
+              </p>
+              <div id="lifestyleActionList" style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Cancer Screening Roadmap -->
+            <div style="margin-top: 24px;">
+              <h3 style="font-size: 0.95rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-calendar-check text-accent"></i> Targeted Cancer Screening Roadmap (USPSTF / ACS)
+              </h3>
+              <div id="screeningTimelineList" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="margin-top: 22px; display: flex; gap: 10px;">
+              <button class="btn btn-secondary" onclick="window.print()" style="flex: 1; padding: 12px;">
+                <i class="fa-solid fa-print"></i> Print Cancer Prevention Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/accessibility.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('preventiveForm');
+      const patientSelect = document.getElementById('patientSelect');
+      const cautionCheckboxes = document.querySelectorAll('#cautionChecklist input[type="checkbox"]');
+      const cautionAlertBox = document.getElementById('cautionAlertBox');
+      const cancerPills = document.querySelectorAll('.cancer-pill');
+      const cancerTypeSelect = document.getElementById('pCancerType');
+
+      // Check URL parameters for cancer_type or patient_id
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCancer = urlParams.get('cancer_type');
+      const urlPatient = urlParams.get('patient_id');
+
+      if (urlCancer) {
+        cancerTypeSelect.value = urlCancer;
+        cancerPills.forEach(p => p.classList.toggle('active', p.dataset.type === urlCancer));
+      }
+      if (urlPatient && patientSelect) {
+        patientSelect.value = urlPatient;
+        patientSelect.dispatchEvent(new Event('change'));
+      }
+
+      // Filter pills
+      cancerPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          cancerPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          cancerTypeSelect.value = pill.dataset.type;
+          form.dispatchEvent(new Event('submit'));
+        });
+      });
+
+      cancerTypeSelect.addEventListener('change', () => {
+        cancerPills.forEach(p => p.classList.toggle('active', p.dataset.type === cancerTypeSelect.value));
+      });
+
+      // Autofill on patient select
+      patientSelect.addEventListener('change', (e) => {
+        const opt = e.target.selectedOptions[0];
+        if (!opt || !opt.value) return;
+        document.getElementById('pName').value = opt.dataset.name || '';
+        document.getElementById('pAge').value = opt.dataset.age || 45;
+        if (opt.dataset.gender) document.getElementById('pGender').value = opt.dataset.gender;
+        if (opt.dataset.cancer) {
+          cancerTypeSelect.value = opt.dataset.cancer;
+          cancerPills.forEach(p => p.classList.toggle('active', p.dataset.type === opt.dataset.cancer));
+        }
+        form.dispatchEvent(new Event('submit'));
+      });
+
+      // CAUTION checklist triage
+      cautionCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const checked = Array.from(cautionCheckboxes).some(c => c.checked);
+          cautionAlertBox.style.display = checked ? 'block' : 'none';
+        });
+      });
+
+      // Submit Form
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const familyHistory = Array.from(document.querySelectorAll('input[name="familyHistory"]:checked')).map(c => c.value);
+
+        const payload = {
+          patient_name: document.getElementById('pName').value,
+          age: parseInt(document.getElementById('pAge').value) || 45,
+          gender: document.getElementById('pGender').value,
+          cancer_type: cancerTypeSelect.value,
+          smoking_status: document.getElementById('pSmoking').value,
+          pack_years: parseFloat(document.getElementById('pPackYears').value) || 0,
+          radon_occupational: document.getElementById('pRadon').checked,
+          brca_mutation: document.getElementById('pBRCA').value,
+          breast_density: document.getElementById('pDensity').value,
+          sunburn_history: document.getElementById('pSunburn').value,
+          atypical_moles_count: parseInt(document.getElementById('pMoles').value) || 0,
+          cranial_radiation: document.getElementById('pCranialRadiation').checked,
+          neuro_headaches: document.getElementById('pNeuroHeadaches').checked,
+          family_history: familyHistory
+        };
+
+        try {
+          const res = await fetch('/api/preventive/assess', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            renderAssessment(data.assessment, payload);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      function renderAssessment(assessment, inputData) {
+        const gauge = document.getElementById('riskGauge');
+        const gaugeVal = document.getElementById('gaugeVal');
+        const badge = document.getElementById('riskLevelBadge');
+        const summary = document.getElementById('riskSummaryText');
+
+        gaugeVal.innerText = `${assessment.overall_index}%`;
+        badge.className = `badge ${assessment.badge_class}`;
+        badge.innerText = `${assessment.risk_level} Cancer Risk`;
+
+        let color = '#10b981';
+        if (assessment.risk_level === 'Moderate') color = '#fbbf24';
+        else if (assessment.risk_level === 'Elevated' || assessment.risk_level === 'High') color = '#ff4d6d';
+        gauge.style.borderColor = color;
+
+        // Update Organ Bars
+        const scores = assessment.organ_scores;
+        updateBar('lung', scores.lung);
+        updateBar('skin', scores.skin);
+        updateBar('brain', scores.brain);
+        if (scores.breast !== null) {
+          document.getElementById('breastOrganRow').style.display = 'block';
+          updateBar('breast', scores.breast);
+        } else {
+          document.getElementById('breastOrganRow').style.display = 'none';
+        }
+
+        // Modifiable Reduction
+        document.getElementById('reductionPotentialBadge').innerText = `-${assessment.modifiable_reduction_potential}% Achievable`;
+        const actionList = document.getElementById('lifestyleActionList');
+        actionList.innerHTML = '';
+        if (assessment.lifestyle_action_plan.length === 0) {
+          actionList.innerHTML = '<p style="font-size: 0.8rem; color: var(--muted-light);">Oncologic risk factors currently well-controlled. Continue standard baseline surveillance.</p>';
+        } else {
+          assessment.lifestyle_action_plan.forEach(item => {
+            const div = document.createElement('div');
+            div.style.cssText = 'padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.03); border: 1px solid var(--border);';
+            div.innerHTML = `
+              <div style="display:flex; justify-content:space-between; font-size:0.84rem; font-weight:600;">
+                <span>${item.action}</span>
+                <span style="color:var(--success);">${item.impact}</span>
+              </div>
+              <p style="font-size:0.75rem; color:var(--muted-light); margin-top:2px;">${item.clinical_rationale}</p>
+            `;
+            actionList.appendChild(div);
+          });
+        }
+
+        // Screenings Roadmap
+        const timelineList = document.getElementById('screeningTimelineList');
+        timelineList.innerHTML = '';
+        assessment.screenings.forEach(sc => {
+          const div = document.createElement('div');
+          const isPriority = sc.urgency === 'priority';
+          div.style.cssText = `padding: 12px; border-radius: 8px; background: ${isPriority ? 'rgba(255,77,109,0.1)' : 'rgba(255,255,255,0.02)'}; border: 1px solid ${isPriority ? 'var(--danger)' : 'var(--border)'};`;
+          div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <strong style="font-size:0.88rem; color:${isPriority ? 'var(--danger)' : 'var(--text)'};">${sc.cancer_name} — ${sc.primary_modality}</strong>
+              <span class="badge ${isPriority ? 'badge-danger' : 'badge-success'}">${sc.status}</span>
+            </div>
+            <p style="font-size:0.78rem; color:var(--muted-light); margin-bottom:4px;">${sc.mortality_benefit}</p>
+            <div style="font-size:0.75rem; color:var(--accent);"><i class="fa-regular fa-clock"></i> Recommended Interval: ${sc.interval} (${sc.guideline_org})</div>
+          `;
+          timelineList.appendChild(div);
+        });
+
+        // Setup speech text
+        const speechText = `Oncology vulnerability assessment completed for ${inputData.patient_name}. Cancer vulnerability score is ${assessment.overall_index} percent, classified as ${assessment.risk_level} risk. Modifiable reduction potential is up to ${assessment.modifiable_reduction_potential} percent.`;
+        document.getElementById('speakResultsBtn').dataset.text = speechText;
+      }
+
+      function updateBar(key, val) {
+        val = val || 0;
+        const valEl = document.getElementById(`${key}ScoreVal`);
+        const barEl = document.getElementById(`${key}Bar`);
+        if (valEl) valEl.innerText = `${val}%`;
+        if (barEl) {
+          barEl.style.width = `${val}%`;
+          if (val > 60) barEl.style.background = '#ff4d6d';
+          else if (val > 35) barEl.style.background = '#fbbf24';
+          else barEl.style.background = '#10b981';
+        }
+      }
+
+      // Initial default run
+      form.dispatchEvent(new Event('submit'));
+    });
+  </script>
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_live.js"></script>
+</body>
+</html>

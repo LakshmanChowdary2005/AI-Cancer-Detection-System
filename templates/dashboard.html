@@ -4,169 +4,345 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Doctor Dashboard — MediScan AI</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --bg: #070b17;
-      --surface: rgba(10, 18, 35, 0.88);
-      --border: rgba(255,255,255,0.12);
-      --accent: #35d0b8;
-      --text: #eef2ff;
-      --muted: #8ca3c6;
-      --radius: 24px;
-      --shadow: 0 22px 60px rgba(0,0,0,0.24);
-    }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: 'DM Sans', sans-serif;
-      background: linear-gradient(180deg, #06101e 0%, #091b2d 100%);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      padding: 28px;
-    }
-    .page {
-      width: 100%;
-      max-width: 1180px;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      padding: 18px 24px;
-      border-radius: 28px;
-      background: rgba(4, 12, 22, 0.92);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-    }
-    .brand { width: 50px; height: 50px; border-radius: 18px; display:grid; place-items:center; background: linear-gradient(135deg, var(--accent), #22a58e); color:#07101d; font-weight:700; }
-    .brand-title h1 { margin: 0; font-family:'DM Serif Display', serif; font-size:1.8rem; }
-    .brand-title p { margin: 4px 0 0; color: var(--muted); font-size:0.95rem; }
-    .header-actions { margin-left:auto; display:flex; gap:12px; }
-    .button { border:none; border-radius:999px; padding:12px 18px; cursor:pointer; font-weight:700; letter-spacing:0.02em; }
-    .button-primary { background: linear-gradient(135deg, var(--accent), #22a58e); color:#07101d; }
-    .button-secondary { background: rgba(255,255,255,0.06); color: var(--text); border:1px solid rgba(255,255,255,0.12); }
-    .layout { display:grid; grid-template-columns: 1fr 0.44fr; gap: 22px; }
-    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
-    .panel { background: rgba(6, 16, 30, 0.92); border:1px solid rgba(255,255,255,0.08); border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; }
-    .panel-body { padding: 26px; }
-    .panel-title { margin:0 0 18px; color: var(--muted); text-transform:uppercase; letter-spacing:0.14em; font-size:0.82rem; }
-    .section-heading { margin:0; font-size:1.6rem; line-height:1.1; }
-    .summary-card { display:grid; gap:12px; margin-bottom:20px; }
-    .summary-card .item { display:flex; justify-content:space-between; gap:12px; padding:16px 18px; border-radius:22px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); }
-    .summary-card .item label { color: var(--muted); font-size:0.82rem; }
-    .summary-card .item span { font-weight:700; }
-    .report-list { display:grid; gap:18px; }
-    .report-card { border-radius: 24px; border:1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
-    .report-card .card-body { display:grid; gap:16px; padding:20px; }
-    .report-card h3 { margin:0; font-size:1.2rem; }
-    .report-meta { display:grid; gap:10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .report-meta span { color: var(--muted); font-size:0.92rem; }
-    .report-image { width:100%; height:220px; object-fit:cover; border-radius:20px; background:#0c1725; }
-    .tag { display:inline-flex; padding:6px 12px; border-radius:999px; font-size:0.78rem; background: rgba(53,208,184,0.16); color: #b8ffee; }
-    .comment-box { display:grid; gap:12px; }
-    .comment-box textarea { width:100%; min-height:100px; border-radius:18px; padding:14px; border:1px solid rgba(255,255,255,0.10); background:rgba(255,255,255,0.04); color:var(--text); resize:vertical; }
-    .comment-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-    .comment-list { display:grid; gap:10px; margin-top:10px; }
-    .comment-item { padding:12px 14px; border-radius:18px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); }
-    .verify-panel { display:grid; gap:16px; }
-    .verify-panel input { width:100%; padding:14px; border-radius:18px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color: var(--text); }
-    .empty-state { color: var(--muted); }
-    .qr-preview { display:grid; place-items:center; padding:16px; border-radius:22px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); }
-  </style>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
-  <div class="page">
-    <header>
-      <div class="brand">D</div>
-      <div class="brand-title">
-        <h1>Doctor Dashboard</h1>
-        <p>Review scans, manage comments, and verify reports with QR tokens.</p>
-      </div>
-      <div class="header-actions">
-        <a class="button button-secondary" href="/">Back to Scan</a>
-        <button id="clear-reports-button" class="button button-secondary" type="button">Clear History</button>
+  <div class="page-container">
+    
+    <!-- Navigation Header -->
+    <header class="header-bar">
+      <a href="/" class="brand-section">
+        <div class="brand-logo" style="background: linear-gradient(135deg, #3b82f6 0%, #00f2fe 100%);">
+          <i class="fa-solid fa-user-doctor"></i>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1>MediScan AI &bull; Physician Command Center</h1>
+            <span class="brand-status-chip" style="color: #3b82f6; background: rgba(59, 130, 246, 0.12); border-color: rgba(59, 130, 246, 0.3);"><span class="dot" style="background: #3b82f6; box-shadow: 0 0 8px #3b82f6;"></span> EMR MAINFRAME CONNECTED</span>
+          </div>
+          <p>Real-time inpatient oncology registry, clinical notes sync, digital signatures, and EMR audit logs</p>
+        </div>
+      </a>
+      <div class="header-nav-wrap">
+        <nav class="nav-actions">
+          <a class="nav-link" href="/"><i class="fa-solid fa-stethoscope"></i> <span>Diagnostic</span></a>
+          <a class="nav-link" href="/preventive"><i class="fa-solid fa-shield-halved"></i> <span>Preventive</span></a>
+          <a class="nav-link" href="/monitoring"><i class="fa-solid fa-chart-line"></i> <span>Monitoring</span></a>
+          <a class="nav-link" href="/workflows"><i class="fa-solid fa-network-wired"></i> <span>Workflows</span></a>
+          <a class="nav-link" href="/wellbeing"><i class="fa-solid fa-heart-pulse"></i> <span>Wellbeing</span></a>
+          <a class="nav-link" href="/interactions"><i class="fa-solid fa-pills"></i> <span>Interactions</span></a>
+          <a class="nav-link active" href="/dashboard"><i class="fa-solid fa-user-doctor"></i> <span>Dashboard</span></a>
+        </nav>
+        <button class="theme-toggle-btn" id="themeToggle" type="button" title="Switch Theme (Light / Dark)">
+          <i class="fa-solid fa-moon"></i> <span>Dark</span>
+        </button>
+        <a class="btn btn-primary" id="export-excel-button" href="/api/export_excel" style="padding: 7px 15px; font-size: 0.82rem; border-radius: 9999px;">
+          <i class="fa-solid fa-file-excel"></i> Export Excel
+        </a>
+        <a class="nav-portal-btn" href="/logout" style="color: var(--danger); border-color: rgba(255, 77, 109, 0.4);" title="Sign Out">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </a>
       </div>
     </header>
 
-    <div class="layout">
-      <div>
-        <div class="panel">
-          <div class="panel-body">
-            <p class="panel-title">Live report feed</p>
-            <h2 class="section-heading">Recent patient scans</h2>
-            <p class="subtext">The most recent AI predictions are stored here. Click a report to review patient details, stage, severity and leave notes.</p>
-          </div>
+    <!-- Top KPI Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <i class="fa-solid fa-file-waveform"></i>
         </div>
-
-        <div id="report-list" class="report-list"></div>
+        <div class="stat-info">
+          <h3 id="total-count">0</h3>
+          <p>Total Scans Processed</p>
+        </div>
       </div>
 
-      <div>
-        <div class="panel">
-          <div class="panel-body">
-            <p class="panel-title">QR Token Verification</p>
-            <div class="verify-panel">
-              <input id="dashboard-qr-input" type="text" placeholder="Paste the verification token here" />
-              <button id="dashboard-qr-verify" class="button button-primary" type="button">Verify Report</button>
-              <p id="dashboard-qr-status" class="empty-state">Enter a token to validate a report.</p>
-            </div>
-          </div>
+      <div class="stat-card">
+        <div class="stat-icon danger">
+          <i class="fa-solid fa-triangle-exclamation"></i>
         </div>
+        <div class="stat-info">
+          <h3 id="high-risk-count">0</h3>
+          <p>High Risk Scans Flagged</p>
+        </div>
+      </div>
 
-        <div class="panel" style="margin-top:22px;">
-          <div class="panel-body">
-            <p class="panel-title">Summary</p>
-            <div class="summary-card">
-              <div class="item"><label>Total reports</label><span id="total-count">0</span></div>
-              <div class="item"><label>High-risk flagged</label><span id="high-risk-count">0</span></div>
-              <div class="item"><label>Average severity</label><span id="avg-severity">0%</span></div>
-            </div>
-            <div class="panel-title" style="margin-top:18px;">Risk distribution</div>
-            <div class="chart-card" style="margin-top:12px; background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:22px; padding:18px;">
-              <canvas id="dashboardChart" width="300" height="220"></canvas>
-            </div>
+<div class="stat-card">
+        <div class="stat-icon">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div class="stat-info">
+          <h3 id="avg-severity">0%</h3>
+          <p>Average Severity Score</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(139,92,246,0.15); color:#8b5cf6;">
+          <i class="fa-solid fa-list-check"></i>
+        </div>
+        <div class="stat-info">
+          <h3 id="priority-count">0</h3>
+          <p>Patients in Triage Queue</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Priority Queue (Automatic Patient Triage) -->
+    <div class="panel-card mb-4" id="priority-queue-panel">
+      <div class="panel-header" style="padding: 14px 20px 10px;">
+        <span class="panel-tag">AI Triage</span>
+        <h2 class="panel-heading" style="font-size: 1.15rem;"><i class="fa-solid fa-tower-broadcast" style="color: #8b5cf6;"></i> AI Priority Queue</h2>
+        <p class="panel-subtext" style="font-size: 0.8rem;">Patients are automatically triaged by urgency based on AI diagnosis confidence, risk level, and severity. Higher scores are seen first.</p>
+      </div>
+      <div class="panel-body" style="padding: 12px 16px;">
+        <div id="priority-queue-lanes" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px;">
+          <div class="empty-placeholder" style="padding: 16px; border: 1px dashed var(--border); border-radius: 14px; text-align:center; color: var(--muted);">
+            <i class="fa-solid fa-spinner fa-spin" style="margin-bottom: 8px; display:block;"></i>
+            Loading priority queue...
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Main Layout: Left Feed / Right verification & Analytics -->
+    <div class="main-grid">
+      
+      <!-- Left Column: Report Feed & Filtering -->
+      <div>
+        <div class="filter-bar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="dashboard-search" class="form-input" placeholder="Search patient name, ID, or label..." />
+          </div>
+          
+          <div class="filter-pills">
+            <button class="pill-btn active" data-filter="all" type="button">All Scans</button>
+            <button class="pill-btn" data-filter="high-risk" type="button">High Risk</button>
+            <button class="pill-btn" data-filter="brain" type="button">Brain</button>
+            <button class="pill-btn" data-filter="breast" type="button">Breast</button>
+            <button class="pill-btn" data-filter="lung" type="button">Lung</button>
+            <button class="pill-btn" data-filter="skin" type="button">Skin</button>
+          </div>
+        </div>
+
+        <!-- Scan Report Cards List Container -->
+        <div id="report-list">
+          <div class="panel-card empty-placeholder">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 12px; display: block; color: var(--accent);"></i>
+            Loading clinical scan reports...
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Token Verification & Risk Chart -->
+      <div>
+        
+        <!-- Verification Tool Panel -->
+        <div class="panel-card mb-4">
+          <div class="panel-header">
+            <span class="panel-tag">Security & Validation</span>
+            <h2 class="panel-heading"><i class="fa-solid fa-shield-halved text-accent"></i> QR Token Verification</h2>
+            <p class="panel-subtext">Verify authenticity of patient printouts or digital tokens.</p>
+          </div>
+          <div class="panel-body">
+            <div class="form-group">
+              <label class="form-label">Verification Token</label>
+              <input id="dashboard-qr-input" type="text" class="form-input" placeholder="Paste verification hex token here" />
+            </div>
+            <button id="dashboard-qr-verify" class="btn btn-primary btn-block" type="button">
+              <i class="fa-solid fa-check-double"></i> Validate Report Signature
+            </button>
+            <p id="dashboard-qr-status" style="margin-top: 14px; font-size: 0.88rem; color: var(--muted); text-align: center;"></p>
+          </div>
+        </div>
+
+        <!-- Risk Analytics Doughnut Chart -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <span class="panel-tag">Population Analytics</span>
+            <h2 class="panel-heading"><i class="fa-solid fa-chart-pie text-accent"></i> Risk Distribution</h2>
+            <p class="panel-subtext">Overview of severity & risk levels across active cases.</p>
+          </div>
+          <div class="panel-body" style="text-align: center;">
+            <div style="height: 240px; position: relative;">
+              <canvas id="dashboardChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const reportList = document.getElementById('report-list');
     const totalCount = document.getElementById('total-count');
     const highRiskCount = document.getElementById('high-risk-count');
     const avgSeverity = document.getElementById('avg-severity');
+    const priorityCount = document.getElementById('priority-count');
+    const priorityQueueLanes = document.getElementById('priority-queue-lanes');
     const dashboardChartCanvas = document.getElementById('dashboardChart');
     let dashboardChart = null;
     const clearReportsButton = document.getElementById('clear-reports-button');
     const qrInput = document.getElementById('dashboard-qr-input');
     const qrVerifyBtn = document.getElementById('dashboard-qr-verify');
     const qrStatus = document.getElementById('dashboard-qr-status');
+    const searchInput = document.getElementById('dashboard-search');
+    const filterPills = document.querySelectorAll('.pill-btn');
+
+let allReports = [];
+    let currentFilter = 'all';
+    let currentSearch = '';
 
     window.addEventListener('DOMContentLoaded', () => {
       loadReports();
+      loadPriorityQueue();
+    });
+
+    // ---- AI Priority Queue ----
+const QUEUE_LANE_COLORS = {
+      'Emergency': '#ff4d6d',
+      'Urgent': '#fb923c',
+      'Normal Queue': '#fbbf24',
+      'Routine Review': '#35d0b8'
+    };
+
+    // Map a priority queue lane to its CSS badge class.
+    function pqClass(lane) {
+      const map = {
+        'Emergency': 'pq-emergency',
+        'Urgent': 'pq-urgent',
+        'Normal Queue': 'pq-normal',
+        'Routine Review': 'pq-routine'
+      };
+      return map[lane] || 'pq-routine';
+    }
+
+    async function loadPriorityQueue() {
+      try {
+        const res = await fetch('/api/priority_queue');
+        if (!res.ok) {
+          priorityQueueLanes.innerHTML = '<div class="empty-placeholder" style="padding:24px; border:1px dashed var(--border); border-radius:14px; text-align:center; color:var(--muted);">Priority queue requires doctor login.</div>';
+          return;
+        }
+        const data = await res.json();
+        renderPriorityQueue(data);
+      } catch (error) {
+        priorityQueueLanes.innerHTML = '<div class="empty-placeholder" style="padding:24px; border:1px dashed var(--border); border-radius:14px; text-align:center; color:var(--muted);">Unable to load priority queue.</div>';
+      }
+    }
+
+    function renderPriorityQueue(data) {
+      if (!data || !data.lanes) {
+        priorityQueueLanes.innerHTML = '<div class="empty-placeholder" style="padding:24px; border:1px dashed var(--border); border-radius:14px; text-align:center; color:var(--muted);">No triage data available.</div>';
+        return;
+      }
+
+      if (priorityCount) priorityCount.textContent = String(data.total || 0);
+
+      priorityQueueLanes.innerHTML = '';
+      const laneOrder = ['Emergency', 'Urgent', 'Normal Queue', 'Routine Review'];
+
+laneOrder.forEach(lane => {
+        const reports = data.lanes[lane] || [];
+        const color = QUEUE_LANE_COLORS[lane] || '#94a3b8';
+        const laneEl = document.createElement('div');
+        laneEl.className = 'queue-lane';
+        laneEl.style.borderTop = `3px solid ${color}`;
+
+        const header = document.createElement('div');
+        header.className = 'queue-lane-header';
+        header.innerHTML = `
+          <div>
+            <div class="queue-lane-name">${lane}</div>
+            <div class="queue-lane-count">${reports.length} patient(s)</div>
+          </div>
+          <span class="queue-lane-badge" style="background:${color};">${reports.length}</span>
+        `;
+        laneEl.appendChild(header);
+
+        // Scrollable, compact list body so the panel stays small.
+        const body = document.createElement('div');
+        body.className = 'queue-lane-body';
+
+        if (!reports.length) {
+          const empty = document.createElement('div');
+          empty.className = 'queue-lane-empty';
+          empty.textContent = '— No patients in this lane';
+          body.appendChild(empty);
+        } else {
+          reports.forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'queue-item';
+            const riskColor = r.risk === 'High' ? '#ff4d6d' : (r.risk === 'Moderate' ? '#fbbf24' : '#35d0b8');
+            item.innerHTML = `
+              <div class="queue-item-top">
+                <span class="queue-item-name">#${r.priority_rank||1} ${r.patient_name}</span>
+                <span class="queue-item-risk" style="color:${riskColor};">${r.risk}</span>
+              </div>
+              <div class="queue-item-label">
+                <span>${r.label}</span>
+                <div class="queue-flow-arrow" style="margin-top:4px;">
+                  <span>Risk ${r.confidence_pct}%</span>
+                  <span class="arrow-down"><i class="fa-solid fa-arrow-down"></i></span>
+                  <span style="font-weight:700; color:${color};">${lane}</span>
+                </div>
+              </div>
+              <div class="queue-item-meta">
+                <span>Conf: <b>${r.confidence_pct}%</b></span>
+                <span>Score: <b style="color:${color};">${r.priority_score}</b></span>
+              </div>
+            `;
+            body.appendChild(item);
+          });
+        }
+
+        laneEl.appendChild(body);
+        priorityQueueLanes.appendChild(laneEl);
+      });
+    }
+
+    // Filtering & Searching listeners
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        currentSearch = e.target.value.toLowerCase();
+        applyFilters();
+      });
+    }
+
+    filterPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        filterPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentFilter = pill.dataset.filter;
+        applyFilters();
+      });
     });
 
     clearReportsButton.addEventListener('click', async () => {
-      if (!confirm('This will delete all saved dashboard reports. Continue?')) {
+      if (!confirm('This will permanently delete all saved dashboard reports. Continue?')) {
         return;
       }
       try {
         const response = await fetch('/api/clear_reports', { method: 'POST' });
         if (!response.ok) {
-          qrStatus.style.color = '#ffb3b3';
+          qrStatus.style.color = 'var(--danger)';
           qrStatus.textContent = 'Failed to clear reports.';
           return;
         }
         loadReports();
-        qrStatus.style.color = '#b8ffd9';
+        qrStatus.style.color = 'var(--success)';
         qrStatus.textContent = 'Report history cleared successfully.';
       } catch (error) {
-        qrStatus.style.color = '#ffb3b3';
+        qrStatus.style.color = 'var(--danger)';
         qrStatus.textContent = 'Unable to clear report history.';
       }
     });
@@ -185,14 +361,14 @@
         });
         const result = await response.json();
         if (result.valid) {
-          qrStatus.style.color = '#b8ffd9';
-          qrStatus.textContent = `Valid report for ${result.report.patient_name} (${result.report.label}).`;
+          qrStatus.style.color = 'var(--accent)';
+          qrStatus.textContent = `✓ Valid report token for ${result.report.patient_name} (${result.report.label}).`;
         } else {
-          qrStatus.style.color = '#ffb3b3';
-          qrStatus.textContent = 'Invalid token or report not found.';
+          qrStatus.style.color = 'var(--danger)';
+          qrStatus.textContent = '✕ Invalid token or report not found.';
         }
       } catch (error) {
-        qrStatus.style.color = '#ffb3b3';
+        qrStatus.style.color = 'var(--danger)';
         qrStatus.textContent = 'Unable to verify token. Is the server running?';
       }
     });
@@ -200,20 +376,48 @@
     async function loadReports() {
       try {
         const res = await fetch('/api/reports');
-        const reports = await res.json();
-        renderReports(reports);
+        allReports = await res.json();
+        applyFilters();
       } catch (error) {
-        reportList.innerHTML = '<p class="empty-state">Failed to load reports.</p>';
+        reportList.innerHTML = '<div class="panel-card empty-placeholder">Failed to load reports.</div>';
       }
     }
 
-    function renderReports(reports) {
-      reportList.innerHTML = '';
+function applyFilters() {
+      let filtered = allReports.filter(report => {
+        const matchesSearch = !currentSearch || 
+          (report.patient_name && report.patient_name.toLowerCase().includes(currentSearch)) ||
+          (report.patient_id && report.patient_id.toLowerCase().includes(currentSearch)) ||
+          (report.label && report.label.toLowerCase().includes(currentSearch));
+
+        let matchesType = true;
+        if (currentFilter === 'high-risk') {
+          matchesType = report.risk === 'High';
+        } else if (currentFilter !== 'all') {
+          matchesType = report.cancer_type === currentFilter;
+        }
+
+        return matchesSearch && matchesType;
+      });
+
+      // Default-sort by AI priority: Emergency first, then by priority score descending.
+      const laneOrder = { 'Emergency': 0, 'Urgent': 1, 'Normal Queue': 2, 'Routine Review': 3 };
+      filtered.sort((a, b) => {
+        const laneDiff = (laneOrder[a.priority_queue] ?? 3) - (laneOrder[b.priority_queue] ?? 3);
+        if (laneDiff !== 0) return laneDiff;
+        return (b.priority_score || 0) - (a.priority_score || 0);
+      });
+
+      renderReports(filtered);
+      updateKpis(allReports);
+    }
+
+    function updateKpis(reports) {
       if (!reports.length) {
-        reportList.innerHTML = '<p class="empty-state">No reports available yet. Run a scan first.</p>';
         totalCount.textContent = '0';
         highRiskCount.textContent = '0';
         avgSeverity.textContent = '0%';
+        renderSummaryChart(reports);
         return;
       }
 
@@ -223,62 +427,122 @@
       reports.forEach(report => {
         if (report.risk === 'High') highRisk += 1;
         severitySum += report.severity_score || 0;
-
-        const card = document.createElement('article');
-        card.className = 'report-card';
-        card.innerHTML = `
-          <div class="card-body">
-            <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:start;">
-              <div style="flex:1 1 220px; min-width:180px;">
-                <img class="report-image" src="/${report.image_path}" alt="Patient scan" />
-              </div>
-              <div style="flex:2 1 320px; display:grid; gap:10px;">
-                <h3>${report.patient_name} · ${report.patient_gender}</h3>
-                <div class="report-meta">
-                  <span><strong>Age</strong> ${report.patient_age}</span>
-                  <span><strong>Type</strong> ${report.cancer_type}</span>
-                  <span><strong>Label</strong> ${report.label}</span>
-                  <span><strong>Stage</strong> ${report.stage}</span>
-                  <span><strong>Severity</strong> ${report.severity_score}%</span>
-                  <span><strong>Risk</strong> ${report.risk}</span>
-                </div>
-                <p style="color: var(--muted);">${new Date(report.timestamp).toLocaleString()}</p>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                  <span class="tag">Report ID</span>
-                  <span class="tag">${report.report_id.slice(0, 10)}…</span>
-                </div>
-              </div>
-            </div>
-            <div class="comment-box">
-              <label style="color:var(--muted); font-size:0.9rem;">Doctor comments</label>
-              <textarea data-report-id="${report.report_id}" placeholder="Add a comment for this patient"></textarea>
-              <div class="comment-row">
-                <button class="button button-primary" data-action="save-comment" data-report-id="${report.report_id}">Save comment</button>
-              </div>
-              <div class="comment-list">
-                ${report.comments && report.comments.length ? report.comments.map(c => `<div class="comment-item"><strong>${new Date(c.timestamp).toLocaleString()}</strong><p style="margin:6px 0 0;">${c.comment}</p></div>`).join('') : '<p class="empty-state">No comments yet.</p>'}
-              </div>
-            </div>
-          </div>
-        `;
-        reportList.appendChild(card);
       });
 
       totalCount.textContent = String(reports.length);
       highRiskCount.textContent = String(highRisk);
       avgSeverity.textContent = `${Math.round(severitySum / reports.length)}%`;
       renderSummaryChart(reports);
+    }
+
+    function renderReports(reports) {
+      reportList.innerHTML = '';
+      if (!reports.length) {
+        reportList.innerHTML = '<div class="panel-card empty-placeholder"><i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>No matching scan reports found.</div>';
+        return;
+      }
+
+      reports.forEach(report => {
+        const card = document.createElement('article');
+        card.className = 'report-card';
+        
+        const riskClass = report.risk === 'High' ? 'badge-danger' : (report.risk === 'Moderate' ? 'badge-warning' : 'badge-success');
+
+        card.innerHTML = `
+<div class="report-header">
+            <div class="patient-title-group">
+              <h3><i class="fa-solid fa-hospital-user text-accent"></i> ${report.patient_name}</h3>
+              <div class="patient-meta-text">${report.patient_gender} • ${report.patient_age} yrs • ID: ${report.patient_id || 'N/A'}</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <span class="badge ${riskClass}">Risk: ${report.risk}</span>
+              <span class="pq-badge ${pqClass(report.priority_queue)}"><i class="fa-solid fa-tower-broadcast"></i> ${report.priority_queue || 'Routine Review'} · ${report.priority_score || 0}</span>
+            </div>
+          </div>
+
+          <div class="report-content-grid">
+            <img class="report-thumb" src="/${report.image_path}" alt="Patient scan thumbnail" onerror="this.src='https://via.placeholder.com/160x140?text=Scan+Image';" />
+            
+            <div>
+              <div style="font-weight: 700; font-size: 1.1rem; color: var(--text); margin-bottom: 8px;">${report.label}</div>
+              
+              <div class="report-details-list">
+                <div class="detail-pill"><label>Cancer Type</label><span>${(report.cancer_type || '').toUpperCase()}</span></div>
+                <div class="detail-pill"><label>Stage Rating</label><span>${report.stage}</span></div>
+                <div class="detail-pill"><label>Severity Score</label><span>${report.severity_score}%</span></div>
+                <div class="detail-pill"><label>Affected Area</label><span>${report.affected_area_pct ?? 'N/A'}%</span></div>
+                <div class="detail-pill"><label>Tumor Size</label><span>${report.tumor_size_estimate || 'N/A'}</span></div>
+                <div class="detail-pill"><label>Confidence</label><span>${report.confidence_pct}%</span></div>
+                <div class="detail-pill"><label>Last Visit</label><span>${report.last_visit_date || 'N/A'}</span></div>
+                <div class="detail-pill" style="border: 1px solid var(--accent);"><label>Next Visit</label><span style="color: var(--accent); font-weight:700;">${report.next_visit_date || 'N/A'}</span></div>
+              </div>
+
+              <div style="margin-top: 10px; font-size: 0.82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+                <span><i class="fa-solid fa-envelope text-accent"></i> ${report.patient_email || 'No email registered'}</span>
+                <span><i class="fa-brands fa-google-drive text-accent"></i> ${report.drive_url ? `<a href="${report.drive_url}" target="_blank" style="color:var(--accent);">View on Drive</a>` : (report.gdrive_status || 'Local Storage')}</span>
+              </div>
+
+              <!-- Integration Action Buttons -->
+              <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <a href="/api/download_pdf/${report.report_id}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.78rem;" target="_blank">
+                  <i class="fa-solid fa-file-pdf"></i> PDF Report
+                </a>
+                <button class="btn btn-secondary" data-action="resend-email" data-report-id="${report.report_id}" type="button" style="padding: 6px 12px; font-size: 0.78rem;">
+                  <i class="fa-solid fa-paper-plane"></i> Send Email
+                </button>
+                <button class="btn btn-secondary" data-action="upload-gdrive" data-report-id="${report.report_id}" type="button" style="padding: 6px 12px; font-size: 0.78rem;">
+                  <i class="fa-brands fa-google-drive"></i> Sync Drive
+                </button>
+                <button class="btn btn-secondary" data-action="compare-scan" data-report-id="${report.report_id}" type="button" style="padding: 6px 12px; font-size: 0.78rem;">
+                  <i class="fa-solid fa-arrows-rotate"></i> Compare Scan
+                </button>
+              </div>
+
+              <div style="font-size: 0.78rem; color: var(--muted); margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fa-solid fa-clock"></i> ${new Date(report.timestamp).toLocaleString()}</span>
+                <span>Token: <code style="color: var(--accent);">${(report.qr_token || '').slice(0, 10)}...</code></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="comment-section">
+            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;"><i class="fa-solid fa-comment-medical text-accent"></i> Clinical Comments & Doctor Notes</div>
+            
+            <div class="comment-input-group">
+              <input type="text" class="form-input" data-report-id="${report.report_id}" placeholder="Type notes for this patient report..." />
+              <button class="btn btn-primary" data-action="save-comment" data-report-id="${report.report_id}" type="button" style="padding: 10px 18px; font-size: 0.85rem;">
+                Add Note
+              </button>
+            </div>
+
+            <div class="comments-list">
+              ${report.comments && report.comments.length ? report.comments.map(c => `
+                <div class="comment-item">
+                  <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px;">
+                    <span style="color: var(--accent);">Dr. Reviewer</span>
+                    <span class="comment-time">${new Date(c.timestamp).toLocaleString()}</span>
+                  </div>
+                  <div>${c.comment}</div>
+                </div>
+              `).join('') : '<p style="color: var(--muted); font-size: 0.82rem; margin-top: 6px;">No doctor comments added yet.</p>'}
+            </div>
+          </div>
+        `;
+        reportList.appendChild(card);
+      });
+
       bindCommentButtons();
+      bindIntegrationButtons();
     }
 
     function renderSummaryChart(reports) {
-      const riskCounts = { High: 0, Moderate: 0, Low: 0, Unknown: 0 };
+      const riskCounts = { High: 0, Moderate: 0, Low: 0 };
       reports.forEach(report => {
-        const key = report.risk || 'Unknown';
+        const key = report.risk || 'Low';
         if (Object.prototype.hasOwnProperty.call(riskCounts, key)) {
           riskCounts[key] += 1;
         } else {
-          riskCounts.Unknown += 1;
+          riskCounts.Low += 1;
         }
       });
 
@@ -287,17 +551,22 @@
       dashboardChart = new Chart(dashboardChartCanvas.getContext('2d'), {
         type: 'doughnut',
         data: {
-          labels: ['High', 'Moderate', 'Low'],
+          labels: ['High Risk', 'Moderate Risk', 'Low Risk'],
           datasets: [{
             data: chartData,
-            backgroundColor: ['#ff6b6b', '#ffb347', '#35d0b8'],
-            borderWidth: 0
+            backgroundColor: ['#ff4d6d', '#fbbf24', '#35d0b8'],
+            borderWidth: 0,
+            hoverOffset: 6
           }]
         },
         options: {
           maintainAspectRatio: false,
+          cutout: '68%',
           plugins: {
-            legend: { position: 'bottom', labels: { color: '#eef2ff' } }
+            legend: { 
+              position: 'bottom',
+              labels: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 12 } } 
+            }
           }
         }
       });
@@ -307,8 +576,8 @@
       document.querySelectorAll('[data-action="save-comment"]').forEach(button => {
         button.addEventListener('click', async () => {
           const reportId = button.dataset.reportId;
-          const textarea = document.querySelector(`textarea[data-report-id="${reportId}"]`);
-          const comment = textarea.value.trim();
+          const input = document.querySelector(`input[data-report-id="${reportId}"]`);
+          const comment = input.value.trim();
           if (!comment) return;
 
           try {
@@ -319,7 +588,7 @@
             });
             const result = await res.json();
             if (result.report) {
-              textarea.value = '';
+              input.value = '';
               loadReports();
             }
           } catch (error) {
@@ -328,6 +597,78 @@
         });
       });
     }
+
+    function bindIntegrationButtons() {
+      document.querySelectorAll('[data-action="resend-email"]').forEach(button => {
+        button.addEventListener('click', async () => {
+          const reportId = button.dataset.reportId;
+          const emailInput = prompt("Enter patient/physician email address for dispatch:");
+          if (emailInput === null) return;
+
+          button.disabled = true;
+          button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+          try {
+            const res = await fetch('/api/send_email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ report_id: reportId, recipient_email: emailInput })
+            });
+            const result = await res.json();
+            alert(result.result ? result.result.message : 'Email request processed.');
+            loadReports();
+          } catch (err) {
+            alert('Email dispatch failed: ' + err.message);
+          } finally {
+            button.disabled = false;
+            button.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Email';
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-action="upload-gdrive"]').forEach(button => {
+        button.addEventListener('click', async () => {
+          const reportId = button.dataset.reportId;
+          button.disabled = true;
+          button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+
+          try {
+            const res = await fetch('/api/upload_gdrive', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ report_id: reportId })
+            });
+            const result = await res.json();
+            alert(result.result ? `Google Drive Status: ${result.result.drive_status}` : 'Google Drive sync request completed.');
+            loadReports();
+          } catch (err) {
+            alert('Drive sync failed: ' + err.message);
+          } finally {
+            button.disabled = false;
+            button.innerHTML = '<i class="fa-brands fa-google-drive"></i> Sync Drive';
+          }
+        });
+      });
+
+      document.querySelectorAll('[data-action="compare-scan"]').forEach(button => {
+        button.addEventListener('click', async () => {
+          const reportId = button.dataset.reportId;
+          try {
+            const res = await fetch(`/api/compare_previous/${reportId}`);
+            const result = await res.json();
+            if (!result.available) {
+              alert(result.message || 'No previous scan available.');
+              return;
+            }
+            alert(`${result.summary}\n\nPrevious scan: ${result.previous_report.label} (${result.previous_report.confidence_pct}% confidence)\nCurrent scan: ${result.current_report.label} (${result.current_report.confidence_pct}% confidence)`);
+          } catch (err) {
+            alert('Comparison failed: ' + err.message);
+          }
+        });
+      });
+    }
   </script>
+  <script src="/static/js/hospital_live.js"></script>
+  <script src="/static/js/accessibility.js"></script>
 </body>
 </html>

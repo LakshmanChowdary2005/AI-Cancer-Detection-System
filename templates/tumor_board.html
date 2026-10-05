@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multidisciplinary Tumor Board (MDT) — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="/static/css/hospital_system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container" style="max-width: 1440px;">
+
+    <!-- Top Hospital Navigation Header -->
+    {% include 'hospital_header.html' %}
+
+    <!-- Top Heading Row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-users-viewfinder text-accent"></i> Multidisciplinary Tumor Board (MDT Review) ⭐⭐⭐
+        </h2>
+        <p style="font-size: 0.82rem; color: var(--muted); margin: 3px 0 0 0;">
+          Consensus oncology review &bull; Collaborative decision-making across Radiology, Medical Oncology, and Surgical Oncology
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span class="badge badge-success" style="font-size: 0.8rem; padding: 6px 12px;">
+          <i class="fa-solid fa-users"></i> Panel Session Active
+        </span>
+        <a href="/imaging?patient_id={{ patient.patient_id }}" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">
+          <i class="fa-solid fa-x-ray"></i> Open PACS Workstation
+        </a>
+      </div>
+    </div>
+
+    <!-- Active Patient Case Header -->
+    <div class="panel-card" style="margin-bottom: 20px; padding: 18px 24px; background: linear-gradient(135deg, rgba(13,22,45,0.9), rgba(15,23,42,0.9));">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 50px; height: 50px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fff;">
+            <i class="fa-solid fa-hospital-user"></i>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="pacs-patient-id-badge">{{ patient.patient_id }}</span>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #fff;">{{ patient.name }}</h3>
+              <span class="badge badge-danger">High Risk Carcinoma</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">
+              {{ patient.age }} Years Old &bull; {{ patient.gender }} &bull; Assigned: {{ patient.assigned_doctor }} &bull; Department: {{ patient.department }}
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 14px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase;">Modality</div>
+            <strong style="color: #38bdf8; font-size: 0.85rem;">{{ patient.scans[0].modality if patient.scans else 'CT Chest' }}</strong>
+          </div>
+          <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 14px; text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--muted); text-transform: uppercase;">AI Staging</div>
+            <strong style="color: #34d399; font-size: 0.85rem;">Stage IB / IIA Candidate</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI-Assisted MDT Consensus Meter & Summary (Requirement #8) -->
+    <div class="mdt-consensus-box">
+      <div class="mdt-consensus-header">
+        <div>
+          <span class="panel-tag" style="background: rgba(139,92,246,0.2); color: #c4b5fd; border-color: rgba(139,92,246,0.4);">
+            AI-Assisted Consensus Engine
+          </span>
+          <h3 style="margin: 4px 0 0 0; font-size: 1.2rem; font-weight: 800; color: #fff;">
+            Multidisciplinary Consensus: Surgical Candidate with Post-Op Adjuvant Protocol
+          </h3>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 1.85rem; font-weight: 800; color: #34d399; line-height: 1;">87%</div>
+          <div style="font-size: 0.72rem; color: var(--muted); text-transform: uppercase;">Inter-Department Agreement</div>
+        </div>
+      </div>
+
+      <!-- Agreement Meter Bar -->
+      <div class="mdt-meter-bar">
+        <div class="mdt-meter-fill" style="width: 87%;"></div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-top: 14px; font-size: 0.82rem;">
+        <div>
+          <span style="color: #38bdf8; font-weight: 700; text-transform: uppercase; font-size: 0.74rem;">Overall Assessment:</span>
+          <p style="margin: 4px 0 0 0; color: #cbd5e1; line-height: 1.5;">
+            The multidisciplinary panel confirms solitary peripheral pulmonary nodule (1.8cm) without mediastinal lymphadenopathy.
+            Patient is clinically fit (ECOG 0) with adequate pulmonary reserve. Minimally invasive resection is indicated.
+          </p>
+        </div>
+        <div style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 10px 12px;">
+          <span style="color: #f87171; font-weight: 700; font-size: 0.74rem; text-transform: uppercase;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Key Divergence:
+          </span>
+          <p style="margin: 3px 0 0 0; color: #fca5a5; font-size: 0.76rem; line-height: 1.4;">
+            Stage assessment requires intraoperative frozen section correlation to exclude micrometastases in station 4R lymph nodes.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Specialized Department Assessment Cards (Requirement #8) -->
+    <div class="mdt-departments-grid">
+      
+      <!-- 1. Radiology Review -->
+      <div class="mdt-dept-card" style="border-top: 3px solid #06b6d4;">
+        <div class="mdt-dept-title" style="color: #22d3ee;">
+          <i class="fa-solid fa-x-ray"></i> Radiology Department Findings
+        </div>
+        <div style="font-size: 0.74rem; color: var(--muted); margin-bottom: 8px;">
+          Reviewed by: <strong>Dr. Marcus Wei, MD (Chief Radiologist)</strong>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text); line-height: 1.6;">
+          <p style="margin: 0 0 8px 0;">
+            <strong>Imaging Findings:</strong> Low-dose helical CT chest shows a solitary 1.8 &times; 1.4 cm spiculated mass located in the posterior segment of the right upper lobe.
+          </p>
+          <ul style="margin: 0; padding-left: 16px; font-size: 0.78rem;">
+            <li>No pleural tethering or chest wall invasion.</li>
+            <li>Subcentimeter subcarinal lymph nodes (normal morphology).</li>
+            <li>AI Grad-CAM highlights focal hyperdensity (+42 HU).</li>
+          </ul>
+        </div>
+        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.72rem; color: #34d399;"><i class="fa-solid fa-circle-check"></i> Verified via PACS</span>
+          <span class="badge badge-primary">T1b N0 M0</span>
+        </div>
+      </div>
+
+      <!-- 2. Medical Oncology Review -->
+      <div class="mdt-dept-card" style="border-top: 3px solid #3b82f6;">
+        <div class="mdt-dept-title" style="color: #60a5fa;">
+          <i class="fa-solid fa-dna"></i> Medical Oncology Assessment
+        </div>
+        <div style="font-size: 0.74rem; color: var(--muted); margin-bottom: 8px;">
+          Reviewed by: <strong>Dr. Sarah Sharma, MD (Attending Oncologist)</strong>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text); line-height: 1.6;">
+          <p style="margin: 0 0 8px 0;">
+            <strong>Clinical Assessment:</strong> Patient presented with chronic cough. Biopsy confirmed invasive adenocarcinoma. EGFR mutation panel positive for Exon 19 deletion.
+          </p>
+          <ul style="margin: 0; padding-left: 16px; font-size: 0.78rem;">
+            <li>High responsiveness anticipated for targeted EGFR TKIs.</li>
+            <li>Adjuvant Osimertinib indicated post-resection.</li>
+            <li>Neoadjuvant systemic therapy not required at current stage.</li>
+          </ul>
+        </div>
+        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.72rem; color: #34d399;"><i class="fa-solid fa-circle-check"></i> Biomarkers Profiled</span>
+          <span class="badge badge-success">EGFR Exon 19+</span>
+        </div>
+      </div>
+
+      <!-- 3. Thoracic Surgery Review -->
+      <div class="mdt-dept-card" style="border-top: 3px solid #f43f5e;">
+        <div class="mdt-dept-title" style="color: #f87171;">
+          <i class="fa-solid fa-syringe"></i> Surgical Oncology Considerations
+        </div>
+        <div style="font-size: 0.74rem; color: var(--muted); margin-bottom: 8px;">
+          Reviewed by: <strong>Dr. Rajiv Mehta, MD (Thoracic Surgeon)</strong>
+        </div>
+        <div style="font-size: 0.82rem; color: var(--text); line-height: 1.6;">
+          <p style="margin: 0 0 8px 0;">
+            <strong>Surgical Considerations:</strong> Lesion is technically resectable via Video-Assisted Thoracoscopic Surgery (VATS) right upper lobectomy.
+          </p>
+          <ul style="margin: 0; padding-left: 16px; font-size: 0.78rem;">
+            <li>Clear surgical margin >2cm achievable.</li>
+            <li>Systematic mediastinal lymph node dissection (Stations 2R, 4R, 7, 9R).</li>
+            <li>Pulmonary function tests: FEV1 84% predicted.</li>
+          </ul>
+        </div>
+        <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.72rem; color: #34d399;"><i class="fa-solid fa-circle-check"></i> Resectable</span>
+          <span class="badge badge-danger">OR Reserved</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tumor Board Voting & Final Consensus Sign-off (Requirement #9) -->
+    <div class="panel-card" style="padding: 20px 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #fff;">
+            <i class="fa-solid fa-square-check text-accent"></i> Multidisciplinary Board Vote &amp; Sign-off
+          </h3>
+          <p style="font-size: 0.78rem; color: var(--muted); margin: 3px 0 0 0;">
+            Record unanimous panel consensus for EMR inclusion and digital patient discharge plan.
+          </p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="voteApproveBtn" class="btn btn-primary" style="background: #10b981; border-color: #059669; padding: 7px 16px; font-size: 0.82rem;">
+            <i class="fa-solid fa-thumbs-up"></i> Approve Treatment Plan (3-0)
+          </button>
+          <button id="voteModifyBtn" class="btn btn-outline" style="padding: 7px 16px; font-size: 0.82rem;">
+            <i class="fa-solid fa-pencil"></i> Request Re-Staging
+          </button>
+        </div>
+      </div>
+
+      <div style="background: rgba(15,23,42,0.6); border: 1px solid var(--hospital-card-border); border-radius: 10px; padding: 14px 18px; font-size: 0.82rem; color: var(--text);">
+        <strong style="color: #38bdf8;">Certified Consensus Statement:</strong>
+        <p style="margin: 4px 0 0 0; line-height: 1.5;">
+          "The MediScan MDT Oncology Board unanimously recommends proceeding with VATS Right Upper Lobectomy and mediastinal lymphadenectomy on October 09, 2026, followed by 3-year adjuvant targeted Osimertinib therapy based on EGFR Exon 19 confirmation."
+        </p>
+        <div style="margin-top: 10px; font-size: 0.72rem; color: var(--muted); display: flex; gap: 16px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+          <span>Chair: <strong>Dr. Sarah Sharma, MD</strong></span>
+          <span>Radiology: <strong>Dr. Marcus Wei, MD</strong></span>
+          <span>Surgery: <strong>Dr. Rajiv Mehta, MD</strong></span>
+          <span style="color: #34d399;"><i class="fa-solid fa-certificate"></i> Digital Cryptographic Hash Verified</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_system.js"></script>
+  <script>
+    const voteBtn = document.getElementById('voteApproveBtn');
+    if (voteBtn) {
+      voteBtn.addEventListener('click', () => {
+        showToast('MDT Tumor Board Consensus Confirmed & Certified into EMR!', 'success');
+        voteBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Consensus Certified';
+        voteBtn.style.background = '#047857';
+      });
+    }
+  </script>
+</body>
+</html>

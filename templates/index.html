@@ -1,737 +1,655 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MediScan AI — Cancer Detection</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <title>MediScan AI — Advanced Cancer Diagnostic Portal</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    :root {
-      --bg: #070b17;
-      --bg-secondary: #08121d;
-      --surface: rgba(10, 18, 35, 0.82);
-      --surface-strong: rgba(7, 11, 23, 0.96);
-      --border: rgba(255, 255, 255, 0.08);
-      --accent: #35d0b8;
-      --accent-strong: #28b79f;
-      --danger: #ff6b6b;
-      --text: #eef2ff;
-      --muted: #8ca3c6;
-      --radius: 26px;
-      --shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
-    }
-
-    body.light-mode {
-      --bg: #f4f7fb;
-      --bg-secondary: #dbe4f4;
-      --surface: rgba(255, 255, 255, 0.88);
-      --surface-strong: rgba(255, 255, 255, 0.98);
-      --border: rgba(14, 31, 60, 0.14);
-      --accent: #2f8efb;
-      --accent-strong: #1d6fd6;
-      --danger: #d4444f;
-      --text: #1f2a40;
-      --muted: #64748b;
-      --shadow: 0 24px 60px rgba(31, 42, 64, 0.10);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top left, rgba(53, 208, 184, 0.14), transparent 24%),
-                  radial-gradient(circle at bottom right, rgba(255, 102, 102, 0.12), transparent 22%),
-                  linear-gradient(180deg, var(--bg) 0%, var(--bg-secondary) 100%);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      display: flex;
-      justify-content: center;
-      padding: 32px;
-    }
-
-    .page {
-      width: 100%;
-      max-width: 1180px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      margin-bottom: 26px;
-      padding: 22px 26px;
-      border-radius: 30px;
-      background: rgba(9, 14, 29, 0.90);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(18px);
-    }
-
-    .brand {
-      width: 50px;
-      height: 50px;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, var(--accent), #22a58e);
-      color: #07101d;
-      font-size: 1.2rem;
-      font-weight: 700;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
-    }
-
-    .brand-title {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .brand-title h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.8rem;
-      margin: 0;
-      letter-spacing: -0.03em;
-    }
-
-    .brand-title p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .badge {
-      margin-left: auto;
-      padding: 8px 18px;
-      background: rgba(61, 217, 179, 0.14);
-      border: 1px solid rgba(61, 217, 179, 0.24);
-      border-radius: 999px;
-      color: var(--accent);
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-    }
-
-    .theme-toggle {
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 999px;
-      padding: 12px 18px;
-      background: rgba(255,255,255,0.05);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 0.92rem;
-      transition: transform 0.2s ease, background 0.2s ease;
-    }
-
-    .theme-toggle:hover {
-      transform: translateY(-1px);
-      background: rgba(255,255,255,0.10);
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 28px;
-    }
-
-    @media (max-width: 980px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(20px);
-      overflow: hidden;
-    }
-
-    .panel-body {
-      padding: 28px;
-    }
-
-    .panel-title {
-      margin: 0 0 18px;
-      font-size: 0.82rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-    }
-
-    .section-heading {
-      margin: 0;
-      font-size: 1.6rem;
-      letter-spacing: -0.02em;
-      line-height: 1.1;
-    }
-
-    .subtext {
-      margin-top: 10px;
-      color: var(--muted);
-      line-height: 1.7;
-      max-width: 640px;
-    }
-
-    .form-row {
-      display: grid;
-      gap: 18px;
-      margin-top: 24px;
-    }
-
-    .select-row {
-      margin-top: 12px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 10px;
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    select,
-    input[type='file'] {
-      width: 100%;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.04);
-      color: var(--text);
-      padding: 14px 16px;
-      font-size: 0.96rem;
-      outline: none;
-    }
-
-    select {
-      appearance: none;
-      cursor: pointer;
-    }
-
-    .upload-zone {
-      border: 2px dashed rgba(255,255,255,0.14);
-      border-radius: 24px;
-      min-height: 220px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      padding: 30px 20px;
-      text-align: center;
-      color: var(--muted);
-      transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
-      position: relative;
-      background: rgba(255,255,255,0.025);
-    }
-
-    .upload-zone:hover,
-    .upload-zone.dragover {
-      transform: translateY(-2px);
-      border-color: rgba(61, 217, 179, 0.75);
-      background: rgba(61, 217, 179, 0.08);
-    }
-
-    .upload-zone p {
-      margin: 0;
-      font-size: 0.95rem;
-      line-height: 1.7;
-    }
-
-    .upload-icon {
-      width: 68px;
-      height: 68px;
-      border-radius: 18px;
-      display: grid;
-      place-items: center;
-      background: rgba(61, 217, 179, 0.16);
-      color: var(--accent);
-      font-size: 1.6rem;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
-    }
-
-    #preview-wrap {
-      display: none;
-      position: relative;
-      border-radius: 24px;
-      overflow: hidden;
-      margin-top: 20px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(255,255,255,0.04);
-    }
-
-    #preview-img {
-      width: 100%;
-      display: block;
-    }
-
-    .remove-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(0, 0, 0, 0.55);
-      color: #fff;
-      cursor: pointer;
-      font-size: 16px;
-      display: grid;
-      place-items: center;
-      transition: transform 0.2s ease;
-    }
-
-    .remove-btn:hover {
-      transform: scale(1.05);
-    }
-
-    .btn-analyse {
-      margin-top: 16px;
-      width: 100%;
-      border: none;
-      border-radius: 18px;
-      padding: 16px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-      color: #07101d;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 20px 50px rgba(53, 208, 184, 0.18);
-      transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-
-    .btn-analyse:hover:not(:disabled) {
-      transform: translateY(-2px);
-    }
-
-    .btn-analyse:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .status-card,
-    .info-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 22px;
-      padding: 20px;
-    }
-
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-top: 24px;
-    }
-
-    .status-label {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-    }
-
-    .status-value {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    #results {
-      display: none;
-      animation: fadeInUp 0.48s ease both;
-    }
-
-    .upload-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 12px 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 20px;
-      margin-top: 16px;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .upload-meta span {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: var(--text);
-      font-size: 0.82rem;
-      letter-spacing: 0.04em;
-    }
-
-    .result-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      flex-wrap: wrap;
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .result-label {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.9rem;
-      margin: 0;
-      line-height: 1.05;
-    }
-
-    .risk-badge {
-      padding: 10px 18px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .risk-High { background: rgba(255, 107, 107, 0.16); color: #ffcdcd; }
-    .risk-Moderate { background: rgba(255, 180, 80, 0.16); color: #ffe6b5; }
-    .risk-Low { background: rgba(61, 217, 179, 0.16); color: #c8ffee; }
-
-    .gauge-wrap {
-      display: grid;
-      gap: 20px;
-      margin-top: 22px;
-    }
-
-    .gauge-circle {
-      width: 108px;
-      height: 108px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    .gauge-circle svg { transform: rotate(-90deg); }
-
-    .gauge-text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .gauge-pct {
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-
-    .gauge-sub {
-      font-size: 0.72rem;
-      color: var(--muted);
-      letter-spacing: 0.08em;
-    }
-
-    .chart-card {
-      margin-top: 24px;
-      border-radius: 24px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      padding: 18px 20px 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #confidenceChart {
-      width: 100%;
-      max-width: 260px;
-      height: 260px;
-      margin: 0 auto;
-    }
-
-    .bar-row {
-      margin-top: 22px;
-      display: grid;
-      gap: 16px;
-    }
-
-    .bar-title {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.86rem;
-      color: var(--muted);
-    }
-
-    .bar-track {
-      height: 12px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .bar-fill {
-      height: 100%;
-      border-radius: 999px;
-      transition: width 0.8s ease;
-    }
-
-    .bar-mal { background: linear-gradient(90deg, #ff6b6b, #ff9a9a); }
-    .bar-ben { background: linear-gradient(90deg, #35d0b8, #22a592); }
-
-    .info-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-top: 24px;
-    }
-
-    .info-item {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 20px;
-      padding: 18px;
-    }
-
-    .info-item .label {
-      font-size: 0.72rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-    }
-
-    .info-item .value {
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-
-    #gradcam-card {
-      display: none;
-      margin-top: 24px;
-    }
-
-    .gradcam-caption {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-top: 14px;
-      line-height: 1.7;
-    }
-
-    .no-result {
-      margin-top: 14px;
-      color: var(--muted);
-      line-height: 1.8;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding-top: 20px;
-    }
-
-    .footer {
-      margin-top: 32px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.82rem;
-    }
-
-    .demo-note {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-      padding: 14px 18px;
-      border-radius: 18px;
-      background: rgba(255, 166, 48, 0.10);
-      border: 1px solid rgba(255, 166, 48, 0.16);
-      color: #ffd99e;
-      font-size: 0.92rem;
-      line-height: 1.5;
-    }
+    /* Local font faces for Indic scripts (served from /fonts/) */
+    @font-face { font-family: 'NotoTelugu'; src: url('/fonts/Noto_Sans_Telugu/NotoSansTelugu-VariableFont_wdth,wght.ttf'); }
+    @font-face { font-family: 'NotoDeva'; src: url('/fonts/Noto_Sans_Devanagari/NotoSansDevanagari-VariableFont_wdth,wght.ttf'); }
+    @font-face { font-family: 'NotoTamil'; src: url('/fonts/Noto_Sans_Tamil/NotoSansTamil-VariableFont_wdth,wght.ttf'); }
+    @font-face { font-family: 'NotoKannada'; src: url('/fonts/Noto_Sans_Kannada/NotoSansKannada-VariableFont_wdth,wght.ttf'); }
+    @font-face { font-family: 'NotoMalayalam'; src: url('/fonts/Noto_Sans_Malayalam/NotoSansMalayalam-VariableFont_wdth,wght.ttf'); }
+    @font-face { font-family: 'NotoBengali'; src: url('/fonts/Noto_Sans_Bengali/NotoSansBengali-VariableFont_wdth,wght.ttf'); }
+    /* Language picker styles */
+    .lang-picker { position: relative; }
+    .lang-picker-btn { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; cursor: pointer; display:flex; gap:8px; align-items:center; }
+    .lang-picker-btn .arrow { margin-left: 6px; opacity: 0.8; }
+    .lang-picker-menu { position: absolute; right: 0; top: calc(100% + 8px); background: var(--surface-card); border: 1px solid var(--border); min-width: 160px; box-shadow: 0 6px 18px rgba(0,0,0,0.4); border-radius: 8px; z-index: 60; display: none; }
+    .lang-option { padding: 8px 12px; cursor: pointer; font-size: 0.92rem; color: var(--text); }
+    .lang-option:hover { background: rgba(255,255,255,0.03); }
+    .lang-option.active { background: rgba(255,255,255,0.04); font-weight: 700; }
   </style>
 </head>
 <body>
-  <div class="page">
-    <header>
-      <div class="brand">M</div>
-      <div class="brand-title">
-        <h1>MediScan AI</h1>
-        <p>Modern cancer detection interface with fast image review.</p>
+  <div class="page-container">
+    <!-- Navigation Header -->
+    <header class="header-bar">
+      <a href="/" class="brand-section">
+        <div class="brand-logo" style="background: linear-gradient(135deg, #2563eb 0%, #00f2fe 100%);">
+          <i class="fa-solid fa-hospital"></i>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1>MediScan AI &bull; Oncology Medical Center</h1>
+            <span class="brand-status-chip" style="color: #38bdf8; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.35);"><span class="dot" style="background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span> PACS DICOM GATEWAY LIVE</span>
+          </div>
+          <p>Hospital Clinical Cancer Diagnostics, Rapid Emergency Triage, &amp; Explainable AI Telemetry</p>
+        </div>
+      </a>
+      <div class="header-nav-wrap">
+        <nav class="nav-actions">
+          <a class="nav-link active" href="/"><i class="fa-solid fa-stethoscope"></i> <span>Diagnostic</span></a>
+          <a class="nav-link" href="/dashboard"><i class="fa-solid fa-gauge-high"></i> <span>Dashboard</span></a>
+          <a class="nav-link" href="/patients"><i class="fa-solid fa-hospital-user"></i> <span>Patients EMR</span></a>
+          <a class="nav-link" href="/imaging"><i class="fa-solid fa-x-ray"></i> <span>PACS Imaging</span></a>
+          <a class="nav-link" href="/tumor-board"><i class="fa-solid fa-users-viewfinder"></i> <span>Tumor Board</span></a>
+          <a class="nav-link" href="/worklist"><i class="fa-solid fa-list-check"></i> <span>Worklist</span></a>
+          <a class="nav-link" href="/appointments"><i class="fa-solid fa-calendar-check"></i> <span>Appointments</span></a>
+          <a class="nav-link" href="/portal/patient" style="color: #34d399;"><i class="fa-solid fa-user"></i> <span>Patient Portal</span></a>
+        </nav>
+
+        <!-- Global Whole-Webpage Language Selector -->
+        <select id="globalLangSelector" class="lang-pill-select" onchange="changeGlobalLanguage(this.value)" title="Translate Entire Webpage" style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-size: 0.78rem; font-weight: 700; border-radius: 20px; padding: 5px 12px; outline: none; cursor: pointer;">
+          <option value="en">🌐 English (US)</option>
+          <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+          <option value="te">🇮🇳 Telugu (తెలుగు)</option>
+          <option value="ta">🇮🇳 Tamil (தமிழ்)</option>
+          <option value="kn">🇮🇳 Kannada (ಕನ್ನಡ)</option>
+          <option value="ml">🇮🇳 Malayalam (മലയാളം)</option>
+          <option value="bn">🇮🇳 Bengali (বাংলা)</option>
+          <option value="es">🇪🇸 Spanish (Español)</option>
+          <option value="fr">🇫🇷 French (Français)</option>
+          <option value="de">🇩🇪 German (Deutsch)</option>
+          <option value="ar">🇸🇦 Arabic (العربية)</option>
+        </select>
+
+        <!-- Doctor Login Gateway Button -->
+        {% if session.get('doctor_logged_in') %}
+          <div class="doctor-badge-status" style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.35); border-radius:9999px;">
+            <span style="font-size:0.76rem; font-weight:700; color:#6ee7b7;"><i class="fa-solid fa-user-doctor"></i> {{ session.get('doctor_name', 'Dr. Sarah Sharma, MD') }}</span>
+            <a href="/doctor/logout" style="color:#f87171; font-size:0.75rem; text-decoration:none; margin-left:4px;" title="Sign Out"><i class="fa-solid fa-power-off"></i></a>
+          </div>
+        {% else %}
+          <a href="/doctor/login" class="doctor-login-cta-btn" style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:linear-gradient(135deg, rgba(37,99,235,0.25), rgba(6,182,212,0.25)); border:1px solid #38bdf8; color:#38bdf8; font-size:0.78rem; font-weight:700; border-radius:9999px; text-decoration:none;" title="Doctor & Hospital Staff Gateway">
+            <i class="fa-solid fa-user-doctor"></i> <span>Doctor Login</span>
+          </a>
+        {% endif %}
+
+        <!-- Patient Login Gateway Button -->
+        {% if session.get('patient_logged_in') %}
+          <div class="patient-badge-status" style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.35); border-radius:9999px;">
+            <span style="font-size:0.76rem; font-weight:700; color:#6ee7b7;"><i class="fa-solid fa-user"></i> {{ session.get('patient_name', 'Eleanor Vance') }}</span>
+            <a href="/patient/logout" style="color:#f87171; font-size:0.75rem; text-decoration:none; margin-left:4px;" title="Sign Out"><i class="fa-solid fa-power-off"></i></a>
+          </div>
+        {% else %}
+          <a href="/patient/login" class="patient-login-cta-btn" style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#34d399; font-size:0.78rem; font-weight:700; border-radius:9999px; text-decoration:none;" title="Patient Health Portal Gateway">
+            <i class="fa-solid fa-hospital-user"></i> <span>Patient Login</span>
+          </a>
+        {% endif %}
+
+        <button class="theme-toggle-btn" id="themeToggle" type="button" title="Switch Theme (Light / Dark)">
+          <i class="fa-solid fa-moon"></i> <span>Dark</span>
+        </button>
       </div>
-      <button class="theme-toggle" id="themeToggle" type="button">🌙 Dark Mode</button>
-      <a class="badge" href="/dashboard" style="text-decoration:none; color: var(--accent);">Doctor Dashboard</a>
     </header>
 
-    <div class="layout">
-      <div class="panel">
-        <div class="panel-body">
-          <p class="panel-title">Upload Medical Image</p>
-          <h2 class="section-heading">Inspect your scan in seconds.</h2>
-          <p class="subtext">Upload a medical image and the AI will classify the cancer type, confidence and risk score. The interface is designed for clarity and speed.</p>
+    <!-- Main Grid: Left Upload & Details / Right Diagnostics & Results -->
+    <div class="main-grid">
+      
+      <!-- Panel Left: Input Form & File Upload -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <span class="panel-tag">Medical Image Intake</span>
+          <h2 class="panel-heading">Upload Medical Scan</h2>
+          <p class="panel-subtext">Upload MRI, CT, or Dermoscopy scans for deep ensemble classification & Grad-CAM analysis.</p>
+        </div>
 
-          <div class="demo-note">
-            ⚠️ Demo mode: If the backend model is not trained, predictions may be illustrative.
+        <div class="panel-body">
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 12px 18px; border-radius: var(--radius-sm); margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 10px; overflow: hidden;">
+              <i class="fa-solid fa-file-medical text-accent" style="font-size: 1.2rem;"></i>
+              <span id="file-name" style="font-size: 0.9rem; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">No image selected yet</span>
+            </div>
+            <span class="badge badge-success" id="status-chip">Ready for Auto-Scan</span>
           </div>
 
-          <div class="form-row">
-            <div class="upload-meta">
-              <span id="file-name">No image selected yet</span>
-              <span class="status-chip" id="status-chip">Ready for automatic analysis</span>
+          <!-- Patient Information Fields -->
+          <div class="form-group">
+            <label class="form-label"><i class="fa-solid fa-hospital-user"></i> Patient Metadata & Appointment Schedule <span style="color: var(--danger);">*</span></label>
+            <div class="form-row-2">
+              <input id="patientName" type="text" class="form-input" placeholder="Patient Full Name *" required />
+              <input id="patientAge" type="number" min="1" max="120" class="form-input" placeholder="Age (e.g. 45) *" required />
             </div>
-
-            <div class="patient-details">
-              <p class="panel-title">Patient Details</p>
-              <div class="form-grid">
-                <input id="patientName" type="text" placeholder="Patient name" />
-                <input id="patientAge" type="number" min="0" placeholder="Age" />
-                <select id="patientGender">
-                  <option value="">Gender</option>
-                  <option value="Female">Female</option>
-                  <option value="Male">Male</option>
-                  <option value="Other">Other</option>
-                </select>
-                <input id="patientId" type="text" placeholder="Patient ID (optional)" />
+            <div class="form-row-2" style="margin-top: 12px;">
+              <select id="patientGender" class="form-select" required>
+                <option value="">Select Gender *</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Other">Other</option>
+              </select>
+              <div style="display: flex; gap: 6px; width: 100%;">
+                <input id="patientId" type="text" class="form-input" placeholder="Patient ID *" value="MS-2026-004821" required style="font-family: monospace; font-weight: 700; color: #38bdf8;" />
+                <button type="button" class="btn btn-outline" id="btnGenPatientId" title="Generate New Patient ID" style="padding: 0 10px; font-size: 0.8rem; white-space: nowrap;">
+                  <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
               </div>
             </div>
-
-            <div class="upload-zone" id="drop-zone">
-              <div class="upload-icon">🩻</div>
-              <p><strong>Click to upload</strong> or drag & drop your scan here.</p>
-              <p>Automatic cancer type detection is enabled.</p>
-              <input type="file" id="file-input" accept="image/*" />
+            <div class="form-row-2" style="margin-top: 12px;">
+              <input id="patientEmail" type="email" class="form-input" placeholder="Patient Email *" required />
             </div>
-
-            <div id="preview-wrap">
-              <img id="preview-img" src="" alt="Preview" />
-              <button class="remove-btn" id="remove-btn" type="button">✕</button>
+            <div class="form-row-2" style="margin-top: 12px;">
+              <div>
+                <label style="display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px;"><i class="fa-regular fa-calendar-days text-accent"></i> Last Visit Date</label>
+                <input id="lastVisitDate" type="date" class="form-input" style="width: 100%; color-scheme: dark;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 4px;"><i class="fa-solid fa-calendar-check text-accent"></i> Next Visit Date (Auto if blank)</label>
+                <input id="nextVisitDate" type="date" class="form-input" style="width: 100%; color-scheme: dark;" />
+              </div>
             </div>
-
-            <button class="btn-analyse" id="analyse-btn" type="button" disabled>
-              <div class="spinner" id="spinner"></div>
-              <span id="btn-text">🔍 Analyse Image</span>
-            </button>
           </div>
+
+          <!-- 1-Click Clinical Demo Scan Presets -->
+          <div class="demo-presets-bar">
+            <div class="demo-presets-header">
+              <span class="demo-presets-title"><i class="fa-solid fa-wand-magic-sparkles"></i> 1-Click Clinical Presets</span>
+              <span class="demo-presets-hint">Instant oncology test scans</span>
+            </div>
+            <div class="demo-presets-pills">
+              <button type="button" class="preset-pill" data-preset="brain" title="Load Brain Glioma MRI scan">
+                <span class="pill-dot brain"></span> <i class="fa-solid fa-brain"></i> Brain Glioma MRI
+              </button>
+              <button type="button" class="preset-pill" data-preset="breast" title="Load Breast Carcinoma scan">
+                <span class="pill-dot breast"></span> <i class="fa-solid fa-ribbon"></i> Breast Carcinoma
+              </button>
+              <button type="button" class="preset-pill" data-preset="lung" title="Load Lung Adenocarcinoma CT scan">
+                <span class="pill-dot lung"></span> <i class="fa-solid fa-lungs"></i> Lung Adenocarcinoma
+              </button>
+              <button type="button" class="preset-pill" data-preset="skin" title="Load Melanoma Dermoscopy scan">
+                <span class="pill-dot skin"></span> <i class="fa-solid fa-sun"></i> Melanoma Dermoscopy
+              </button>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Zone -->
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="form-label" style="margin-bottom: 0;"><i class="fa-solid fa-cloud-arrow-up"></i> Scan Upload Zone &amp; Scanner Reticle</label>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="font-size: 0.72rem; color: #38bdf8; font-weight: 700;"><i class="fa-solid fa-bolt"></i> Target Organ Mode:</span>
+                <select id="organSelectInput" style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.35); color: #e2e8f0; font-size: 0.72rem; padding: 3px 8px; border-radius: 12px; outline: none; cursor: pointer;">
+                  <option value="auto">Auto-Detect (Ensemble)</option>
+                  <option value="brain">Brain MRI</option>
+                  <option value="breast">Breast Ultrasound / Mammo</option>
+                  <option value="lung">Chest CT / Lung X-Ray</option>
+                  <option value="skin">Skin Dermoscopy</option>
+                </select>
+              </div>
+            </div>
+            <div class="upload-zone" id="drop-zone">
+              <div class="reticle-corner reticle-tl"></div>
+              <div class="reticle-corner reticle-tr"></div>
+              <div class="reticle-corner reticle-bl"></div>
+              <div class="reticle-corner reticle-br"></div>
+              <div class="laser-scanner-line"></div>
+              <div class="upload-icon-box">
+                <i class="fa-solid fa-x-ray"></i>
+              </div>
+              <div class="upload-title">Drop Medical Scan or Click to Browse</div>
+              <div class="upload-hint">Brain MRI • Breast Ultrasound / Mammo • Lung CT • Skin Dermoscopy</div>
+              <div class="upload-format-chips">
+                <span class="chip"><i class="fa-solid fa-brain text-accent"></i> Brain</span>
+                <span class="chip"><i class="fa-solid fa-ribbon text-accent"></i> Breast</span>
+                <span class="chip"><i class="fa-solid fa-lungs text-accent"></i> Lung</span>
+                <span class="chip"><i class="fa-solid fa-sun text-accent"></i> Skin</span>
+              </div>
+              <input type="file" id="file-input" accept="image/*" style="display: none;" />
+            </div>
+
+            <!-- Preview Image Card -->
+            <div class="preview-container" id="preview-wrap">
+              <img id="preview-img" src="" alt="Scan Preview" />
+              <button class="preview-remove-btn" id="remove-btn" type="button" title="Remove image">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button class="btn btn-primary btn-block" id="analyse-btn" type="button" disabled>
+            <i class="fa-solid fa-microscope" id="btn-icon"></i>
+            <span id="btn-text">Run Diagnostic Analysis</span>
+          </button>
+
+          <!-- History Section -->
+          <div style="margin-top: 32px; border-top: 1px solid var(--border); padding-top: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <h4 style="font-size: 1rem; font-weight: 700;"><i class="fa-solid fa-clock-rotate-left"></i> Prediction History</h4>
+              <button class="btn btn-secondary" id="clear-history-btn" type="button" style="padding: 6px 12px; font-size: 0.78rem;">Clear</button>
+            </div>
+            <div id="history-list">
+              <p style="color: var(--muted); font-size: 0.85rem;">No recent history logged in this browser session.</p>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <div class="panel" id="results">
-        <div class="panel-body">
-          <p class="panel-title">Analysis Results</p>
-          <div class="result-header">
-            <h2 class="result-label" id="result-label">Awaiting upload</h2>
-            <div class="risk-badge risk-Low" id="risk-badge">Risk: N/A</div>
-          </div>
+      <!-- Panel Right: Results & Grad-CAM Visualizer -->
+      <div>
+        
+        <!-- Loading State Spinner -->
+        <div class="panel-card scanning-loader" id="spinner">
+          <div class="radar-spinner"></div>
+          <div class="scanning-text">Analyzing Image Layers...</div>
+          <div class="scanning-subtext">Running ensemble neural network & computing Grad-CAM feature attention map</div>
+        </div>
 
-          <div class="gauge-wrap">
-            <div class="gauge-circle">
-              <svg width="108" height="108" viewBox="0 0 90 90">
-                <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="9" />
-                <circle cx="45" cy="45" r="38" fill="none" id="gauge-arc" stroke="var(--accent)" stroke-width="9" stroke-dasharray="239" stroke-dashoffset="239" stroke-linecap="round" />
-              </svg>
-              <div class="gauge-text">
-                <span class="gauge-pct" id="gauge-pct">0%</span>
-                <span class="gauge-sub">CONFIDENCE</span>
+        <!-- Initial Placeholder Card (Futuristic Holographic Radar HUD) -->
+        <div class="panel-card" id="no-result-card">
+          <div class="panel-header">
+            <span class="panel-tag"><i class="fa-solid fa-radar text-accent"></i> Awaiting Scan Intake</span>
+            <h2 class="panel-heading">Diagnostic Results Panel</h2>
+            <p class="panel-subtext">Upload a scan or click a 1-click clinical preset on the left to initialize AI ensemble classification.</p>
+          </div>
+          <div class="panel-body" style="text-align: center; padding: 42px 24px;">
+            <div class="radar-hud-wrap">
+              <div class="radar-hud-circle"></div>
+              <div class="radar-hud-inner"></div>
+              <div class="radar-hud-center">
+                <i class="fa-solid fa-dna"></i>
               </div>
             </div>
-            <p style="text-align:center; color: var(--muted); margin: 0;">The model confidence represents how sure the AI is about the predicted label.</p>
-          </div>
-
-          <div class="chart-card">
-            <p class="panel-title">Confidence Chart</p>
-            <canvas id="confidenceChart"></canvas>
-          </div>
-
-          <div class="bar-row">
-            <div>
-              <div class="bar-title"><span>Malignant probability</span><span id="mal-pct">—</span></div>
-              <div class="bar-track"><div class="bar-fill bar-mal" id="mal-bar" style="width: 0%"></div></div>
-            </div>
-            <div>
-              <div class="bar-title"><span>Benign probability</span><span id="ben-pct">—</span></div>
-              <div class="bar-track"><div class="bar-fill bar-ben" id="ben-bar" style="width: 0%"></div></div>
-            </div>
-          </div>
-
-          <div class="info-grid">
-            <div class="info-item"><div class="status-label">Model</div><div class="status-value">MobileNetV2</div></div>
-            <div class="info-item"><div class="status-label">Auto type</div><div class="status-value" id="auto-type-val">N/A</div></div>
-            <div class="info-item"><div class="status-label">Ensemble vote</div><div class="status-value" id="ensemble-type-val">N/A</div></div>
-            <div class="info-item"><div class="status-label">Consensus</div><div class="status-value" id="consensus-val">N/A</div></div>
-            <div class="info-item"><div class="status-label">Quality check</div><div class="status-value" id="quality-status-val">Pending</div></div>
-            <div class="info-item"><div class="status-label">Stage</div><div class="status-value" id="stage-val">N/A</div></div>
-            <div class="info-item"><div class="status-label">Severity Score</div><div class="status-value" id="severity-val">N/A</div></div>
-            <div class="info-item"><div class="status-label">Risk Level</div><div class="status-value" id="risk-val">N/A</div></div>
-            <div class="info-item"><div class="status-label">Explainability</div><div class="status-value">Grad-CAM</div></div>
-          </div>
-
-          <div class="recommendation-card">
-            <p class="panel-title">Doctor Recommendation</p>
-            <p id="recommendation-text">The model is ready to support clinical review. Share this result with a physician for next steps.</p>
-          </div>
-
-          <div class="report-actions">
-            <button class="btn-analyse secondary" id="download-report-btn" type="button" disabled>Download PDF Report</button>
-            <button class="btn-analyse secondary" id="speak-summary-btn" type="button" disabled>Speak Summary</button>
-            <button class="btn-analyse secondary" id="clear-history-btn" type="button">Clear History</button>
-          </div>
-
-          <div class="explanation-card" style="margin-top: 24px; padding: 20px; border-radius: 24px; background: rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);">
-            <p class="panel-title">AI Explanation Panel</p>
-            <p id="explanation-text" style="margin-top: 12px; color: var(--muted);">The explainable AI panel shows how the prediction was derived, the consensus strength, and any quality warnings.</p>
-          </div>
-
-          <div class="history-card">
-            <p class="panel-title">Prediction History</p>
-            <div id="history-list" class="history-list">
-              <p class="history-empty">No history yet. Your recent predictions will appear here.</p>
-            </div>
-          </div>
-
-          <div class="no-result" id="no-result-card">
-            <p><strong>How it works:</strong></p>
-            <p>Upload a dataset image, analyse it, then review the confidence chart and risk summary. Grad-CAM highlights relevant regions for explainability.</p>
-          </div>
-
-          <div class="panel" id="gradcam-card" style="padding: 22px; background: rgba(255,255,255,0.03);">
-            <p class="panel-title">Grad-CAM Heatmap</p>
-            <img id="gradcam-img" src="" alt="Grad-CAM heatmap" style="width: 100%; border-radius: 22px; border: 1px solid rgba(255,255,255,0.08);" />
-            <p class="gradcam-caption">Red highlights indicate the regions the model used to make its prediction.</p>
-          </div>
-
-          <div class="panel" id="qr-panel" style="margin-top:24px; padding:22px; background: rgba(255,255,255,0.03);">
-            <p class="panel-title">QR Verification</p>
-            <div id="qr-code" style="display:grid; place-items:center; padding:14px; margin-bottom:12px;"></div>
-            <p class="subtext" id="qr-token">Token: —</p>
-            <div style="display:grid; gap:12px; margin-top:14px;">
-              <input id="qr-verify-value" type="text" placeholder="Enter verification token" style="width:100%; padding:14px; border-radius:18px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:var(--text);" />
-              <button class="btn-analyse secondary" id="qr-verify-btn" type="button">Verify QR Token</button>
-              <p id="qr-status" style="margin:0; color:var(--muted);"></p>
+            <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">Neural Diagnostic Engine Standby</h3>
+            <p style="color: var(--muted); font-size: 0.88rem; max-width: 440px; margin: 0 auto 16px;">
+              Ready to process high-resolution radiological & dermatological scans with deep Grad-CAM explainability and multi-agent tumor board consultation.
+            </p>
+            <div class="radar-active-models">
+              <div class="radar-model-chip">
+                <span class="model-dot"></span>
+                <span><strong>Brain CNS:</strong> EfficientNet-B3</span>
+              </div>
+              <div class="radar-model-chip">
+                <span class="model-dot"></span>
+                <span><strong>Breast Mammo:</strong> ResNet50-V2</span>
+              </div>
+              <div class="radar-model-chip">
+                <span class="model-dot"></span>
+                <span><strong>Pulmonary Lung:</strong> DenseNet-121</span>
+              </div>
+              <div class="radar-model-chip">
+                <span class="model-dot"></span>
+                <span><strong>Dermoscopy Skin:</strong> MobileNet-V3</span>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- Actual Results Panel (Hidden until prediction runs) -->
+        <div class="panel-card" id="results" style="display: none;">
+          <div class="panel-header">
+            <span class="panel-tag" data-i18n="results_tag">AI Evaluation Report</span>
+            <h2 class="panel-heading" data-i18n="results_heading">Diagnostic Analysis</h2>
+            <p class="panel-subtext" data-i18n="results_subtext">Real-time prediction with neural confidence rating & stage scoring.</p>
+          </div>
+
+          <div class="panel-body">
+            
+            <!-- Hero Result Banner -->
+            <div class="result-hero-card">
+              <div class="hero-top-row">
+                <div class="hero-title-group">
+                  <span class="stage-tag" id="stage-val" data-i18n="stage_na">Stage N/A</span>
+                  <h2 id="result-label" data-i18n="diagnostic_label">Diagnostic Label</h2>
+                </div>
+                <div class="badge badge-success" id="risk-badge" data-i18n-prefix="risk_label">Risk: Low</div>
+              </div>
+
+              <!-- Severity Progress Bar -->
+              <div class="severity-wrapper">
+                <div class="severity-label-row">
+                  <span data-i18n="severity_score_label">Calculated Severity Score</span>
+                  <span id="severity-val">0%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" id="severity-bar" style="width: 0%;"></div>
+                </div>
+              </div>
+<div class="info-grid" style="margin-top: 14px;">
+                <div class="info-item">
+                  <div class="info-item-label" data-i18n="affected_area">Affected Area</div>
+                  <div class="info-item-value" id="affected-area-val">N/A</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-item-label" data-i18n="tumor_size">Tumor Size Estimate</div>
+                  <div class="info-item-value" id="tumor-size-val">N/A</div>
+                </div>
+              </div>
+
+              <!-- AI Priority Queue Lane -->
+              <div class="info-item" style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:14px;">
+                <div>
+                  <div class="info-item-label"><i class="fa-solid fa-tower-broadcast" style="color:#8b5cf6;"></i> <span data-i18n="ai_priority_queue">AI Priority Queue</span></div>
+                  <div class="info-item-value" id="priority-lane-val" style="font-size:1.25rem;">Routine Review</div>
+                </div>
+                <span class="pq-badge" id="priority-lane-badge">Score: 0</span>
+              </div>
+            </div>
+
+            <!-- Grad-CAM Thermal Viewer -->
+            <div class="gradcam-card" id="gradcam-card">
+              <div class="gradcam-header">
+                <h3><i class="fa-solid fa-eye text-accent"></i> <span data-i18n="gradcam_title">Grad-CAM Feature Map</span></h3>
+                <div class="gradcam-toggle-group">
+                  <button class="gradcam-tab-btn active" id="tab-gradcam" type="button" data-i18n="tab_heatmap">Heatmap</button>
+                  <button class="gradcam-tab-btn" id="tab-original" type="button" data-i18n="tab_original">Original</button>
+                </div>
+              </div>
+              <div class="gradcam-view-box">
+                <img id="gradcam-img" src="" alt="Grad-CAM visual feature map" />
+              </div>
+              <div id="image-comparison-grid" style="display: none; margin-top: 12px; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px;">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); margin-bottom: 8px;" data-i18n="original_scan">Original Scan</div>
+                  <img id="original-preview-img" src="" alt="Original scan preview" style="width: 100%; border-radius: 8px; display: block;" />
+                </div>
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px;">
+                  <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); margin-bottom: 8px;" data-i18n="heatmap_overlay">Heatmap Overlay</div>
+                  <img id="heatmap-preview-img" src="" alt="Heatmap preview" style="width: 100%; border-radius: 8px; display: block;" />
+                </div>
+              </div>
+              <p id="heatmap-caption" style="font-size: 0.8rem; color: var(--muted); margin-top: 10px;">
+                <i class="fa-solid fa-circle-info text-accent"></i> <span data-i18n="heatmap_caption">Highlights regions in warmer colors (red/yellow) that drove the AI classification model's decision.</span>
+              </p>
+            </div>
+
+            <!-- Probability Breakdown Bars & Chart -->
+            <div style="background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 22px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h3 style="font-size: 1.05rem; font-weight: 600;"><i class="fa-solid fa-chart-pie text-accent"></i> <span data-i18n="confidence_title">Classification Confidence</span></h3>
+                <span id="gauge-pct" style="font-size: 1.2rem; font-weight: 800; color: var(--accent);">0%</span>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: 140px 1fr; gap: 20px; align-items: center;">
+                <div style="width: 140px; height: 140px; margin: 0 auto;">
+                  <canvas id="confidenceChart"></canvas>
+                </div>
+
+                <div>
+                  <div style="margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                      <span style="color: var(--muted);" data-i18n="malignant_prob">Malignant Probability</span>
+                      <span id="mal-pct" style="font-weight: 700; color: var(--danger);">0%</span>
+                    </div>
+                    <div class="progress-track">
+                      <div class="progress-fill fill-danger" id="mal-bar" style="width: 0%;"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px;">
+                      <span style="color: var(--muted);" data-i18n="benign_normal_prob">Benign / Normal Probability</span>
+                      <span id="ben-pct" style="font-weight: 700; color: var(--success);">0%</span>
+                    </div>
+                    <div class="progress-track">
+                      <div class="progress-fill" id="ben-bar" style="width: 0%;"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detailed Grid Information -->
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-item-label" data-i18n="auto_type">Auto Type Detected</div>
+                <div class="info-item-value" id="auto-type-val">N/A</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item-label" data-i18n="ensemble_vote">Ensemble Vote</div>
+                <div class="info-item-value" id="ensemble-type-val">N/A</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item-label" data-i18n="last_visit_date">Last Visit Date</div>
+                <div class="info-item-value" id="last-visit-val">N/A</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item-label" data-i18n="next_visit_approx">Next Visit (Approx)</div>
+                <div class="info-item-value text-accent" id="next-visit-val" style="font-weight: 700;">N/A</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item-label" data-i18n="gdrive_autosave">Google Drive Auto-Save</div>
+                <div class="info-item-value" id="gdrive-status-val" style="font-size: 0.82rem; font-weight: 600;">Pending</div>
+              </div>
+              <div class="info-item">
+                <div class="info-item-label" data-i18n="gmail_alert">Gmail Alert Dispatch</div>
+                <div class="info-item-value" id="email-status-val" style="font-size: 0.82rem; font-weight: 600;">Pending</div>
+              </div>
+            </div>
+
+<!-- Clinical Explanation & Recommendation -->
+            <div class="clinical-box">
+              <div class="clinical-box-header">
+                <div class="clinical-title"><i class="fa-solid fa-clipboard-check"></i> <span data-i18n="clinical_title">Clinical Summary & Explainable AI</span></div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                  <label style="font-size:0.85rem; color:var(--muted); margin:0;" data-i18n="language_label">Language</label>
+                  <div class="lang-picker" id="langPicker">
+                    <button type="button" class="lang-picker-btn" id="langPickerBtn">English <span class="arrow">▾</span></button>
+                    <div class="lang-picker-menu" id="langPickerMenu">
+                      <div class="lang-option" data-lang="en">English</div>
+                      <div class="lang-option" data-lang="hi">Hindi (हिन्दी)</div>
+                      <div class="lang-option" data-lang="te">Telugu (తెలుగు)</div>
+                      <div class="lang-option" data-lang="ta">Tamil (தமிழ்)</div>
+                      <div class="lang-option" data-lang="kn">Kannada (ಕನ್ನಡ)</div>
+                      <div class="lang-option" data-lang="ml">Malayalam (മലയാളം)</div>
+                      <div class="lang-option" data-lang="bn">Bengali (বাংলা)</div>
+                      <div class="lang-option" data-lang="ar">Arabic (العربية)</div>
+                      <div class="lang-option" data-lang="es">Spanish (Español)</div>
+                      <div class="lang-option" data-lang="fr">French (Français)</div>
+                      <div class="lang-option" data-lang="de">German (Deutsch)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p id="explanation-text" data-i18n="explanation_placeholder">AI explanation notes will appear here summarizing decision reasoning.</p>
+              <div style="margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); font-size: 0.9rem; color: var(--text); line-height: 1.6;">
+                <strong><i class="fa-solid fa-circle-check text-accent"></i> <span data-i18n="recommendation_label">Recommendation:</span></strong> <span id="recommendation-text">Share this scan with a physician for secondary opinion.</span>
+              </div>
+<div id="voice-summary-box" style="margin-top: 12px; font-size: 0.86rem; color: var(--muted); display:none;"></div>
+            </div>
+
+<!-- Multi-Agent AI Clinical Second Opinion -->
+            <div class="panel-card" style="margin-top: 22px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden;">
+              <div class="panel-header" style="background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(14,165,233,0.08)); border-bottom: 1px solid var(--border);">
+                <span class="panel-tag">AI Clinical Second Opinion</span>
+                <h2 class="panel-heading" style="font-size: 1.1rem;"><i class="fa-solid fa-people-group text-accent"></i> Multi-Agent Tumor Board</h2>
+                <p class="panel-subtext">Five specialized AI personas independently review this scan, then an AI aggregator synthesizes a unified clinical recommendation.</p>
+              </div>
+              <div class="panel-body">
+                <div id="multi-agent-wrap" style="margin-bottom: 16px;">
+                  <div style="display:flex; align-items:center; gap:10px; color:var(--muted); font-size:0.9rem;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading AI second opinion...
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage-Based Remedies & Health Habits -->
+            <div class="panel-card" id="stage-guidance-panel" style="display: none; margin-top: 22px; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden;">
+              <div class="panel-header" style="background: linear-gradient(135deg, rgba(16,185,129,0.14), rgba(14,165,233,0.06)); border-bottom: 1px solid var(--border);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                  <span class="panel-tag" id="guidance-stage-tag" style="background: rgba(16,185,129,0.2); color: #10b981; font-weight: 700;">Stage Guidance</span>
+                  <span class="badge badge-success" id="guidance-organ-badge" style="font-size: 0.75rem;">Supportive Care Protocol</span>
+                </div>
+                <h2 class="panel-heading" style="font-size: 1.15rem; margin-top: 6px;"><i class="fa-solid fa-heart-pulse text-accent"></i> <span id="guidance-main-title">Stage-Based Supportive Remedies & Health Habits</span></h2>
+                <p class="panel-subtext" id="guidance-main-subtext">Evidence-based supportive remedies, daily healthy habits, and clinical nutrition tailored to your specific cancer stage and organ diagnosis.</p>
+              </div>
+              <div class="panel-body">
+                <div id="stage-guidance-wrap">
+                  <div style="display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.9rem;">
+                    <i class="fa-solid fa-spinner fa-spin"></i> Loading stage guidance...
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons Row -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+              <button class="btn btn-secondary" id="download-report-btn" type="button" disabled>
+                <i class="fa-solid fa-file-pdf"></i> Download PDF Report
+              </button>
+              <button class="btn btn-secondary" id="speak-summary-btn" type="button" disabled>
+                <i class="fa-solid fa-volume-high"></i> Voice Assistant
+              </button>
+            </div>
+
+            <!-- Integrated Cancer Care Pathways (Directly tailored to this diagnosed cancer) -->
+            <div id="cancer-care-pathways" style="display: none; background: rgba(53, 208, 184, 0.04); border: 1px solid rgba(53, 208, 184, 0.28); border-radius: var(--radius-md); padding: 22px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                <h4 style="font-size: 1rem; font-weight: 700; color: var(--accent); margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-route"></i> Cancer Care Pathways for <span id="pathway-cancer-name">Patient</span>
+                </h4>
+                <span class="badge badge-success" id="pathway-risk-badge">Active Case</span>
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+                Directly connect this diagnosed malignancy to evidence-based preventive screening, ICU telemetry monitoring, tumor board workflows, and oncology distress coping:
+              </p>
+              <div class="pathway-grid">
+                <a id="btn-goto-preventive" href="/preventive" class="pathway-nav-card">
+                  <div class="pathway-icon-wrap" style="color: #10b981; background: rgba(16, 185, 129, 0.12);">
+                    <i class="fa-solid fa-shield-halved"></i>
+                  </div>
+                  <div class="pathway-title">Preventive Care</div>
+                  <div class="pathway-desc">ACS/USPSTF screening roadmap & organ risk reduction</div>
+                </a>
+                <a id="btn-goto-monitoring" href="/monitoring" class="pathway-nav-card">
+                  <div class="pathway-icon-wrap" style="color: #0ea5e9; background: rgba(14, 165, 233, 0.12);">
+                    <i class="fa-solid fa-chart-line"></i>
+                  </div>
+                  <div class="pathway-title">Oncology Telemetry</div>
+                  <div class="pathway-desc">Tumor biomarkers (CEA/CA15-3/S100B), ANC & vital alerts</div>
+                </a>
+                <a id="btn-goto-workflows" href="/workflows" class="pathway-nav-card">
+                  <div class="pathway-icon-wrap" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.12);">
+                    <i class="fa-solid fa-network-wired"></i>
+                  </div>
+                  <div class="pathway-title">MDT Tumor Board</div>
+                  <div class="pathway-desc">AJCC TNM / WHO CNS staging & biopsy requisition</div>
+                </a>
+                <a id="btn-goto-wellbeing" href="/wellbeing" class="pathway-nav-card">
+                  <div class="pathway-icon-wrap" style="color: #ec4899; background: rgba(236, 72, 153, 0.12);">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                  </div>
+                  <div class="pathway-title">Psycho-Oncology</div>
+                  <div class="pathway-desc">NCCN distress thermometer & breathing pacer</div>
+                </a>
+                <a id="btn-goto-interactions" href="/interactions" class="pathway-nav-card">
+                  <div class="pathway-icon-wrap" style="color: #f59e0b; background: rgba(245, 158, 11, 0.12);">
+                    <i class="fa-solid fa-pills"></i>
+                  </div>
+                  <div class="pathway-title">Drug Interactions</div>
+                  <div class="pathway-desc">CYP450 chemo-herb-supplement safety checker</div>
+                </a>
+              </div>
+            </div>
+
+            <!-- QR Verification Section -->
+            <div style="background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px;">
+              <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px;"><i class="fa-solid fa-qrcode text-accent"></i> Report Verification QR Code</h4>
+              <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                <div id="qr-code" style="background: #ffffff; padding: 10px; border-radius: var(--radius-sm);"></div>
+                <div style="flex: 1; min-width: 200px;">
+                  <div style="font-size: 0.85rem; color: var(--muted); margin-bottom: 6px;">Secure Token Identifier:</div>
+                  <code id="qr-token" style="display: block; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 0.82rem; word-break: break-all; margin-bottom: 12px;">Token: —</code>
+                  <div style="display: flex; gap: 8px;">
+                    <input id="qr-verify-value" type="text" class="form-input" placeholder="Paste verification token" style="padding: 8px 12px; font-size: 0.85rem;" />
+                    <button class="btn btn-secondary" id="qr-verify-btn" type="button" style="padding: 8px 14px; font-size: 0.85rem;">Verify</button>
+                  </div>
+                  <p id="qr-status" style="font-size: 0.82rem; margin-top: 6px; color: var(--muted);"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- PACS DICOM Launch & Doctor Review / Digital Sign-off (Requirements #5 & #9) -->
+            <div style="background: rgba(15,23,42,0.9); border: 1px solid rgba(56,189,248,0.25); border-radius: 14px; padding: 22px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                <div>
+                  <span class="panel-tag" style="background: rgba(56,189,248,0.15); color: #38bdf8;">PACS Integration</span>
+                  <h3 style="font-size: 1.15rem; font-weight: 800; margin: 4px 0 0 0; color: #fff;">
+                    <i class="fa-solid fa-x-ray text-accent"></i> PACS / DICOM Imaging Workspace &bull; Doctor Sign-Off
+                  </h3>
+                </div>
+                <a id="btnOpenInPACS" href="/imaging" class="btn btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">
+                  <i class="fa-solid fa-expand"></i> Launch in Full PACS Workstation &rarr;
+                </a>
+              </div>
+
+              <!-- Human-in-the-Loop Doctor Review & Digital Sign-off -->
+              <div class="signoff-box" style="margin-top: 0; background: rgba(0,0,0,0.35);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <span style="font-size: 0.82rem; font-weight: 800; color: #10b981; text-transform: uppercase;">
+                    <i class="fa-solid fa-user-doctor"></i> Doctor Review &amp; Digital Sign-Off ⭐
+                  </span>
+                  <span style="font-size: 0.72rem; color: var(--muted);">Human-in-the-Loop Workflow</span>
+                </div>
+
+                <div class="signoff-actions-grid">
+                  <button type="button" class="signoff-action-btn confirm active" data-action="confirm">
+                    <i class="fa-solid fa-check"></i> Confirm AI Finding
+                  </button>
+                  <button type="button" class="signoff-action-btn modify" data-action="modify">
+                    <i class="fa-solid fa-pen"></i> Modify Finding
+                  </button>
+                  <button type="button" class="signoff-action-btn reject" data-action="reject">
+                    <i class="fa-solid fa-xmark"></i> Reject Finding
+                  </button>
+                </div>
+
+                <div style="margin: 12px 0;">
+                  <label style="font-size: 0.75rem; color: var(--muted); display: block; margin-bottom: 4px;">Doctor Clinical Review Notes:</label>
+                  <textarea id="diagDoctorNotes" class="form-input" rows="2" style="font-size: 0.8rem; width: 100%;">Reviewed AI feature map and localization. Findings confirmed for clinical staging and tumor board review.</textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                  <div>
+                    <label style="font-size: 0.72rem; color: var(--muted); display: block;">Certifying Physician:</label>
+                    <input type="text" id="diagDoctorName" class="form-input" value="Dr. Sarah Sharma, MD" style="font-size: 0.78rem;" />
+                  </div>
+                  <div>
+                    <label style="font-size: 0.72rem; color: var(--muted); display: block;">Review Timestamp:</label>
+                    <input type="text" class="form-input" value="05 Oct 2026 &bull; Verified" readonly style="font-size: 0.78rem; font-family: monospace;" />
+                  </div>
+                </div>
+
+                <button type="button" id="executeDiagSignOffBtn" class="btn btn-primary" style="width: 100%; padding: 9px; font-size: 0.85rem; background: linear-gradient(135deg, #059669, #10b981); border: none;">
+                  <i class="fa-solid fa-signature"></i> Apply Digital Signature &amp; Certify into EMR
+                </button>
+
+                <div id="diagSignatureStampPreview" class="signature-stamp" style="display: none; margin-top: 14px;"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <div class="footer">Designed for clear medical review, with premium glassmorphism styling and responsive layout.</div>
-  </div>
+<!-- Hidden Gauge SVGs for JS reference -->
+    <div style="display: none;">
+      <svg><circle id="gauge-arc"></circle></svg>
+      <span id="risk-val"></span>
+    </div>
 
+</div>
+
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -744,6 +662,7 @@
     const analyseBtn = document.getElementById('analyse-btn');
     const spinner = document.getElementById('spinner');
     const btnText = document.getElementById('btn-text');
+    const btnIcon = document.getElementById('btn-icon');
     const resultLabel = document.getElementById('result-label');
     const fileNameText = document.getElementById('file-name');
     const statusChip = document.getElementById('status-chip');
@@ -751,6 +670,10 @@
     const patientAge = document.getElementById('patientAge');
     const patientGender = document.getElementById('patientGender');
     const patientId = document.getElementById('patientId');
+    const patientEmail = document.getElementById('patientEmail');
+    const lastVisitDate = document.getElementById('lastVisitDate');
+    const nextVisitDate = document.getElementById('nextVisitDate');
+
     const themeToggle = document.getElementById('themeToggle');
     const downloadReportBtn = document.getElementById('download-report-btn');
     const historyList = document.getElementById('history-list');
@@ -760,18 +683,25 @@
     const riskVal = document.getElementById('risk-val');
     const stageVal = document.getElementById('stage-val');
     const severityVal = document.getElementById('severity-val');
+    const severityBar = document.getElementById('severity-bar');
     const autoTypeVal = document.getElementById('auto-type-val');
     const ensembleTypeVal = document.getElementById('ensemble-type-val');
-    const consensusVal = document.getElementById('consensus-val');
-    const qualityStatusVal = document.getElementById('quality-status-val');
+    const lastVisitVal = document.getElementById('last-visit-val');
+    const nextVisitVal = document.getElementById('next-visit-val');
+    const gdriveStatusVal = document.getElementById('gdrive-status-val');
+    const emailStatusVal = document.getElementById('email-status-val');
     const malPct = document.getElementById('mal-pct');
     const benPct = document.getElementById('ben-pct');
     const malBar = document.getElementById('mal-bar');
     const benBar = document.getElementById('ben-bar');
     const gaugePct = document.getElementById('gauge-pct');
-    const gaugeArc = document.getElementById('gauge-arc');
     const gradcamCard = document.getElementById('gradcam-card');
     const gradcamImg = document.getElementById('gradcam-img');
+    const imageComparisonGrid = document.getElementById('image-comparison-grid');
+    const originalPreviewImg = document.getElementById('original-preview-img');
+    const heatmapPreviewImg = document.getElementById('heatmap-preview-img');
+    const tabGradcam = document.getElementById('tab-gradcam');
+    const tabOriginal = document.getElementById('tab-original');
     const qrCodeContainer = document.getElementById('qr-code');
     const qrTokenText = document.getElementById('qr-token');
     const qrVerifyValue = document.getElementById('qr-verify-value');
@@ -781,12 +711,26 @@
     const resultsPanel = document.getElementById('results');
     const speakSummaryBtn = document.getElementById('speak-summary-btn');
     const explanationText = document.getElementById('explanation-text');
+const affectedAreaVal = document.getElementById('affected-area-val');
+    const tumorSizeVal = document.getElementById('tumor-size-val');
+    const priorityLaneVal = document.getElementById('priority-lane-val');
+    const priorityLaneBadge = document.getElementById('priority-lane-badge');
+    const voiceSummaryBox = document.getElementById('voice-summary-box');
+    const translateLangSelect = document.getElementById('translateLangSelect');
+    const langPickerBtn = document.getElementById('langPickerBtn');
+    const langPickerMenu = document.getElementById('langPickerMenu');
 
-    let selectedFile = null;
+let selectedFile = null;
+    let originalScanDataUrl = '';
+    let gradcamDataUrl = '';
     let confidenceChart = null;
     let predictionHistory = [];
     let lastReportData = null;
+    let reportLanguage = 'en';
+    let utteranceStarted = false;
 
+    // Drag & Drop handlers
+    dropZone.addEventListener('click', () => fileInput.click());
     dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
     dropZone.addEventListener('drop', e => {
@@ -800,10 +744,82 @@
       if (fileInput.files[0]) loadFile(fileInput.files[0]);
     });
 
+    // Theme toggle
     themeToggle.addEventListener('click', () => {
       const isLight = document.body.classList.toggle('light-mode');
-      themeToggle.textContent = isLight ? '☀️ Light Mode' : '🌙 Dark Mode';
+      themeToggle.innerHTML = isLight ? '<i class="fa-solid fa-sun"></i> <span>Light</span>' : '<i class="fa-solid fa-moon"></i> <span>Dark</span>';
       localStorage.setItem('appTheme', isLight ? 'light' : 'dark');
+    });
+
+    // 1-Click Clinical Demo Presets Handler
+    const clinicalPresets = {
+      brain: {
+        file: '/static/uploads/Te-gl_1.jpg',
+        filename: 'Te-gl_1.jpg',
+        name: 'Marcus Vance',
+        age: 48,
+        gender: 'Male',
+        id: 'PT-CNS-8821',
+        email: 'm.vance@mediscan.org'
+      },
+      breast: {
+        file: '/static/uploads/malignant_1.png',
+        filename: 'malignant_1.png',
+        name: 'Sophia Lin',
+        age: 52,
+        gender: 'Female',
+        id: 'PT-BR-4190',
+        email: 's.lin@mediscan.org'
+      },
+      lung: {
+        file: '/static/uploads/lungaca1.jpeg',
+        filename: 'lungaca1.jpeg',
+        name: 'Robert Chen',
+        age: 61,
+        gender: 'Male',
+        id: 'PT-LU-7032',
+        email: 'r.chen@mediscan.org'
+      },
+      skin: {
+        file: '/static/uploads/10.jpg',
+        filename: '10.jpg',
+        name: 'Emma Davis',
+        age: 39,
+        gender: 'Female',
+        id: 'PT-SK-2914',
+        email: 'e.davis@mediscan.org'
+      }
+    };
+
+    document.querySelectorAll('.preset-pill').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const type = btn.getAttribute('data-preset');
+        const p = clinicalPresets[type];
+        if (!p) return;
+
+        // Visual feedback on clicked button
+        document.querySelectorAll('.preset-pill').forEach(b => b.style.borderColor = '');
+        btn.style.borderColor = 'var(--accent)';
+
+        // Autofill patient metadata
+        if (patientName) patientName.value = p.name;
+        if (patientAge) patientAge.value = p.age;
+        if (patientGender) patientGender.value = p.gender;
+        if (patientId) patientId.value = p.id;
+        if (patientEmail) patientEmail.value = p.email;
+
+        try {
+          statusChip.textContent = 'Loading Sample...';
+          const resp = await fetch(p.file);
+          if (!resp.ok) throw new Error('Failed to load sample image');
+          const blob = await resp.blob();
+          const file = new File([blob], p.filename, { type: blob.type || 'image/jpeg' });
+          loadFile(file);
+        } catch (err) {
+          console.error('Preset loading error:', err);
+          statusChip.textContent = 'Sample Failed';
+        }
+      });
     });
 
     clearHistoryBtn.addEventListener('click', () => {
@@ -813,55 +829,116 @@
     });
 
     downloadReportBtn.addEventListener('click', () => {
-      if (lastReportData) createPdfReport(lastReportData);
+      if (lastReportData && lastReportData.data && lastReportData.data.report_id) {
+        window.location.href = '/api/download_pdf/' + lastReportData.data.report_id;
+      } else if (lastReportData) {
+        createPdfReport(lastReportData);
+      }
     });
 
     window.addEventListener('DOMContentLoaded', () => {
       const savedTheme = localStorage.getItem('appTheme');
       if (savedTheme === 'light') {
         document.body.classList.add('light-mode');
-        themeToggle.textContent = '☀️ Light Mode';
+        themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i> <span>Light</span>';
+      }
+      if (lastVisitDate && !lastVisitDate.value) {
+        lastVisitDate.value = new Date().toISOString().split('T')[0];
       }
       loadHistory();
     });
 
+    // Load file preview
     function loadFile(f) {
       selectedFile = f;
-      previewImg.src = URL.createObjectURL(f);
-      previewWrap.style.display = 'block';
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        originalScanDataUrl = e.target.result;
+        previewImg.src = originalScanDataUrl;
+        previewWrap.style.display = 'block';
+        dropZone.style.display = 'none';
+      };
+      reader.readAsDataURL(f);
+
       analyseBtn.disabled = false;
       resultsPanel.style.display = 'none';
       noResultCard.style.display = 'block';
       gradcamCard.style.display = 'none';
       fileNameText.textContent = f.name;
-      statusChip.textContent = 'Image loaded, ready to analyse';
+      statusChip.textContent = 'Image Loaded';
       downloadReportBtn.disabled = true;
     }
 
-    removeBtn.addEventListener('click', () => {
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       fileNameText.textContent = 'No image selected yet';
-      statusChip.textContent = 'Ready for automatic analysis';
+      statusChip.textContent = 'Ready for Auto-Scan';
       selectedFile = null;
       fileInput.value = '';
       previewImg.src = '';
       previewWrap.style.display = 'none';
+      dropZone.style.display = 'flex';
       analyseBtn.disabled = true;
       downloadReportBtn.disabled = true;
     });
 
+    // Tab buttons for Grad-CAM viewer
+    if (tabGradcam && tabOriginal) {
+      tabGradcam.addEventListener('click', () => {
+        tabGradcam.classList.add('active');
+        tabOriginal.classList.remove('active');
+        if (gradcamDataUrl) gradcamImg.src = gradcamDataUrl;
+      });
+      tabOriginal.addEventListener('click', () => {
+        tabOriginal.classList.add('active');
+        tabGradcam.classList.remove('active');
+        if (originalScanDataUrl) gradcamImg.src = originalScanDataUrl;
+      });
+    }
+
+    // Prediction Analysis
     analyseBtn.addEventListener('click', async () => {
       if (!selectedFile) return;
-      spinner.style.display = 'block';
-      btnText.textContent = 'Analysing…';
+
+      const nameVal = patientName.value.trim();
+      const ageVal = patientAge.value.trim();
+      const genderVal = patientGender.value.trim();
+      const idVal = patientId.value ? patientId.value.trim() : '';
+      const emailVal = patientEmail.value ? patientEmail.value.trim() : '';
+      const lastVisitValInput = lastVisitDate.value ? lastVisitDate.value.trim() : '';
+      const nextVisitValInput = nextVisitDate.value ? nextVisitDate.value.trim() : '';
+
+      if (!nameVal || !ageVal || !genderVal || !idVal || !emailVal) {
+        alert('Please fill out all compulsory patient details: Name, Age, Gender, Patient ID, and Email.');
+        if (!nameVal) patientName.focus();
+        else if (!ageVal) patientAge.focus();
+        else if (!genderVal) patientGender.focus();
+        else if (!idVal) patientId.focus();
+        else if (!emailVal) patientEmail.focus();
+        return;
+      }
+
+      spinner.style.display = 'flex';
+      noResultCard.style.display = 'none';
+      resultsPanel.style.display = 'none';
+      btnText.textContent = '⚡ Rapid Neural Analysis...';
+      btnIcon.className = 'fa-solid fa-spinner fa-spin';
       analyseBtn.disabled = true;
 
+      const startAnalysisTime = performance.now();
       const formData = new FormData();
       formData.append('image', selectedFile);
-      formData.append('cancer_type', 'auto');
-      formData.append('patient_name', patientName.value || 'Anonymous');
-      formData.append('patient_age', patientAge.value || 'Unknown');
-      formData.append('patient_gender', patientGender.value || 'Unknown');
+      const organVal = document.getElementById('organSelectInput')?.value || 'auto';
+      formData.append('cancer_type', organVal);
+      formData.append('fast_mode', 'true');
+      formData.append('report_language', reportLanguage);
+      formData.append('patient_name', nameVal);
+      formData.append('patient_age', ageVal);
+      formData.append('patient_gender', genderVal);
       formData.append('patient_id', patientId.value || 'N/A');
+      formData.append('patient_email', emailVal);
+      formData.append('last_visit_date', lastVisitValInput);
+      formData.append('next_visit_date', nextVisitValInput);
 
       try {
         const res = await fetch('/predict', { method: 'POST', body: formData });
@@ -875,32 +952,71 @@
           alert('Error: ' + data.error);
           return;
         }
-        showResults(data);
+        const elapsedSec = ((performance.now() - startAnalysisTime) / 1000).toFixed(2);
+        showResults(data, elapsedSec);
       } catch (err) {
         console.error('Fetch error:', err);
-        alert('Request failed: ' + err.message + '\nCheck the browser console and Flask terminal for details.');
+        alert('Request failed: ' + err.message);
       } finally {
         spinner.style.display = 'none';
-        btnText.textContent = '🔍 Analyse Image';
+        btnText.textContent = 'Run Diagnostic Analysis';
+        btnIcon.className = 'fa-solid fa-microscope';
         analyseBtn.disabled = false;
       }
     });
 
-    function showResults(data) {
+    function showResults(data, elapsedSec) {
       resultsPanel.style.display = 'block';
       noResultCard.style.display = 'none';
-      gradcamCard.style.display = data.gradcam ? 'block' : 'none';
-      statusChip.textContent = 'Analysis complete';
-      recommendationText.textContent = getRecommendation(data.risk, data.confidence_pct);
+      const activeLang = localStorage.getItem('mediscan_language') || reportLanguage || 'en';
+      reportLanguage = activeLang;
+      statusChip.innerHTML = '<i class="fa-solid fa-bolt" style="color:#38bdf8;"></i> Analysis Complete ' + (elapsedSec ? '(' + elapsedSec + 's)' : '');
+
+      recommendationText.textContent = getRecommendation(data.risk, data.confidence_pct, activeLang);
       downloadReportBtn.disabled = false;
 
       resultLabel.textContent = data.label || 'Prediction';
       const risk = data.risk || 'Low';
       riskBadge.textContent = 'Risk: ' + risk;
-      riskBadge.className = 'risk-badge risk-' + risk;
-      riskVal.textContent = risk;
-      stageVal.textContent = data.stage || 'N/A';
-      severityVal.textContent = data.severity_score != null ? data.severity_score + '%' : 'N/A';
+      riskBadge.className = risk === 'High' ? 'badge badge-danger' : (risk === 'Moderate' ? 'badge badge-warning' : 'badge badge-success');
+      if (riskVal) riskVal.textContent = risk;
+      stageVal.textContent = data.stage || 'Stage N/A';
+
+      // Update Integrated Cancer Care Pathways for this specific cancer
+      const pathwaysCard = document.getElementById('cancer-care-pathways');
+      if (pathwaysCard) {
+        pathwaysCard.style.display = 'block';
+        const detectedCancer = (data.cancer_type || 'lung').toLowerCase();
+        const detectedLabel = data.label || 'Cancer';
+        document.getElementById('pathway-cancer-name').textContent = `${detectedCancer.toUpperCase()} (${detectedLabel})`;
+        
+        const pid = (patientId && patientId.value) ? patientId.value : '';
+        document.getElementById('btn-goto-preventive').href = `/preventive?cancer_type=${detectedCancer}&patient_id=${encodeURIComponent(pid)}`;
+        document.getElementById('btn-goto-monitoring').href = `/monitoring?cancer_type=${detectedCancer}&patient_id=${encodeURIComponent(pid)}`;
+        document.getElementById('btn-goto-workflows').href = `/workflows?cancer_type=${detectedCancer}&patient_id=${encodeURIComponent(pid)}`;
+        document.getElementById('btn-goto-wellbeing').href = `/wellbeing?cancer_type=${detectedCancer}`;
+        if (document.getElementById('btn-goto-interactions')) {
+          document.getElementById('btn-goto-interactions').href = `/interactions?cancer_type=${detectedCancer}&patient_id=${encodeURIComponent(pid)}`;
+        }
+      }
+      
+const sev = data.severity_score != null ? data.severity_score : 0;
+      severityVal.textContent = sev + '%';
+      severityBar.style.width = sev + '%';
+      if (sev > 60) {
+        severityBar.classList.add('fill-danger');
+      } else {
+        severityBar.classList.remove('fill-danger');
+      }
+
+      // AI Priority Queue lane + score
+      const pqLane = data.priority_queue || 'Routine Review';
+      const pqScore = data.priority_score != null ? data.priority_score : 0;
+      if (priorityLaneVal) priorityLaneVal.textContent = pqLane;
+      if (priorityLaneBadge) {
+        priorityLaneBadge.textContent = 'Score: ' + pqScore;
+        priorityLaneBadge.className = 'pq-badge ' + pqClass(pqLane);
+      }
 
       const finalMal = Math.round(data.malignant_pct ?? 0);
       const finalBen = Math.round(data.benign_pct ?? 0);
@@ -911,8 +1027,6 @@
 
       const pct = Math.round(Math.max(finalMal, finalBen));
       gaugePct.textContent = pct + '%';
-      gaugeArc.style.strokeDashoffset = 239 - (pct / 100) * 239;
-      gaugeArc.style.stroke = data.confidence >= 0.5 ? 'var(--accent)' : 'var(--danger)';
 
       if (confidenceChart) confidenceChart.destroy();
       const ctx = document.getElementById('confidenceChart').getContext('2d');
@@ -921,45 +1035,63 @@
         data: {
           labels: ['Confidence', 'Remaining'],
           datasets: [{
-            data: [data.confidence_pct ?? 0, 100 - (data.confidence_pct ?? 0)],
-            backgroundColor: ['#35d0b8', 'rgba(255,255,255,0.14)'],
+            data: [data.confidence_pct ?? 0, Math.max(0, 100 - (data.confidence_pct ?? 0))],
+            backgroundColor: ['#35d0b8', 'rgba(255,255,255,0.08)'],
             borderWidth: 0,
-            hoverOffset: 6
+            hoverOffset: 4
           }]
         },
         options: {
-          aspectRatio: 1,
-          maintainAspectRatio: true,
-          cutout: '70%',
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: context => `${context.label}: ${context.parsed}%`
-              }
-            }
-          }
+          maintainAspectRatio: false,
+          cutout: '72%',
+          plugins: { legend: { display: false } }
         }
       });
 
+// Always show Original + Heatmap comparison grid
+      if (originalScanDataUrl) {
+        gradcamImg.src = originalScanDataUrl;
+        if (originalPreviewImg) originalPreviewImg.src = originalScanDataUrl;
+        if (heatmapPreviewImg) heatmapPreviewImg.src = originalScanDataUrl;
+        if (imageComparisonGrid) imageComparisonGrid.style.display = 'grid';
+        if (tabGradcam && tabOriginal) {
+          tabGradcam.classList.remove('active');
+          tabOriginal.classList.add('active');
+        }
+      }
+
+      // If heatmap is already available, show it immediately
       if (data.gradcam) {
-        gradcamImg.src = 'data:image/png;base64,' + data.gradcam;
+        setHeatmap('data:image/png;base64,' + data.gradcam);
+      } else if (data.report_id) {
+        // Fast mode: heatmap is generated in background — poll until ready
+        startHeatmapPolling(data.report_id);
       }
 
-      autoTypeVal.textContent = data.auto_type || 'N/A';
-      ensembleTypeVal.textContent = data.ensemble_type || 'N/A';
-      consensusVal.textContent = data.consensus ? 'Yes' : 'Review';
-      qualityStatusVal.textContent = data.quality_ok ? 'Passed' : 'Warning';
-      if (!data.quality_ok && data.quality_message) {
-        qualityStatusVal.setAttribute('title', data.quality_message);
-      } else {
-        qualityStatusVal.removeAttribute('title');
+      if (affectedAreaVal) affectedAreaVal.textContent = data.affected_area_pct != null ? `${data.affected_area_pct}%` : 'N/A';
+      if (tumorSizeVal) tumorSizeVal.textContent = data.tumor_size_estimate || 'N/A';
+      if (voiceSummaryBox) {
+        voiceSummaryBox.style.display = data.voice_summary ? 'block' : 'none';
+        voiceSummaryBox.textContent = data.voice_summary || '';
       }
-      explanationText.textContent = data.explanation || explanationText.textContent;
 
-      renderQrToken(data.qr_token);
+      autoTypeVal.textContent = data.auto_type ? data.auto_type.toUpperCase() : 'N/A';
+      ensembleTypeVal.textContent = data.ensemble_type ? data.ensemble_type.toUpperCase() : 'N/A';
+      if (lastVisitVal) lastVisitVal.textContent = data.last_visit_date || 'N/A';
+      if (nextVisitVal) nextVisitVal.textContent = data.next_visit_date || 'N/A';
+      if (gdriveStatusVal) gdriveStatusVal.textContent = data.gdrive_status || 'Saved Locally';
+      if (emailStatusVal) emailStatusVal.textContent = data.email_status ? (data.email_status.includes('dispatched') ? 'Dispatched' : 'Prepared') : 'Ready';
 
-      const record = {
+      explanationText.textContent = data.explanation || 'No summary generated.';
+      // Set translation picker to the report language (or English)
+      const initLang = data.report_language || reportLanguage || 'en';
+      reportLanguage = initLang;
+      setActiveLang(initLang);
+      translateExplanation(data.explanation || '', initLang);
+renderQrToken(data.qr_token);
+      renderMultiAgent(data);
+
+const record = {
         timestamp: Date.now(),
         patientName: patientName.value || 'Anonymous',
         patientAge: patientAge.value || 'Unknown',
@@ -972,12 +1104,27 @@
       saveHistory(record);
       lastReportData = { data, patient: record };
       speakSummaryBtn.disabled = false;
+      // Render the stage-based remedies and health habits
+      renderStageGuidance(data.stage_guidance);
+      // Render the multi-agent section in the currently selected language.
+      translateMultiAgentSection();
+      // Localize the results UI (labels, values, heatmap caption) in the
+      // currently selected language so everything stays consistent.
+      localizeUi(reportLanguage || 'en');
+      if (reportLanguage && reportLanguage !== 'en') {
+        updateStageGuidanceLanguage(reportLanguage);
+        if (typeof window.changeGlobalLanguage === 'function') {
+          setTimeout(() => {
+            window.changeGlobalLanguage(reportLanguage);
+          }, 60);
+        }
+      }
     }
 
     qrVerifyBtn.addEventListener('click', async () => {
       const token = qrVerifyValue.value.trim();
       if (!token) {
-        qrStatus.textContent = 'Enter a token to verify the report.';
+        qrStatus.textContent = 'Enter a token to verify.';
         return;
       }
       try {
@@ -988,94 +1135,651 @@
         });
         const result = await res.json();
         if (result.valid) {
-          qrStatus.style.color = '#b8ffd9';
-          qrStatus.textContent = 'Valid report token. Loaded report for ' + result.report.patient_name + '.';
+          qrStatus.style.color = 'var(--accent)';
+          qrStatus.textContent = '✓ Verified report for ' + result.report.patient_name + '.';
         } else {
-          qrStatus.style.color = '#ffb3b3';
-          qrStatus.textContent = 'Token invalid or not found.';
+          qrStatus.style.color = 'var(--danger)';
+          qrStatus.textContent = '✕ Token invalid or expired.';
         }
       } catch (err) {
-        qrStatus.style.color = '#ffb3b3';
-        qrStatus.textContent = 'Verification request failed. Is the server running?';
+        qrStatus.style.color = 'var(--danger)';
+        qrStatus.textContent = 'Verification request failed.';
       }
     });
 
-    function renderQrToken(token) {
+function renderQrToken(token) {
       qrCodeContainer.innerHTML = '';
       if (!token) {
         qrTokenText.textContent = 'Token: —';
         return;
       }
       qrTokenText.textContent = 'Token: ' + token;
+      // Encode the full report URL so scanning the QR opens the digital report
+      const reportUrl = window.location.origin + '/report/' + token;
       new QRCode(qrCodeContainer, {
-        text: token,
-        width: 120,
-        height: 120,
-        colorDark: '#1e293b',
-        colorLight: 'transparent',
+        text: reportUrl,
+        width: 100,
+        height: 100,
+        colorDark: '#0f172a',
+        colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H
       });
+      // Add a hint + clickable link below the QR
+      const existingTip = document.getElementById('qr-open-link');
+      if (existingTip) existingTip.remove();
+      const tip = document.createElement('div');
+      tip.id = 'qr-open-link';
+      tip.style.cssText = 'margin-top:10px; font-size:0.82rem; color:var(--muted);';
+      tip.innerHTML = '<i class="fa-solid fa-qrcode text-accent"></i> Scan to view report: <a href="' + reportUrl + '" target="_blank" style="color:var(--accent); word-break:break-all;">Open Digital Report</a>';
+      qrCodeContainer.parentElement.appendChild(tip);
     }
 
-    function getRecommendation(risk, confidencePct) {
+// Map a priority queue lane to its CSS badge class.
+    function pqClass(lane) {
+      const map = {
+        'Emergency': 'pq-emergency',
+        'Urgent': 'pq-urgent',
+        'Normal Queue': 'pq-normal',
+        'Routine Review': 'pq-routine'
+      };
+      return map[lane] || 'pq-routine';
+    }
+
+    // Font map for Indic scripts
+    const fontMap = { 'te': 'NotoTelugu', 'hi': 'NotoDeva', 'ta': 'NotoTamil', 'kn': 'NotoKannada', 'ml': 'NotoMalayalam', 'bn': 'NotoBengali' };
+
+    async function translateExplanation(text, lang) {
+      // Reset font first
+      explanationText.style.fontFamily = '';
+      if (!text) return;
+      if (!lang || lang === 'en') {
+        explanationText.textContent = text;
+        return;
+      }
+      try {
+        const res = await fetch('/api/translate', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ text, lang }) });
+        if (!res.ok) throw new Error('Translate API error');
+        const j = await res.json();
+        explanationText.textContent = j.translated || text;
+        if (fontMap[lang]) explanationText.style.fontFamily = fontMap[lang];
+      } catch (err) {
+        console.warn('Translation failed:', err);
+        explanationText.textContent = text;
+      }
+    }
+
+    // Translate when user changes the dropdown
+    function setActiveLang(lang) {
+      // update button text and active class
+      const opts = Array.from(langPickerMenu.querySelectorAll('.lang-option'));
+      opts.forEach(o => o.classList.toggle('active', o.dataset.lang === lang));
+      const btnLabel = opts.find(o => o.dataset.lang === lang)?.textContent || 'English';
+      langPickerBtn.innerHTML = btnLabel + ' <span class="arrow">▾</span>';
+    }
+
+    // Keep a copy of the original English text for every data-i18n element so we
+    // can reliably restore/show consistent state while switching languages.
+    let uiStrings = {};
+
+    // Localize all static UI labels (elements with data-i18n) using the server
+    // translation dictionary, then localize dynamic values (label, stage, risk,
+    // priority lane, heatmap caption) based on the current report.
+    async function localizeUi(lang) {
+      try {
+        const res = await fetch('/api/ui_labels?lang=' + (lang || 'en'));
+        const j = await res.json();
+        const dict = j.labels || {};
+        const fontName = fontMap[lang] || '';
+// Apply to every data-i18n element (skip the explanation paragraph —
+        // its text is the dynamic AI explanation, translated separately).
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          if (el.id === 'explanation-text') return;
+          const key = el.getAttribute('data-i18n');
+          if (dict[key]) {
+            el.textContent = dict[key];
+            if (fontName && el.tagName !== 'BUTTON') el.style.fontFamily = fontName;
+            else if (!fontName) el.style.fontFamily = '';
+          } else {
+            // fallback: restore original English text stored on first load
+            if (uiStrings[key] !== undefined) el.textContent = uiStrings[key];
+          }
+        });
+        // Localize dynamic values based on current report data
+        if (lastReportData && lastReportData.data) {
+          const d = lastReportData.data;
+          await Promise.all([
+            localizeValue(d, 'label', el => resultLabel.textContent = el instanceof Object ? el.translated : el),
+            localizeValue(d, 'stage', el => stageVal.textContent = el instanceof Object ? el.translated : el),
+            localizeValue(d, 'risk', el => { if (riskBadge) riskBadge.textContent = 'Risk: ' + (el instanceof Object ? el.translated : el); }),
+            localizeValue(d, 'priority', el => { if (priorityLaneVal) priorityLaneVal.textContent = el instanceof Object ? el.translated : el; })
+          ]);
+        }
+        // Localize heatmap caption based on whether result is benign or suspicious
+        localizeHeatmapCaption(lang);
+        // Apply font to the explanation text if not already set by translateExplanation
+        if (fontName && explanationText && explanationText.textContent) {
+          // only set font if not in English
+        }
+      } catch (err) {
+        console.warn('UI localization failed:', err);
+      }
+    }
+
+    async function localizeValue(d, kind, setter) {
+      let text;
+      if (kind === 'label') text = d.label || '';
+      else if (kind === 'stage') text = d.stage || '';
+      else if (kind === 'risk') text = d.risk || 'Low';
+      else if (kind === 'priority') text = d.priority_queue || 'Routine Review';
+      if (!text) return;
+      if (reportLanguage === 'en' || !reportLanguage) { setter(text); return; }
+      try {
+        const res = await fetch('/api/localize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, lang: reportLanguage, kind })
+        });
+        const j = await res.json();
+        setter(j.translated || text);
+      } catch (err) {
+        setter(text);
+      }
+    }
+
+    // Show localized explanation for the heatmap: benign shows a green "clear scan"
+    // caption, malignant shows the warm-colors description.
+    async function localizeHeatmapCaption(lang) {
+      const caption = document.getElementById('heatmap-caption');
+      if (!caption) return;
+      let key = 'heatmap_caption';  // default (malignant / suspicious)
+      if (lastReportData && lastReportData.data) {
+        const label = (lastReportData.data.label || '').toLowerCase();
+        if (label.includes('benign') || label.includes('normal') || label.includes('no tumor')) {
+          key = 'heatmap_caption_clear';
+        }
+      }
+      try {
+        const res = await fetch('/api/ui_labels?lang=' + (lang || 'en'));
+        const j = await res.json();
+        const dict = j.labels || {};
+        if (dict[key]) caption.querySelector('span') ? caption.querySelector('span').textContent = dict[key] : caption.textContent = dict[key];
+      } catch (err) { /* keep default */ }
+    }
+
+    // Toggle menu
+    langPickerBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const showing = langPickerMenu.style.display === 'block';
+      langPickerMenu.style.display = showing ? 'none' : 'block';
+    });
+
+    // Option click
+    langPickerMenu.addEventListener('click', (e) => {
+      const opt = e.target.closest('.lang-option');
+      if (!opt) return;
+      const lang = opt.dataset.lang;
+      reportLanguage = lang;
+      setActiveLang(lang);
+      langPickerMenu.style.display = 'none';
+      if (typeof window.changeGlobalLanguage === 'function') {
+        window.changeGlobalLanguage(lang);
+      } else {
+        const original = lastReportData && lastReportData.data && lastReportData.data.explanation ? lastReportData.data.explanation : (uiStrings.explanation_placeholder || explanationText.textContent);
+        translateExplanation(original, lang);
+        translateMultiAgentSection();
+        updateStageGuidanceLanguage(lang);
+        localizeUi(lang);
+      }
+    });
+
+    // Listen to global language changes from header dropdown
+    window.addEventListener('mediscan:languageChanged', async (e) => {
+      const lang = e.detail ? e.detail.lang : (localStorage.getItem('mediscan_language') || 'en');
+      reportLanguage = lang;
+      if (typeof setActiveLang === 'function') setActiveLang(lang);
+
+      if (lastReportData && lastReportData.data) {
+        const d = lastReportData.data;
+        if (recommendationText) {
+          recommendationText.textContent = getRecommendation(d.risk, d.confidence_pct, lang);
+        }
+        await localizeUi(lang);
+        const original = d.explanation || (uiStrings.explanation_placeholder || explanationText.textContent);
+        translateExplanation(original, lang);
+        translateMultiAgentSection();
+        updateStageGuidanceLanguage(lang);
+      }
+    });
+
+    // Store original English text for data-i18n elements on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (uiStrings[key] === undefined) uiStrings[key] = el.textContent;
+      });
+    });
+
+    // Close on outside click
+    document.addEventListener('click', () => { langPickerMenu.style.display = 'none'; });
+
+    function getRecommendation(risk, confidencePct, lang) {
+      lang = lang || reportLanguage || localStorage.getItem('mediscan_language') || 'en';
+      let rec = 'Low risk: continue monitoring and share the report with your clinician for confirmation.';
       if (risk === 'High' || confidencePct >= 85) {
-        return 'High alert: immediate clinical review is recommended. Consult a doctor as soon as possible.';
+        rec = 'High alert: immediate clinical review is recommended. Consult a physician as soon as possible.';
+      } else if (risk === 'Moderate' || confidencePct >= 60) {
+        rec = 'Moderate risk: follow-up tests should be scheduled with a medical specialist.';
       }
-      if (risk === 'Moderate' || confidencePct >= 60) {
-        return 'Moderate risk: follow-up tests should be scheduled and consult a medical specialist.';
+      if (lang !== 'en' && window.MEDISCAN_TRANSLATIONS && window.MEDISCAN_TRANSLATIONS[lang] && window.MEDISCAN_TRANSLATIONS[lang][rec]) {
+        return window.MEDISCAN_TRANSLATIONS[lang][rec];
       }
-      return 'Low risk: continue monitoring and share the report with your clinician for confirmation.';
+      return rec;
     }
 
+function getSpeechLocale(lang) {
+      const map = { en: 'en-US', hi: 'hi-IN', te: 'te-IN', ta: 'ta-IN', bn: 'bn-BD', kn: 'kn-IN', ml: 'ml-IN', ar: 'ar-SA', es: 'es-ES', fr: 'fr-FR', de: 'de-DE' };
+      return map[lang] || 'en-US';
+    }
+
+// Fetch the fully-localized voice summary from the server so the browser TTS
+    // reads the ENTIRE report in the selected language (TTS can't read mixed scripts).
     function speakSummary() {
       if (!lastReportData || !window.speechSynthesis) return;
       const { data, patient } = lastReportData;
-      const text = `Report for ${patient.patientName}. Prediction: ${data.label}. Risk level: ${data.risk}. Confidence: ${data.confidence_pct} percent. Stage: ${data.stage}. Severity score: ${data.severity_score} percent. ${data.quality_ok ? 'Image quality passed.' : data.quality_message}.`;
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      window.speechSynthesis.speak(utterance);
+      const lang = (reportLanguage || data.report_language || 'en');
+
+      const doSpeak = (text) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const locale = getSpeechLocale(lang);
+        utterance.lang = locale;
+        utterance.rate = 0.95;
+        const voices = window.speechSynthesis.getVoices();
+        const voice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(locale.split('-')[0].toLowerCase())) || voices.find(v => v.lang === locale);
+        if (voice) utterance.voice = voice;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+      };
+
+      // Try to get the fully-localized summary from the server.
+      if (data.report_id) {
+        fetch('/api/voice_summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ report_id: data.report_id, lang })
+        })
+        .then(res => res.json())
+        .then(j => {
+          if (j.voice_summary) {
+            doSpeak(j.voice_summary);
+          } else {
+            doSpeak(data.voice_summary || `Report for ${patient.patientName}. Prediction: ${data.label}. Risk level: ${data.risk}. Confidence: ${data.confidence_pct} percent. Stage: ${data.stage}. Affected area: ${data.affected_area_pct ?? 'N/A'} percent. Tumor size estimate: ${data.tumor_size_estimate || 'N/A'}.`);
+          }
+        })
+        .catch(() => {
+          doSpeak(data.voice_summary || `Report for ${patient.patientName}. Prediction: ${data.label}. Risk level: ${data.risk}. Confidence: ${data.confidence_pct} percent. Stage: ${data.stage}.`);
+        });
+      } else {
+        doSpeak(data.voice_summary || `Report for ${patient.patientName}. Prediction: ${data.label}. Risk level: ${data.risk}. Confidence: ${data.confidence_pct} percent. Stage: ${data.stage}.`);
+      }
     }
 
     speakSummaryBtn.addEventListener('click', () => {
-      speakSummary();
+      if (window.speechSynthesis && window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        speakSummaryBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Voice Assistant';
+      } else {
+        speakSummary();
+        speakSummaryBtn.innerHTML = '<i class="fa-solid fa-stop"></i> Stop';
+        utteranceStarted = true;
+      }
     });
+
+    // Voices load asynchronously in many browsers — warm up the list so the
+    // correct native voice is available when the user clicks "Voice Assistant".
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+    }
+
+    // Reset the voice button label when speech finishes
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onend = () => {
+        if (speakSummaryBtn) speakSummaryBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Voice Assistant';
+      };
+    }
+
+// ----- Multi-Agent AI Clinical Second Opinion Renderer -----
+    function renderMultiAgent(data) {
+      const wrap = document.getElementById('multi-agent-wrap');
+      if (!wrap) return;
+      if (!data || !data.multi_agent) {
+        wrap.innerHTML = '<div style="color:var(--muted); font-size:0.9rem;">AI second opinion is being prepared in the background and will appear here shortly.</div>';
+        return;
+      }
+      const ma = data.multi_agent;
+      const consensus = ma.consensus || {};
+      const board = ma.tumor_board || {};
+      const timeline = ma.timeline || {};
+      const plan = ma.treatment_plan || {};
+      const opinions = ma.opinions || {};
+      // Localized labels (from the server-side _labels block, fallback to English)
+      const L = ma._labels || {};
+      const lbl = (key, fallback) => L[key] || fallback;
+
+      let html = '';
+
+      // Final AI Aggregator / Consensus
+      html += '<div style="background:linear-gradient(135deg,rgba(220,38,38,0.10),rgba(37,99,235,0.08)); border:1px solid rgba(220,38,38,0.25); border-radius:var(--radius-md); padding:16px 18px; margin-bottom:16px;">';
+      html += '<div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">';
+      html += '<i class="fa-solid fa-scale-balanced" style="color:#dc2626; font-size:1.2rem;"></i>';
+      html += '<strong style="font-size:1rem;">' + (consensus.role || lbl('final_ai_aggregator', 'Final AI Aggregator — Consensus')) + '</strong>';
+      if (consensus.urgency) {
+        const urgColor = consensus.urgency === 'URGENT' ? 'var(--danger)' : (consensus.urgency === 'Prioritized' ? '#d97706' : 'var(--success)');
+        html += '<span style="margin-left:auto; font-weight:800; color:' + urgColor + '; border:1px solid ' + urgColor + '; padding:3px 10px; border-radius:999px; font-size:0.75rem;">' + consensus.urgency + '</span>';
+      }
+      html += '</div>';
+      if (consensus.overall_recommendation) html += '<p style="font-size:0.92rem; line-height:1.6; margin:0 0 8px;">' + consensus.overall_recommendation + '</p>';
+      if (consensus.recommended_specialist) html += '<p style="font-size:0.85rem; margin:0 0 4px; color:var(--muted);"><strong>' + lbl('recommended_specialist', 'Recommended Specialist') + ':</strong> ' + consensus.recommended_specialist + '</p>';
+      if (consensus.hospital_recommendation) html += '<p style="font-size:0.85rem; margin:0 0 4px; color:var(--muted);">' + consensus.hospital_recommendation + '</p>';
+      if (consensus.agents_in_agreement != null) html += '<p style="font-size:0.82rem; margin:0; color:var(--muted);">' + lbl('agreement', 'Agreement') + ': ' + consensus.agents_in_agreement + ' / ' + consensus.total_agents + ' agents</p>';
+      html += '</div>';
+
+      // Five AI personas
+      const order = ['radiologist', 'oncologist', 'surgeon', 'pharmacologist', 'lifestyle'];
+      order.forEach(key => {
+        const agent = opinions[key];
+        if (!agent) return;
+        html += '<div style="border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 16px; margin-bottom:12px; background:rgba(255,255,255,0.02);">';
+        html += '<div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">';
+        html += '<i class="' + (agent.icon || 'fa-solid fa-user-doctor') + '" style="color:' + (agent.color || '#2563eb') + '; font-size:1.1rem;"></i>';
+        html += '<strong style="font-size:0.98rem;">' + (agent.role || key) + '</strong>';
+        html += '</div>';
+        if (agent.opinion) html += '<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px;">' + agent.opinion + '</p>';
+        if (agent.findings && agent.findings.length) {
+          html += '<ul style="margin:0 0 8px; padding-left:18px; font-size:0.85rem; color:var(--muted);">';
+          agent.findings.forEach(f => { html += '<li style="margin-bottom:3px;">' + f + '</li>'; });
+          html += '</ul>';
+        }
+        if (agent.recommendations && agent.recommendations.length) {
+          html += '<div style="font-size:0.85rem; color:var(--text);">';
+          html += '<strong style="color:var(--accent);">' + lbl('recommendations', 'Recommendations') + ':</strong>';
+          html += '<ul style="margin:4px 0 0; padding-left:18px;">';
+          agent.recommendations.forEach(r => { html += '<li style="margin-bottom:3px;">' + r + '</li>'; });
+          html += '</ul></div>';
+        }
+        html += '</div>';
+      });
+
+      // Tumor Board
+      if (board.case_summary || board.treatment_options) {
+        html += '<div style="border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 16px; margin-bottom:12px;">';
+        html += '<div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;"><i class="fa-solid fa-users" style="color:#8b5cf6;"></i><strong style="font-size:0.98rem;">' + (board.title || lbl('ai_tumor_board', 'AI Tumor Board')) + '</strong></div>';
+        if (board.case_summary) html += '<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px;">' + board.case_summary + '</p>';
+        if (board.ai_opinion) html += '<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px; color:var(--muted);">' + board.ai_opinion + '</p>';
+        if (board.recommended_tests && board.recommended_tests.length) {
+          html += '<div style="font-size:0.85rem;"><strong style="color:var(--accent);">' + lbl('recommended_tests', 'Recommended Tests') + ':</strong><ul style="margin:4px 0 0; padding-left:18px;">';
+          board.recommended_tests.forEach(t => { html += '<li style="margin-bottom:3px;">' + t + '</li>'; });
+          html += '</ul></div>';
+        }
+        if (board.treatment_options && board.treatment_options.length) {
+          html += '<div style="font-size:0.85rem; margin-top:6px;"><strong style="color:var(--accent);">' + lbl('treatment_options', 'Treatment Options (informational)') + ':</strong><ul style="margin:4px 0 0; padding-left:18px;">';
+          board.treatment_options.forEach(t => { html += '<li style="margin-bottom:3px;">' + t + '</li>'; });
+          html += '</ul></div>';
+        }
+        if (board.doctor_notes) html += '<p style="font-size:0.85rem; margin:8px 0 0; color:var(--muted);"><strong>' + lbl('doctor_notes', 'Doctor Notes') + ':</strong> ' + board.doctor_notes + '</p>';
+        html += '</div>';
+      }
+
+      // Clinical Timeline
+      if (timeline.current || timeline.milestones) {
+        html += '<div style="border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 16px; margin-bottom:12px;">';
+        html += '<div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;"><i class="fa-solid fa-timeline" style="color:#0ea5e9;"></i><strong style="font-size:0.98rem;">' + (timeline.title || lbl('ai_clinical_timeline', 'AI Clinical Timeline')) + '</strong></div>';
+        if (timeline.current) html += '<p style="font-size:0.88rem; margin:0 0 4px;">' + timeline.current + '</p>';
+        if (timeline.prediction) html += '<p style="font-size:0.88rem; margin:0 0 4px;">' + timeline.prediction + '</p>';
+        if (timeline.treatment) html += '<p style="font-size:0.88rem; margin:0 0 8px;">' + timeline.treatment + '</p>';
+        if (timeline.milestones && timeline.milestones.length) {
+          timeline.milestones.forEach(m => {
+            html += '<div style="display:flex; gap:10px; margin-bottom:4px; font-size:0.85rem;"><strong style="min-width:90px; color:var(--accent);">' + m.period + '</strong><span style="color:var(--muted);">' + m.detail + '</span></div>';
+          });
+        }
+        html += '</div>';
+      }
+
+      // Treatment Planner
+      if (plan.recommended_specialist || plan.next_appointment) {
+        html += '<div style="border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 16px; margin-bottom:12px;">';
+        html += '<div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;"><i class="fa-solid fa-clipboard-list" style="color:#10b981;"></i><strong style="font-size:0.98rem;">' + (plan.title || lbl('ai_treatment_planner', 'AI Treatment Planner')) + '</strong></div>';
+        if (plan.recommended_specialist) html += '<p style="font-size:0.88rem; margin:0 0 4px;"><strong>' + lbl('specialist', 'Specialist') + ':</strong> ' + plan.recommended_specialist + '</p>';
+        if (plan.next_appointment) html += '<p style="font-size:0.88rem; margin:0 0 4px;"><strong>' + lbl('next_appointment', 'Next Appointment') + ':</strong> ' + plan.next_appointment + '</p>';
+        if (plan.disclaimer) html += '<p style="font-size:0.78rem; margin:8px 0 0; color:var(--danger);">' + plan.disclaimer + '</p>';
+        html += '</div>';
+      }
+
+      wrap.innerHTML = html;
+    }
+
+    // Re-render the multi-agent section in the currently selected language by
+    // fetching the server-side localized bundle for the saved report.
+    async function translateMultiAgentSection() {
+      const wrap = document.getElementById('multi-agent-wrap');
+      if (!wrap || !lastReportData || !lastReportData.data || !lastReportData.data.report_id) return;
+      const lang = reportLanguage || 'en';
+      if (lang === 'en') {
+        // English is stored as the master copy — render it directly.
+        renderMultiAgent(lastReportData.data);
+        return;
+      }
+      // Fetch translation in the background and update the section when ready.
+      // Do not replace the current English content — this avoids a blocking
+      // spinner and greatly improves perceived responsiveness.
+      try {
+        const res = await fetch('/api/translate_multi_agent/' + lastReportData.data.report_id + '?lang=' + lang);
+        if (!res.ok) throw new Error('Translation API error');
+        const j = await res.json();
+        if (j.multi_agent) {
+          // Update the section inline with the translated bundle when available.
+          renderMultiAgent({ multi_agent: j.multi_agent });
+        }
+      } catch (err) {
+        console.warn('Multi-agent translation failed:', err);
+        // Keep the original English content already rendered.
+      }
+    }
+
+
+
+    // ----- Stage-Based Remedies & Health Habits Renderer -----
+    function renderStageGuidance(guidance) {
+      const panel = document.getElementById('stage-guidance-panel');
+      const wrap = document.getElementById('stage-guidance-wrap');
+      const stageTag = document.getElementById('guidance-stage-tag');
+      const organBadge = document.getElementById('guidance-organ-badge');
+      if (!panel || !wrap) return;
+      if (!guidance) {
+        panel.style.display = 'none';
+        return;
+      }
+      panel.style.display = 'block';
+
+      if (stageTag) stageTag.textContent = guidance.stage || 'Clinical Stage';
+      if (organBadge) {
+        const ctype = guidance.cancer_type ? guidance.cancer_type.toUpperCase() : 'GENERAL';
+        organBadge.textContent = ctype + ' CARE PROTOCOL';
+      }
+
+      let html = '';
+
+      // Stage overview callout banner
+      html += '<div style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(14,165,233,0.05)); border:1px solid rgba(16,185,129,0.25); border-left:4px solid #10b981; border-radius:var(--radius-md); padding:14px 16px; margin-bottom:16px;">';
+      html += '<strong style="color:var(--text); font-size:1rem; display:block; margin-bottom:4px;"><i class="fa-solid fa-clipboard-check text-accent"></i> ' + (guidance.stage_title || 'Stage Care Protocol') + '</strong>';
+      if (guidance.clinical_goal) {
+        html += '<p style="font-size:0.88rem; color:var(--muted); line-height:1.5; margin:0;">' + guidance.clinical_goal + '</p>';
+      }
+      html += '</div>';
+
+      // 4 Cards Grid
+      html += '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin-bottom:16px;">';
+
+      // 1. Supportive Remedies
+      if (guidance.remedies && guidance.remedies.length) {
+        html += '<div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-top:3px solid #10b981; border-radius:var(--radius-md); padding:14px 16px;">';
+        html += '<div style="font-weight:700; font-size:0.92rem; color:#10b981; margin-bottom:10px; display:flex; align-items:center; gap:8px;">';
+        html += '<i class="fa-solid fa-leaf"></i> Supportive Remedies';
+        html += '</div>';
+        html += '<ul style="margin:0; padding-left:18px; font-size:0.86rem; color:var(--text); line-height:1.6;">';
+        guidance.remedies.forEach(r => {
+          html += '<li style="margin-bottom:6px;"><strong style="color:var(--text);">' + r.title + ':</strong> <span style="color:var(--muted);">' + r.desc + '</span></li>';
+        });
+        html += '</ul>';
+        html += '</div>';
+      }
+
+      // 2. Daily Health Habits
+      if (guidance.health_habits && guidance.health_habits.length) {
+        html += '<div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-top:3px solid #0ea5e9; border-radius:var(--radius-md); padding:14px 16px;">';
+        html += '<div style="font-weight:700; font-size:0.92rem; color:#0ea5e9; margin-bottom:10px; display:flex; align-items:center; gap:8px;">';
+        html += '<i class="fa-solid fa-person-walking"></i> Daily Health Habits';
+        html += '</div>';
+        html += '<ul style="margin:0; padding-left:18px; font-size:0.86rem; color:var(--text); line-height:1.6;">';
+        guidance.health_habits.forEach(h => {
+          html += '<li style="margin-bottom:6px;"><strong style="color:var(--text);">' + h.title + ':</strong> <span style="color:var(--muted);">' + h.desc + '</span></li>';
+        });
+        html += '</ul>';
+        html += '</div>';
+      }
+
+      // 3. Nutrition & Hydration
+      if (guidance.nutrition && guidance.nutrition.length) {
+        html += '<div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-top:3px solid #f59e0b; border-radius:var(--radius-md); padding:14px 16px;">';
+        html += '<div style="font-weight:700; font-size:0.92rem; color:#f59e0b; margin-bottom:10px; display:flex; align-items:center; gap:8px;">';
+        html += '<i class="fa-solid fa-apple-whole"></i> Nutrition & Hydration';
+        html += '</div>';
+        html += '<ul style="margin:0; padding-left:18px; font-size:0.86rem; color:var(--text); line-height:1.6;">';
+        guidance.nutrition.forEach(n => {
+          html += '<li style="margin-bottom:6px;"><strong style="color:var(--text);">' + n.title + ':</strong> <span style="color:var(--muted);">' + n.desc + '</span></li>';
+        });
+        html += '</ul>';
+        html += '</div>';
+      }
+
+      // 4. Precautions & Habits to Avoid
+      if (guidance.precautions && guidance.precautions.length) {
+        html += '<div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-top:3px solid #ef4444; border-radius:var(--radius-md); padding:14px 16px;">';
+        html += '<div style="font-weight:700; font-size:0.92rem; color:#ef4444; margin-bottom:10px; display:flex; align-items:center; gap:8px;">';
+        html += '<i class="fa-solid fa-shield-halved"></i> Precautions & Habits to Avoid';
+        html += '</div>';
+        html += '<ul style="margin:0; padding-left:18px; font-size:0.86rem; color:var(--text); line-height:1.6;">';
+        guidance.precautions.forEach(p => {
+          html += '<li style="margin-bottom:6px;"><strong style="color:var(--text);">' + p.title + ':</strong> <span style="color:var(--muted);">' + p.desc + '</span></li>';
+        });
+        html += '</ul>';
+        html += '</div>';
+      }
+
+      html += '</div>';
+
+      // Organ-specific guidance
+      if (guidance.organ_specific) {
+        const org = guidance.organ_specific;
+        html += '<div style="background:rgba(14,165,233,0.06); border:1px solid rgba(14,165,233,0.25); border-radius:var(--radius-md); padding:14px 16px; margin-bottom:14px;">';
+        html += '<div style="font-weight:700; font-size:0.9rem; color:#0ea5e9; margin-bottom:8px; display:flex; align-items:center; gap:8px;">';
+        html += '<i class="' + (org.icon || 'fa-solid fa-hospital-user') + '"></i> ' + org.title;
+        html += '</div>';
+        html += '<ul style="margin:0; padding-left:18px; font-size:0.85rem; color:var(--text); line-height:1.55;">';
+        (org.guidance || []).forEach(g => {
+          html += '<li style="margin-bottom:4px;">' + g + '</li>';
+        });
+        html += '</ul>';
+        html += '</div>';
+      }
+
+      // Disclaimer
+      if (guidance.disclaimer) {
+        html += '<div style="font-size:0.78rem; color:var(--muted); font-style:italic; line-height:1.45; border-top:1px dashed var(--border); padding-top:10px;">';
+        html += '<i class="fa-solid fa-circle-info"></i> ' + guidance.disclaimer;
+        html += '</div>';
+      }
+
+      wrap.innerHTML = html;
+    }
+
+    async function updateStageGuidanceLanguage(lang) {
+      if (!lastReportData || !lastReportData.data || !lastReportData.data.report_id) return;
+      try {
+        const res = await fetch('/api/stage_guidance/' + lastReportData.data.report_id + '?lang=' + lang);
+        if (!res.ok) return;
+        const j = await res.json();
+        if (j.stage_guidance) {
+          renderStageGuidance(j.stage_guidance);
+        }
+      } catch (err) {
+        console.warn('Failed to update stage guidance language:', err);
+      }
+    }
+
+    // ----- Heatmap polling (fast mode) helpers -----
+    function setHeatmap(dataUrl) {
+      gradcamDataUrl = dataUrl;
+      gradcamImg.src = dataUrl;
+      if (heatmapPreviewImg) heatmapPreviewImg.src = dataUrl;
+      if (tabGradcam && tabOriginal) {
+        tabGradcam.classList.add('active');
+        tabOriginal.classList.remove('active');
+      }
+    }
+
+    function startHeatmapPolling(reportId) {
+      let attempts = 0;
+      const maxAttempts = 40; // ~20 seconds
+      const timer = setInterval(async () => {
+        attempts++;
+        if (attempts > maxAttempts) {
+          clearInterval(timer);
+          return;
+        }
+        try {
+          const res = await fetch('/api/report/' + reportId);
+          if (!res.ok) return;
+          const j = await res.json();
+          if (j.gradcam_image_base64) {
+            clearInterval(timer);
+            setHeatmap('data:image/png;base64,' + j.gradcam_image_base64);
+          }
+        } catch (err) {
+          // ignore transient errors and keep polling
+        }
+      }, 500);
+    }
 
     function saveHistory(entry) {
       predictionHistory.unshift(entry);
-      predictionHistory = predictionHistory.slice(0, 6);
+      predictionHistory = predictionHistory.slice(0, 5);
       localStorage.setItem('predictionHistory', JSON.stringify(predictionHistory));
       renderHistory();
     }
 
     function loadHistory() {
       const stored = localStorage.getItem('predictionHistory');
-      if (stored) {
-        predictionHistory = JSON.parse(stored);
-      }
+      if (stored) predictionHistory = JSON.parse(stored);
       renderHistory();
     }
 
     function renderHistory() {
       historyList.innerHTML = '';
       if (!predictionHistory.length) {
-        historyList.innerHTML = '<p class="history-empty">No history yet. Your recent predictions will appear here.</p>';
+        historyList.innerHTML = '<p style="color: var(--muted); font-size: 0.85rem;">No recent history logged in this session.</p>';
         return;
       }
       predictionHistory.forEach(entry => {
         const item = document.createElement('div');
-        item.className = 'history-entry';
-        const details = document.createElement('div');
-        details.className = 'history-details';
-        details.innerHTML = `
-          <strong>${entry.label}</strong>
-          <span>${entry.patientName}, ${entry.patientAge} yrs, ${entry.patientGender}</span>
-          <span>Risk: ${entry.risk} • Confidence: ${entry.confidence_pct}%</span>
+        item.style.cssText = 'padding: 10px 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;';
+        item.innerHTML = `
+          <div>
+            <strong style="color: var(--text); display: block;">${entry.label}</strong>
+            <span style="color: var(--muted); font-size: 0.78rem;">${entry.patientName} • Risk: ${entry.risk}</span>
+          </div>
+          <span style="font-weight: 700; color: var(--accent);">${entry.confidence_pct}%</span>
         `;
-        const time = document.createElement('div');
-        time.className = 'timestamp';
-        time.textContent = new Date(entry.timestamp).toLocaleString();
-        item.appendChild(details);
-        item.appendChild(time);
         historyList.appendChild(item);
       });
     }
@@ -1084,34 +1788,116 @@
       const { data, patient } = report;
       const doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'letter' });
       doc.setFontSize(18);
-      doc.text('MediScan AI Prediction Report', 40, 50);
+      doc.text('MediScan AI — Cancer Diagnostic Report', 40, 50);
+      doc.setFontSize(10);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 40, 70);
+      doc.line(40, 80, 550, 80);
+      
       doc.setFontSize(11);
-      doc.text(`Patient: ${patient.patientName}`, 40, 90);
-      doc.text(`Age: ${patient.patientAge}`, 40, 110);
-      doc.text(`Gender: ${patient.patientGender}`, 40, 130);
-      doc.text(`Patient ID: ${patient.patientId}`, 40, 150);
-      doc.text(`Prediction: ${data.label}`, 40, 190);
-      doc.text(`Auto type: ${data.auto_type || 'N/A'}`, 40, 210);
-      doc.text(`Ensemble vote: ${data.ensemble_type || 'N/A'}`, 40, 230);
-      doc.text(`Consensus: ${data.consensus ? 'Yes' : 'Review needed'}`, 40, 250);
-      doc.text(`Stage: ${data.stage || 'N/A'}`, 40, 270);
-      doc.text(`Severity Score: ${data.severity_score || 0}%`, 40, 290);
-      doc.text(`Risk Level: ${data.risk}`, 40, 310);
-      doc.text(`Confidence: ${data.confidence_pct}%`, 40, 330);
-      doc.text(`Image quality: ${data.quality_ok ? 'Passed' : 'Warning'}`, 40, 350);
-      if (data.quality_message) {
-        doc.text(`Quality note: ${data.quality_message}`, 40, 370, { maxWidth: 500 });
+      doc.text(`Patient Name: ${patient.patientName}`, 40, 110);
+      doc.text(`Age: ${patient.patientAge}`, 40, 130);
+      doc.text(`Gender: ${patient.patientGender}`, 40, 150);
+      doc.text(`Patient ID: ${patient.patientId}`, 40, 170);
+      
+      doc.text(`Classification: ${data.label}`, 40, 210);
+      doc.text(`Stage: ${data.stage || 'N/A'}`, 40, 230);
+      doc.text(`Severity Score: ${data.severity_score || 0}%`, 40, 250);
+      doc.text(`Risk Assessment: ${data.risk}`, 40, 270);
+      doc.text(`Confidence Rating: ${data.confidence_pct}%`, 40, 290);
+      doc.text(`Verification Code: ${data.qr_token}`, 40, 310);
+      
+      doc.text('Clinical Summary:', 40, 350);
+      doc.text(data.explanation || 'N/A', 40, 370, { maxWidth: 500 });
+
+      if (data.stage_guidance) {
+        const sg = data.stage_guidance;
+        let y = 430;
+        doc.setFontSize(13);
+        doc.text('Stage-Based Remedies & Health Habits (' + (data.stage || 'Clinical Stage') + '):', 40, y);
+        y += 20;
+        doc.setFontSize(10);
+        if (sg.clinical_goal) {
+          doc.text('Goal: ' + sg.clinical_goal, 40, y, { maxWidth: 500 });
+          y += 30;
+        }
+        if (sg.remedies && sg.remedies.length) {
+          doc.text('Supportive Remedies: ' + sg.remedies.map(r => r.title + ' (' + r.desc + ')').slice(0, 2).join('; '), 40, y, { maxWidth: 500 });
+          y += 35;
+        }
+        if (sg.health_habits && sg.health_habits.length) {
+          doc.text('Daily Health Habits: ' + sg.health_habits.map(h => h.title + ' (' + h.desc + ')').slice(0, 2).join('; '), 40, y, { maxWidth: 500 });
+          y += 35;
+        }
+        if (sg.nutrition && sg.nutrition.length) {
+          doc.text('Nutrition: ' + sg.nutrition.map(n => n.title).join(', '), 40, y, { maxWidth: 500 });
+          y += 20;
+        }
+        if (sg.precautions && sg.precautions.length) {
+          doc.text('Precautions: ' + sg.precautions.map(p => p.title).join(', '), 40, y, { maxWidth: 500 });
+        }
       }
-      doc.text(`Verification token: ${data.qr_token}`, 40, 410);
-      doc.text('Recommendation:', 40, 440);
-      doc.text(getRecommendation(data.risk, data.confidence_pct), 40, 460, { maxWidth: 500 });
-      if (data.explanation) {
-        doc.text('AI Explanation:', 40, 500);
-        doc.text(data.explanation, 40, 520, { maxWidth: 500 });
-      }
-      doc.save(`mediscan-report-${Date.now()}.pdf`);
+      
+      doc.save(`MediScan-Report-${patient.patientName.replace(/\s+/g, '_')}.pdf`);
     }
   </script>
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_live.js"></script>
+  <script src="/static/js/hospital_system.js"></script>
+  <script>
+    // Patient ID Random Generator
+    const btnGenPid = document.getElementById('btnGenPatientId');
+    if (btnGenPid) {
+      btnGenPid.addEventListener('click', () => {
+        const num = Math.floor(1000 + Math.random() * 9000);
+        const newId = `MS-2026-00${num}`;
+        document.getElementById('patientId').value = newId;
+        const pacsBtn = document.getElementById('btnOpenInPACS');
+        if (pacsBtn) pacsBtn.href = `/imaging?patient_id=${newId}`;
+        showToast(`Generated New Patient ID: ${newId}`, 'info');
+      });
+    }
+
+    // Diagnostic Sign-off Handler
+    const diagSignBtn = document.getElementById('executeDiagSignOffBtn');
+    if (diagSignBtn) {
+      diagSignBtn.addEventListener('click', () => {
+        const dName = document.getElementById('diagDoctorName').value || 'Dr. Sarah Sharma, MD';
+        const dNotes = document.getElementById('diagDoctorNotes').value;
+        const pId = document.getElementById('patientId').value || 'MS-2026-004821';
+        const stamp = document.getElementById('diagSignatureStampPreview');
+
+        if (stamp) {
+          const now = new Date();
+          stamp.innerHTML = `
+            <div style="color: #34d399; font-size: 1.1rem; font-weight: 800; font-family: sans-serif; margin-bottom: 4px;">
+              <i class="fa-solid fa-certificate"></i> VERIFIED &amp; DIGITALLY CERTIFIED
+            </div>
+            <div style="font-family: 'Brush Script MT', cursive; font-size: 1.8rem; color: #38bdf8;">
+              ${dName}
+            </div>
+            <div style="font-size: 0.72rem; color: #94a3b8; font-family: monospace; margin-top: 4px;">
+              Certified: ${now.toLocaleDateString()} ${now.toLocaleTimeString()} &bull; EMR Audit Log: MS-EMR-${Math.random().toString(36).substring(2, 9).toUpperCase()}
+            </div>
+          `;
+          stamp.style.display = 'block';
+        }
+
+        showToast(`Report Certified & Signed into EMR for Patient ${pId}`, 'success');
+
+        fetch('/api/audit_logs/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user: dName,
+            role: 'Doctor',
+            action: 'Doctor Verified & Certified Diagnostic Scan',
+            patient_id: pId,
+            details: dNotes
+          })
+        }).catch(() => {});
+      });
+    }
+  </script>
+  <script src="/static/js/hospital_translate.js"></script>
 </body>
 </html>
-

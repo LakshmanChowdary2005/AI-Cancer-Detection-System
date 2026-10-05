@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Analytics &bull; AI Model Monitoring — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="/static/css/hospital_system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container" style="max-width: 1440px;">
+
+    <!-- Top Hospital Navigation Header -->
+    {% include 'hospital_header.html' %}
+
+    <!-- Top Heading Row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-chart-line text-accent"></i> Hospital Operational Analytics &amp; AI Model Monitoring
+        </h2>
+        <p style="font-size: 0.82rem; color: var(--muted); margin: 3px 0 0 0;">
+          Clinical throughput metrics &bull; Deep learning model telemetry &bull; Drift detection &bull; Inter-rater reliability
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <span class="badge badge-success" style="font-size: 0.78rem; padding: 6px 12px;">
+          <span class="dot" style="background: #10b981;"></span> 4 AI Models Online
+        </span>
+      </div>
+    </div>
+
+    <!-- Top Metrics Overview (Requirement #20) -->
+    <div class="kpi-grid-6">
+      <div class="kpi-card blue">
+        <div class="kpi-header"><span class="kpi-label">Total Inferences</span><i class="fa-solid fa-microchip"></i></div>
+        <div class="kpi-value">{{ monitoring.metrics.total_scans_analyzed }}</div>
+        <div class="kpi-footer">Across 4 cancer modalities</div>
+      </div>
+      <div class="kpi-card emerald">
+        <div class="kpi-header"><span class="kpi-label">Doctor Agreement</span><i class="fa-solid fa-handshake"></i></div>
+        <div class="kpi-value">{{ monitoring.metrics.ai_doctor_agreement }}</div>
+        <div class="kpi-footer">Inter-rater consensus rate</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-header"><span class="kpi-label">Low Confidence</span><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="kpi-value">{{ monitoring.metrics.low_confidence_cases }}</div>
+        <div class="kpi-footer">Flagged for extra review</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-header"><span class="kpi-label">Doctor Overrides</span><i class="fa-solid fa-user-pen"></i></div>
+        <div class="kpi-value">{{ monitoring.metrics.doctor_corrections }}</div>
+        <div class="kpi-footer">0.03% correction rate</div>
+      </div>
+      <div class="kpi-card cyan">
+        <div class="kpi-header"><span class="kpi-label">Avg Review Time</span><i class="fa-solid fa-stopwatch"></i></div>
+        <div class="kpi-value">{{ monitoring.metrics.average_review_turnaround_mins }}m</div>
+        <div class="kpi-footer">From intake to signed report</div>
+      </div>
+      <div class="kpi-card rose">
+        <div class="kpi-header"><span class="kpi-label">Follow-up Adherence</span><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="kpi-value">94.8%</div>
+        <div class="kpi-footer">Automated alerts active</div>
+      </div>
+    </div>
+
+    <!-- AI Model Telemetry Cards (Requirement #21) -->
+    <div class="panel-card" style="margin-bottom: 24px;">
+      <div class="panel-header" style="padding: 16px 20px 10px;">
+        <span class="panel-tag">Neural Architecture Telemetry</span>
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin: 4px 0 0 0;">
+          <i class="fa-solid fa-brain text-accent"></i> Active AI Clinical Models Status &amp; Performance
+        </h3>
+      </div>
+
+      <div style="padding: 14px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+        {% for model in monitoring.models %}
+        <div style="background: rgba(15,23,42,0.7); border: 1px solid var(--hospital-card-border); border-radius: 12px; padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+            <div>
+              <span class="badge badge-primary" style="font-size: 0.72rem;">{{ model.version }}</span>
+              <h4 style="margin: 6px 0 0 0; font-size: 1rem; font-weight: 800; color: #fff;">{{ model.name }}</h4>
+              <div style="font-size: 0.74rem; color: #38bdf8;">{{ model.cancer_type }}</div>
+            </div>
+            <span class="badge badge-success"><span class="dot" style="background:#10b981;"></span> Active</span>
+          </div>
+
+          <div style="font-size: 0.76rem; color: var(--muted); margin: 6px 0 12px 0;">
+            Architecture: <strong style="color: #cbd5e1;">{{ model.architecture }}</strong>
+          </div>
+
+          <!-- Metrics Grid -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(0,0,0,0.25); padding: 10px; border-radius: 8px; margin-bottom: 12px; text-align: center;">
+            <div>
+              <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Validation</div>
+              <strong style="color: #34d399; font-size: 0.95rem;">{{ model.accuracy }}%</strong>
+            </div>
+            <div>
+              <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">AUC-ROC</div>
+              <strong style="color: #38bdf8; font-size: 0.95rem;">{{ model.auc_roc }}</strong>
+            </div>
+            <div>
+              <div style="font-size: 0.68rem; color: var(--muted); text-transform: uppercase;">Latency</div>
+              <strong style="color: #fbbf24; font-size: 0.95rem;">{{ model.avg_latency_ms }}ms</strong>
+            </div>
+          </div>
+
+          <!-- Confidence Distribution -->
+          <div style="font-size: 0.74rem; color: var(--muted); margin-bottom: 6px;">Confidence Distribution:</div>
+          <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 999px; display: flex; overflow: hidden; margin-bottom: 8px;">
+            <div style="width: {{ model.confidence_distribution.high }}%; background: #10b981;" title="High: {{ model.confidence_distribution.high }}%"></div>
+            <div style="width: {{ model.confidence_distribution.moderate }}%; background: #f59e0b;" title="Moderate: {{ model.confidence_distribution.moderate }}%"></div>
+            <div style="width: {{ model.confidence_distribution.low }}%; background: #ef4444;" title="Low: {{ model.confidence_distribution.low }}%"></div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--muted);">
+            <span style="color: #34d399;">High: {{ model.confidence_distribution.high }}%</span>
+            <span style="color: #fbbf24;">Mod: {{ model.confidence_distribution.moderate }}%</span>
+            <span style="color: #f87171;">Low: {{ model.confidence_distribution.low }}%</span>
+          </div>
+
+          <div style="border-top: 1px solid rgba(255,255,255,0.06); margin-top: 10px; padding-top: 8px; display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted);">
+            <span>Drift: <strong style="color: #34d399;">{{ model.data_drift }}</strong></span>
+            <span>Updated: {{ model.last_updated }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Model Version Update History -->
+    <div class="panel-card">
+      <div class="panel-header" style="padding: 16px 20px 10px;">
+        <span class="panel-tag">Audit Trail</span>
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin: 4px 0 0 0;">
+          <i class="fa-solid fa-code-compare text-accent"></i> AI Model Retraining &amp; Version History
+        </h3>
+      </div>
+      <div style="padding: 10px 20px 20px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Model</th>
+              <th>Clinical Retraining Summary &amp; Validation Gain</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for h in monitoring.history %}
+            <tr>
+              <td style="font-family: monospace; font-size: 0.78rem;">{{ h.date }}</td>
+              <td><span class="badge badge-primary">{{ h.model }}</span></td>
+              <td style="font-size: 0.82rem; color: var(--text);">{{ h.action }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_system.js"></script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediScan AI — Patient Wellness &amp; Care Portal</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="/static/css/hospital_system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body style="background: #060b18;">
+  <div class="page-container" style="max-width: 1200px;">
+
+    <!-- Top Hospital Navigation Header -->
+    {% include 'hospital_header.html' %}
+
+    <!-- Welcome Patient Header Banner (Requirement #17) -->
+    <div class="welcome-patient-banner">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(135deg, #10b981, #06b6d4); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #fff; box-shadow: 0 4px 20px rgba(16,185,129,0.4);">
+            <i class="fa-solid fa-heart-pulse"></i>
+          </div>
+          <div>
+            <h2 style="margin: 0; font-size: 1.45rem; font-weight: 800; color: #fff;">
+              Welcome back, {{ patient.name }}
+            </h2>
+            <div style="font-size: 0.84rem; color: #cbd5e1; margin-top: 4px;">
+              Your health journey is supported by <strong>{{ patient.assigned_doctor }}</strong> &bull; Patient ID: <strong style="color: #38bdf8;">{{ patient.patient_id }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="showToast('Messaging Dr. Sharma — Nurse triage will respond within 30 mins.', 'info')" style="padding: 8px 16px; font-size: 0.82rem; background: linear-gradient(135deg, #059669, #10b981); border: none;">
+            <i class="fa-solid fa-comment-medical"></i> Message My Doctor
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid: Left Scan & Report / Right Appointments, Meds, Documents -->
+    <div style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 24px;">
+
+      <!-- Left Column: Latest Scan & Patient-Friendly AI Explanation (Requirements #17 & #18) -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Latest Diagnostic Scan & Plain-English Report Card -->
+        <div class="panel-card" style="margin-bottom: 0;">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <div>
+              <span class="panel-tag" style="background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.3);">
+                Verified Diagnostic Scan
+              </span>
+              <h3 style="font-size: 1.15rem; font-weight: 800; margin: 4px 0 0 0; color: #fff;">
+                <i class="fa-solid fa-file-medical text-accent"></i> Your Latest Diagnostic Scan &amp; Insights
+              </h3>
+            </div>
+
+            <!-- Dual View Toggle: Clinical View vs Patient-Friendly View (Requirement #18) -->
+            <div style="display: flex; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 3px;">
+              <button id="togglePatientViewBtn" class="btn btn-outline active" style="padding: 4px 12px; font-size: 0.72rem; border-radius: 16px; border: none; background: #3b82f6; color: #fff;">
+                <i class="fa-solid fa-hands-holding-child"></i> Patient-Friendly View ⭐
+              </button>
+              <button id="toggleClinicalViewBtn" class="btn btn-outline" style="padding: 4px 12px; font-size: 0.72rem; border-radius: 16px; border: none; color: var(--muted);">
+                <i class="fa-solid fa-stethoscope"></i> Clinical View
+              </button>
+            </div>
+          </div>
+
+          <div style="padding: 20px;">
+            {% if patient.scans %}
+            <div style="display: flex; gap: 18px; margin-bottom: 18px; flex-wrap: wrap;">
+              <img src="{{ patient.scans[0].image_url }}" alt="Scan image" style="width: 140px; height: 140px; object-fit: cover; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15);" />
+              <div style="flex: 1; min-width: 220px;">
+                <div style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase;">Study Type</div>
+                <h4 style="margin: 2px 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #fff;">{{ patient.scans[0].modality }}</h4>
+                <div style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px;">
+                  Exam Date: <strong>{{ patient.scans[0].date }}</strong> &bull; Body Region: <strong>{{ patient.scans[0].body_part }}</strong>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Doctor Signed</span>
+                  <span class="badge badge-primary">High Image Quality</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Patient-Friendly Explanation Box (Requirement #18) -->
+            <div id="aiPatientFriendlyView" style="display: block; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); border-radius: 12px; padding: 16px 18px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; color: #34d399; font-weight: 700; font-size: 0.85rem;">
+                <i class="fa-solid fa-circle-info"></i> What This Scan Means For You (Plain English)
+              </div>
+              <p style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.6; margin: 0;">
+                {{ plain_english }}
+              </p>
+              <div style="margin-top: 10px; font-size: 0.76rem; color: var(--muted);">
+                <i class="fa-solid fa-user-doctor text-accent"></i> Remember: Your doctor {{ patient.assigned_doctor }} has carefully examined this image and is with you every step of the way.
+              </div>
+            </div>
+
+            <!-- Clinical Technical View (Requirement #18) -->
+            <div id="aiClinicalView" style="display: none; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); border-radius: 12px; padding: 16px 18px;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; color: #38bdf8; font-weight: 700; font-size: 0.85rem;">
+                <i class="fa-solid fa-stethoscope"></i> Technical Medical Oncology Finding
+              </div>
+              <p style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.6; margin: 0;">
+                <strong>Finding:</strong> {{ patient.scans[0].finding }}. Grad-CAM shows localized parenchymal attenuation with micro-lobulation. Model confidence: {{ patient.scans[0].confidence }}.
+              </p>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 18px; display: flex; gap: 10px;">
+              <a href="/api/export_excel" class="btn btn-outline" style="padding: 7px 16px; font-size: 0.8rem;">
+                <i class="fa-solid fa-file-pdf"></i> Download Official Signed PDF
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health Documents & Care Plan (Requirement #17) -->
+        <div class="panel-card" style="margin-bottom: 0;">
+          <div class="panel-header" style="padding: 16px 20px 10px;">
+            <span class="panel-tag">Patient Archive</span>
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin: 4px 0 0 0; color: #fff;">
+              <i class="fa-solid fa-folder-open text-accent"></i> My Health Documents
+            </h3>
+          </div>
+          <div style="padding: 14px 20px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.6); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--hospital-card-border);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-file-pdf" style="color: #ef4444; font-size: 1.3rem;"></i>
+                <div>
+                  <strong style="color: #fff; font-size: 0.85rem;">Diagnostic Chest Scan Report &amp; AI Heatmap</strong>
+                  <div style="font-size: 0.72rem; color: var(--muted);">Signed 22 Jan 2026 &bull; PDF &bull; 1.4 MB</div>
+                </div>
+              </div>
+              <a href="/api/export_excel" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.74rem;">
+                Download
+              </a>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15,23,42,0.6); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--hospital-card-border);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa-solid fa-file-contract" style="color: #10b981; font-size: 1.3rem;"></i>
+                <div>
+                  <strong style="color: #fff; font-size: 0.85rem;">Informed Consent Form &amp; Privacy Agreement</strong>
+                  <div style="font-size: 0.72rem; color: var(--muted);">Digitally Signed 14 Jan 2026 &bull; PDF &bull; 420 KB</div>
+                </div>
+              </div>
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.74rem;" onclick="showToast('Consent document verified', 'info')">
+                View
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Upcoming Appointments, Medications, Care Team -->
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- Upcoming Appointment Card (Requirement #17) -->
+        <div class="panel-card" style="margin-bottom: 0; border-top: 3px solid #3b82f6;">
+          <div class="panel-header" style="padding: 16px 20px 10px;">
+            <span class="panel-tag" style="background: rgba(59,130,246,0.15); color: #60a5fa;">Next Clinical Visit</span>
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin: 4px 0 0 0; color: #fff;">
+              <i class="fa-solid fa-calendar-check text-accent"></i> Upcoming Appointment
+            </h3>
+          </div>
+          <div style="padding: 14px 20px;">
+            <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(56,189,248,0.25); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px;">
+              <div style="font-size: 1.1rem; font-weight: 800; color: #38bdf8;">10:30 AM &bull; Tomorrow</div>
+              <div style="font-size: 0.82rem; font-weight: 700; color: #fff; margin-top: 4px;">Oncology Consultation &bull; Pre-Op Planning</div>
+              <div style="font-size: 0.76rem; color: var(--muted); margin-top: 2px;">
+                With <strong>{{ patient.assigned_doctor }}</strong> &bull; Main Clinic Suite 4B
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-primary" style="flex: 1; padding: 6px; font-size: 0.76rem;" onclick="showToast('Appointment added to device calendar!', 'success')">
+                <i class="fa-solid fa-calendar-plus"></i> Add to Calendar
+              </button>
+              <button class="btn btn-outline" style="flex: 1; padding: 6px; font-size: 0.76rem;" onclick="showToast('Reschedule request sent to clinic.', 'info')">
+                Reschedule
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Current Medications (Requirement #17) -->
+        <div class="panel-card" style="margin-bottom: 0;">
+          <div class="panel-header" style="padding: 16px 20px 10px;">
+            <span class="panel-tag">Prescriptions</span>
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin: 4px 0 0 0; color: #fff;">
+              <i class="fa-solid fa-pills text-accent"></i> My Active Medications
+            </h3>
+          </div>
+          <div style="padding: 14px 20px; display: flex; flex-direction: column; gap: 10px;">
+            {% for med in patient.medications %}
+            <div style="background: rgba(15,23,42,0.6); border: 1px solid var(--hospital-card-border); border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong style="color: #fff; font-size: 0.88rem;">{{ med.drug }}</strong>
+                <div style="font-size: 0.74rem; color: #38bdf8;">{{ med.dose }}</div>
+              </div>
+              <span class="badge {% if med.status == 'Active' %}badge-success{% else %}badge-warning{% endif %}" style="font-size: 0.7rem;">
+                {{ med.status }}
+              </span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Care Team Support -->
+        <div class="panel-card" style="margin-bottom: 0;">
+          <div class="panel-header" style="padding: 14px 18px 8px;">
+            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #fff;">
+              <i class="fa-solid fa-user-doctor text-accent"></i> Dedicated Care Team
+            </h4>
+          </div>
+          <div style="padding: 12px 18px; font-size: 0.8rem; color: var(--text); line-height: 1.6;">
+            <div>&bull; Attending: <strong>{{ patient.assigned_doctor }}</strong></div>
+            <div>&bull; Nurse Navigator: <strong>Jennifer Adams, RN</strong></div>
+            <div>&bull; Emergency 24/7 Helpline: <strong>+1 (800) 555-SCAN</strong></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_system.js"></script>
+</body>
+</html>

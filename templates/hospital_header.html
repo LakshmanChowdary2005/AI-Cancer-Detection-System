@@ -1,0 +1,582 @@
+<!-- =====================================================
+     MEDISCAN AI — UNIFIED HOSPITAL NAVIGATION HEADER
+     ===================================================== -->
+<header class="header-bar" style="margin-bottom: 14px;">
+  <a href="/hospital-dashboard" class="brand-section">
+    <div class="brand-logo" style="background: linear-gradient(135deg, #2563eb 0%, #00f2fe 100%);">
+      <i class="fa-solid fa-hospital"></i>
+    </div>
+    <div class="brand-info">
+      <div class="brand-title-row">
+        <h1>MediScan AI &bull; Oncology Medical Center</h1>
+        <span class="brand-status-chip" style="color: #38bdf8; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.35);">
+          <span class="dot" style="background: #10b981; box-shadow: 0 0 8px #10b981;"></span> EMR &bull; PACS ONLINE
+        </span>
+      </div>
+      <p>Enterprise Cancer Diagnostic Intelligence &bull; Clinical EMR &bull; DICOM Workstation</p>
+    </div>
+  </a>
+
+  <div class="header-nav-wrap">
+    <nav class="nav-actions">
+      <a class="nav-link {% if request.path == '/hospital-dashboard' or request.path == '/dashboard' %}active{% endif %}" href="/hospital-dashboard" title="Command Center">
+        <i class="fa-solid fa-gauge-high"></i> <span>Dashboard</span>
+      </a>
+      <a class="nav-link {% if request.path.startswith('/patients') %}active{% endif %}" href="/patients" title="EMR & Longitudinal Timeline">
+        <i class="fa-solid fa-hospital-user"></i> <span>Patients EMR</span>
+      </a>
+      <a class="nav-link {% if request.path == '/imaging' %}active{% endif %}" href="/imaging" title="PACS / DICOM Workstation">
+        <i class="fa-solid fa-x-ray"></i> <span>PACS Imaging</span>
+      </a>
+      <a class="nav-link {% if request.path == '/tumor-board' %}active{% endif %}" href="/tumor-board" title="Multidisciplinary Tumor Board">
+        <i class="fa-solid fa-users-viewfinder"></i> <span>Tumor Board</span>
+      </a>
+      <a class="nav-link {% if request.path == '/worklist' %}active{% endif %}" href="/worklist" title="Doctor Worklist & Triage">
+        <i class="fa-solid fa-list-check"></i> <span>Worklist</span>
+      </a>
+      <a class="nav-link {% if request.path == '/appointments' %}active{% endif %}" href="/appointments" title="Appointments">
+        <i class="fa-solid fa-calendar-check"></i> <span>Appointments</span>
+      </a>
+      <a class="nav-link {% if request.path == '/analytics' %}active{% endif %}" href="/analytics" title="Hospital Analytics & AI Monitoring">
+        <i class="fa-solid fa-chart-pie"></i> <span>Analytics</span>
+      </a>
+      <a class="nav-link {% if request.path == '/security' %}active{% endif %}" href="/security" title="Audit Trail & Privacy">
+        <i class="fa-solid fa-shield-halved"></i> <span>Security</span>
+      </a>
+      <a class="nav-link {% if request.path.startswith('/portal/patient') %}active{% endif %}" href="/portal/patient" style="color: #34d399;" title="Patient Friendly View">
+        <i class="fa-solid fa-user"></i> <span>Patient Portal</span>
+      </a>
+    </nav>
+
+    <!-- RBAC Role Switcher & Department Filters -->
+    <div style="display: flex; align-items: center; gap: 8px; position: relative; flex-wrap: wrap;">
+      
+      <!-- Role Selector -->
+      <select id="roleSelector" class="role-pill-select" title="Switch Hospital User Role (RBAC)">
+        <option value="Doctor">Role: Doctor</option>
+        <option value="Radiologist">Role: Radiologist</option>
+        <option value="Oncologist">Role: Oncologist</option>
+        <option value="Surgeon">Role: Surgeon</option>
+        <option value="Nurse">Role: Nurse</option>
+        <option value="Admin">Role: Admin</option>
+        <option value="Patient">Role: Patient</option>
+      </select>
+
+      <!-- Role Scope & Authorized Treatment Pill -->
+      <button id="roleScopeBtn" type="button" class="role-scope-btn" onclick="openRoleScopeModal()" title="View what treatment and system access this role can perform">
+        <i class="fa-solid fa-stethoscope scope-icon"></i>
+        <span id="roleScopeSummary">Doctor: Primary Triage &amp; Prescriptions</span>
+        <i class="fa-solid fa-circle-info" style="font-size: 0.72rem; opacity: 0.75;"></i>
+      </button>
+
+      <!-- Department Filter -->
+      <select id="deptSelector" class="dept-pill-select" title="Filter by Department">
+        <option value="All Departments">All Departments</option>
+        <option value="Radiology">Radiology</option>
+        <option value="Oncology">Oncology</option>
+        <option value="Surgery">Surgery</option>
+        <option value="Pathology">Pathology</option>
+        <option value="General Medicine">General Medicine</option>
+      </select>
+
+      <!-- Global Whole-Webpage Language Selector -->
+      <select id="globalLangSelector" class="lang-pill-select" onchange="changeGlobalLanguage(this.value)" title="Translate Entire Webpage" style="background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-size: 0.78rem; font-weight: 700; border-radius: 20px; padding: 5px 12px; outline: none; cursor: pointer;">
+        <option value="en">🌐 English (US)</option>
+        <option value="hi">🇮🇳 Hindi (हिन्दी)</option>
+        <option value="te">🇮🇳 Telugu (తెలుగు)</option>
+        <option value="ta">🇮🇳 Tamil (தமிழ்)</option>
+        <option value="kn">🇮🇳 Kannada (ಕನ್ನಡ)</option>
+        <option value="ml">🇮🇳 Malayalam (മലയാളം)</option>
+        <option value="bn">🇮🇳 Bengali (বাংলা)</option>
+        <option value="es">🇪🇸 Spanish (Español)</option>
+        <option value="fr">🇫🇷 French (Français)</option>
+        <option value="de">🇩🇪 German (Deutsch)</option>
+        <option value="ar">🇸🇦 Arabic (العربية)</option>
+      </select>
+
+      <!-- Dedicated Doctor Login / Doctor Session Status -->
+      {% if session.get('doctor_logged_in') %}
+        <div class="doctor-badge-status" title="Active Clinical Session">
+          <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 6px #10b981;"></span>
+          <span class="doctor-name">
+            <i class="fa-solid fa-user-doctor"></i> {{ session.get('doctor_name', 'Dr. Sarah Sharma, MD') }}
+          </span>
+          <span class="doctor-role-tag">{{ session.get('user_role', 'Doctor') }}</span>
+          <a href="/doctor/logout" class="logout-btn" title="Sign Out of Doctor Session"><i class="fa-solid fa-power-off"></i></a>
+        </div>
+      {% else %}
+        <a href="/doctor/login" class="doctor-login-cta-btn" title="Separate Doctor & Physician Authentication Gateway">
+          <i class="fa-solid fa-user-doctor"></i> <span>Doctor Login</span>
+        </a>
+      {% endif %}
+
+      <!-- Dedicated Patient Login / Patient Session Status -->
+      {% if session.get('patient_logged_in') %}
+        <div class="patient-badge-status" style="display:inline-flex; align-items:center; gap:6px; padding:4px 10px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.35); border-radius:9999px;">
+          <span style="font-size:0.76rem; font-weight:700; color:#6ee7b7;"><i class="fa-solid fa-user"></i> {{ session.get('patient_name', 'Eleanor Vance') }}</span>
+          <a href="/patient/logout" style="color:#f87171; font-size:0.75rem; text-decoration:none; margin-left:4px;" title="Sign Out of Patient Session"><i class="fa-solid fa-power-off"></i></a>
+        </div>
+      {% else %}
+        <a href="/patient/login" class="patient-login-cta-btn" style="display:inline-flex; align-items:center; gap:6px; padding:5px 12px; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#34d399; font-size:0.78rem; font-weight:700; border-radius:9999px; text-decoration:none;" title="Patient Health Portal Gateway">
+          <i class="fa-solid fa-hospital-user"></i> <span>Patient Login</span>
+        </a>
+      {% endif %}
+
+      <!-- Notifications Bell -->
+      <div style="position: relative;">
+        <button id="notifBellBtn" class="theme-toggle-btn" type="button" title="Hospital Notifications & Critical Alerts" style="position: relative;">
+          <i class="fa-solid fa-bell"></i>
+          <span style="position: absolute; top: -3px; right: -3px; background: #ef4444; color: #fff; font-size: 0.65rem; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 6px #ef4444;">
+            3
+          </span>
+        </button>
+
+        <!-- Notifications Dropdown Drawer -->
+        <div id="notifDropdown" class="notif-dropdown">
+          <div style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; font-weight: 800; color: #38bdf8;"><i class="fa-solid fa-bell"></i> Clinical Notifications</span>
+            <span style="font-size: 0.72rem; color: #94a3b8;">3 Unread</span>
+          </div>
+          <div style="max-height: 280px; overflow-y: auto;">
+            <div class="notif-item unread">
+              <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444; font-size: 1.1rem; margin-top: 2px;"></i>
+              <div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #f87171;">Critical Finding Awaiting Review</div>
+                <div style="font-size: 0.74rem; color: #cbd5e1; margin-top: 2px;">Eleanor Vance (MS-2026-004821) CT Chest flagged as High Risk (94.2% conf).</div>
+                <div style="font-size: 0.68rem; color: #64748b; margin-top: 4px;">12 mins ago &bull; Oncology</div>
+              </div>
+            </div>
+            <div class="notif-item unread">
+              <i class="fa-solid fa-users-viewfinder" style="color: #8b5cf6; font-size: 1.1rem; margin-top: 2px;"></i>
+              <div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #c4b5fd;">MDT Tumor Board Scheduled</div>
+                <div style="font-size: 0.74rem; color: #cbd5e1; margin-top: 2px;">Multidisciplinary panel convened for Amina Patel (MS-2026-005118) at 2:00 PM.</div>
+                <div style="font-size: 0.68rem; color: #64748b; margin-top: 4px;">45 mins ago &bull; Breast Clinic</div>
+              </div>
+            </div>
+            <div class="notif-item unread">
+              <i class="fa-solid fa-file-signature" style="color: #10b981; font-size: 1.1rem; margin-top: 2px;"></i>
+              <div>
+                <div style="font-size: 0.82rem; font-weight: 700; color: #6ee7b7;">Doctor Signed Final Report</div>
+                <div style="font-size: 0.74rem; color: #cbd5e1; margin-top: 2px;">Dr. Sarah Sharma digitally signed SCN-2026-8812. Ready for patient access.</div>
+                <div style="font-size: 0.68rem; color: #64748b; margin-top: 4px;">1 hour ago &bull; Radiology</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding: 8px 16px; background: rgba(0,0,0,0.3); text-align: center; border-top: 1px solid rgba(255,255,255,0.06);">
+            <a href="/worklist" style="font-size: 0.75rem; color: #38bdf8; text-decoration: none; font-weight: 600;">View All in Doctor Worklist &rarr;</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button class="theme-toggle-btn" id="themeToggle" type="button" title="Switch Theme (Light / Dark)">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+
+      <!-- Diagnostic Upload Scanner shortcut -->
+      <a class="btn btn-primary" href="/" style="padding: 6px 14px; font-size: 0.8rem; border-radius: 9999px;" title="Intake Medical Image Scan">
+        <i class="fa-solid fa-plus"></i> New Scan
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- =====================================================
+     CLINICAL ROLE & AUTHORIZED TREATMENT SCOPE MODAL
+     ===================================================== -->
+<div id="roleScopeModal" class="role-modal-overlay" onclick="closeRoleScopeModal(event)">
+  <div class="role-modal-container" onclick="event.stopPropagation()">
+    <div class="role-modal-header">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #2563eb, #00f2fe); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem;">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 800; color: #fff; margin: 0;">Clinical Role Access &amp; Treatment Authorization</h2>
+          <p style="font-size: 0.75rem; color: #94a3b8; margin: 2px 0 0 0;">Hospital Role-Based Access Control (RBAC) &bull; Authorized Clinical Protocols</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeRoleScopeModal()" style="background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 4px;">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Role Tab Selector -->
+    <div class="role-modal-tabs">
+      <button class="role-tab-btn active" data-role="Doctor" onclick="switchModalRoleTab('Doctor')">
+        <i class="fa-solid fa-user-doctor"></i> Doctor (Attending)
+      </button>
+      <button class="role-tab-btn" data-role="Radiologist" onclick="switchModalRoleTab('Radiologist')">
+        <i class="fa-solid fa-x-ray"></i> Radiologist
+      </button>
+      <button class="role-tab-btn" data-role="Oncologist" onclick="switchModalRoleTab('Oncologist')">
+        <i class="fa-solid fa-dna"></i> Medical Oncologist
+      </button>
+      <button class="role-tab-btn" data-role="Surgeon" onclick="switchModalRoleTab('Surgeon')">
+        <i class="fa-solid fa-syringe"></i> Surgeon
+      </button>
+      <button class="role-tab-btn" data-role="Nurse" onclick="switchModalRoleTab('Nurse')">
+        <i class="fa-solid fa-user-nurse"></i> Oncology Nurse
+      </button>
+      <button class="role-tab-btn" data-role="Admin" onclick="switchModalRoleTab('Admin')">
+        <i class="fa-solid fa-hospital-user"></i> Hospital Admin
+      </button>
+      <button class="role-tab-btn" data-role="Patient" onclick="switchModalRoleTab('Patient')">
+        <i class="fa-solid fa-person"></i> Patient / Family
+      </button>
+    </div>
+
+    <!-- Modal Body: Role Profiles -->
+    <div class="role-modal-body">
+      
+      <!-- DOCTOR PROFILE -->
+      <div id="role-view-Doctor" class="role-profile-view active">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 1.1rem; color: #38bdf8; font-weight: 800; margin: 0;">
+              <i class="fa-solid fa-user-doctor"></i> Attending Physician / Clinical Oncologist
+            </h3>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Primary clinical caregiver, diagnostic validation, and treatment plan sign-off.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="selectRoleFromModal('Doctor')" style="padding: 5px 14px; font-size: 0.78rem;">
+            <i class="fa-solid fa-check"></i> Activate Doctor Role
+          </button>
+        </div>
+
+        <div class="role-card-grid">
+          <div class="role-box access">
+            <div class="role-box-title" style="color: #6ee7b7;"><i class="fa-solid fa-key"></i> Required System Access</div>
+            <div class="role-tag-list">
+              <span class="role-tag green"><a href="/hospital-dashboard" style="color:inherit; text-decoration:none;">Dashboard &amp; Census</a></span>
+              <span class="role-tag green"><a href="/patients" style="color:inherit; text-decoration:none;">EMR Longitudinal Timeline</a></span>
+              <span class="role-tag green"><a href="/worklist" style="color:inherit; text-decoration:none;">Diagnostic Worklist</a></span>
+              <span class="role-tag green"><a href="/appointments" style="color:inherit; text-decoration:none;">Clinical Appointments</a></span>
+              <span class="role-tag green"><a href="/" style="color:inherit; text-decoration:none;">AI Neural Scanner (Fast)</a></span>
+              <span class="role-tag green">Digital Sign-Off Protocol</span>
+            </div>
+          </div>
+
+          <div class="role-box treatment">
+            <div class="role-box-title" style="color: #67e8f9;"><i class="fa-solid fa-hand-holding-medical"></i> Authorized Treatments (What they can do)</div>
+            <div class="role-tag-list">
+              <span class="role-tag cyan">Primary Diagnostic Workup</span>
+              <span class="role-tag cyan">TNM / FIGO Staging Confirmation</span>
+              <span class="role-tag cyan">Oral Symptom Management Prescriptions</span>
+              <span class="role-tag cyan">Specialist Consult Referrals (MDT, Surgery, Rad-Onc)</span>
+              <span class="role-tag cyan">Palliative &amp; Hospice Care Protocols</span>
+              <span class="role-tag cyan">Patient Discharge &amp; Follow-up Scheduling</span>
+            </div>
+          </div>
+
+          <div class="role-box limitations">
+            <div class="role-box-title" style="color: #fda4af;"><i class="fa-solid fa-ban"></i> Scope Limitations</div>
+            <div class="role-tag-list">
+              <span class="role-tag rose">Cannot perform surgical resection (reserved for Surgeon)</span>
+              <span class="role-tag rose">Cannot administer high-dose chemo infusion directly without Nurse/Pharmacy co-sign</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RADIOLOGIST PROFILE -->
+      <div id="role-view-Radiologist" class="role-profile-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 1.1rem; color: #38bdf8; font-weight: 800; margin: 0;">
+              <i class="fa-solid fa-x-ray"></i> Diagnostic &amp; Interventional Radiologist
+            </h3>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Imaging interpretation, PACS workstations, Grad-CAM attention maps, and biopsy targeting.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="selectRoleFromModal('Radiologist')" style="padding: 5px 14px; font-size: 0.78rem;">
+            <i class="fa-solid fa-check"></i> Activate Radiologist Role
+          </button>
+        </div>
+
+        <div class="role-card-grid">
+          <div class="role-box access">
+            <div class="role-box-title" style="color: #6ee7b7;"><i class="fa-solid fa-key"></i> Required System Access</div>
+            <div class="role-tag-list">
+              <span class="role-tag green"><a href="/imaging" style="color:inherit; text-decoration:none;">Full PACS / DICOM Workstation</a></span>
+              <span class="role-tag green">Grad-CAM Attention Heatmaps</span>
+              <span class="role-tag green">Window / Leveling &amp; Calipers</span>
+              <span class="role-tag green"><a href="/worklist" style="color:inherit; text-decoration:none;">Radiology Reading Worklist</a></span>
+              <span class="role-tag green">Multi-Agent AI Review</span>
+            </div>
+          </div>
+
+          <div class="role-box treatment">
+            <div class="role-box-title" style="color: #67e8f9;"><i class="fa-solid fa-hand-holding-medical"></i> Authorized Treatments (What they can do)</div>
+            <div class="role-tag-list">
+              <span class="role-tag cyan">CT / Ultrasound-Guided Core Needle Biopsy</span>
+              <span class="role-tag cyan">Stereotactic Lesion Localization &amp; Hook-Wire</span>
+              <span class="role-tag cyan">Radiofrequency / Microwave Tumor Ablation (RFA/MWA)</span>
+              <span class="role-tag cyan">Radiation Oncology Target Contouring (GTV/CTV)</span>
+              <span class="role-tag cyan">Formal BI-RADS &amp; Lung-RADS Classification</span>
+              <span class="role-tag cyan">IV Contrast Injection Safety Clearance</span>
+            </div>
+          </div>
+
+          <div class="role-box limitations">
+            <div class="role-box-title" style="color: #fda4af;"><i class="fa-solid fa-ban"></i> Scope Limitations</div>
+            <div class="role-tag-list">
+              <span class="role-tag rose">Cannot prescribe systemic intravenous chemotherapy</span>
+              <span class="role-tag rose">Cannot discharge inpatients without attending physician order</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ONCOLOGIST PROFILE -->
+      <div id="role-view-Oncologist" class="role-profile-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 1.1rem; color: #38bdf8; font-weight: 800; margin: 0;">
+              <i class="fa-solid fa-dna"></i> Medical Oncologist
+            </h3>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Systemic cancer therapeutics, chemotherapy, targeted precision oncology, and clinical trials.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="selectRoleFromModal('Oncologist')" style="padding: 5px 14px; font-size: 0.78rem;">
+            <i class="fa-solid fa-check"></i> Activate Oncologist Role
+          </button>
+        </div>
+
+        <div class="role-card-grid">
+          <div class="role-box access">
+            <div class="role-box-title" style="color: #6ee7b7;"><i class="fa-solid fa-key"></i> Required System Access</div>
+            <div class="role-tag-list">
+              <span class="role-tag green"><a href="/tumor-board" style="color:inherit; text-decoration:none;">Multidisciplinary Tumor Board</a></span>
+              <span class="role-tag green"><a href="/patients" style="color:inherit; text-decoration:none;">EMR Longitudinal Care Plan</a></span>
+              <span class="role-tag green"><a href="/interactions" style="color:inherit; text-decoration:none;">Drug Interactions Engine</a></span>
+              <span class="role-tag green"><a href="/monitoring" style="color:inherit; text-decoration:none;">Toxicity &amp; Monitoring Flowsheet</a></span>
+              <span class="role-tag green"><a href="/preventive" style="color:inherit; text-decoration:none;">Genomic Risk Models</a></span>
+            </div>
+          </div>
+
+          <div class="role-box treatment">
+            <div class="role-box-title" style="color: #67e8f9;"><i class="fa-solid fa-hand-holding-medical"></i> Authorized Treatments (What they can do)</div>
+            <div class="role-tag-list">
+              <span class="role-tag cyan">Intravenous Chemotherapy (Cisplatin, Paclitaxel, Carboplatin)</span>
+              <span class="role-tag cyan">Targeted Kinase Inhibitors (Osimertinib, Trastuzumab, ALK)</span>
+              <span class="role-tag cyan">Immune Checkpoint Blockade (Pembrolizumab, Nivolumab)</span>
+              <span class="role-tag cyan">Hormonal / Endocrine Therapy (Tamoxifen, Letrozole)</span>
+              <span class="role-tag cyan">Comprehensive Molecular Biomarker Ordering (NGS, PD-L1)</span>
+              <span class="role-tag cyan">Experimental Clinical Trial Protocol Enrollment</span>
+            </div>
+          </div>
+
+          <div class="role-box limitations">
+            <div class="role-box-title" style="color: #fda4af;"><i class="fa-solid fa-ban"></i> Scope Limitations</div>
+            <div class="role-tag-list">
+              <span class="role-tag rose">Cannot perform surgical excision without Surgical Oncologist</span>
+              <span class="role-tag rose">Restricted from modifying central hospital audit configurations</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SURGEON PROFILE -->
+      <div id="role-view-Surgeon" class="role-profile-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 1.1rem; color: #38bdf8; font-weight: 800; margin: 0;">
+              <i class="fa-solid fa-syringe"></i> Surgical Oncologist
+            </h3>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Operative resection, anatomical margin assessment, lymph node dissection, and OR management.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="selectRoleFromModal('Surgeon')" style="padding: 5px 14px; font-size: 0.78rem;">
+            <i class="fa-solid fa-check"></i> Activate Surgeon Role
+          </button>
+        </div>
+
+        <div class="role-card-grid">
+          <div class="role-box access">
+            <div class="role-box-title" style="color: #6ee7b7;"><i class="fa-solid fa-key"></i> Required System Access</div>
+            <div class="role-tag-list">
+              <span class="role-tag green"><a href="/imaging" style="color:inherit; text-decoration:none;">PACS Pre-Op Resectability Workspace</a></span>
+              <span class="role-tag green"><a href="/tumor-board" style="color:inherit; text-decoration:none;">MDT Tumor Board</a></span>
+              <span class="role-tag green"><a href="/worklist" style="color:inherit; text-decoration:none;">Surgical Worklist &amp; OR Queue</a></span>
+              <span class="role-tag green"><a href="/patients" style="color:inherit; text-decoration:none;">Operative Notes &amp; Margins</a></span>
+            </div>
+          </div>
+
+          <div class="role-box treatment">
+            <div class="role-box-title" style="color: #67e8f9;"><i class="fa-solid fa-hand-holding-medical"></i> Authorized Treatments (What they can do)</div>
+            <div class="role-tag-list">
+              <span class="role-tag cyan">Radical Tumor Resection (VATS Lobectomy, Mastectomy, Excision)</span>
+              <span class="role-tag cyan">Sentinel Lymph Node Dissection (SLND) &amp; Regional Clearance</span>
+              <span class="role-tag cyan">Minimally Invasive Laparoscopic / Robotic Staging</span>
+              <span class="role-tag cyan">Intraoperative Frozen Section Margin Evaluation</span>
+              <span class="role-tag cyan">Vascular Access Port-A-Cath Implantation</span>
+              <span class="role-tag cyan">Surgical Resectability Certification (R0/R1/R2)</span>
+            </div>
+          </div>
+
+          <div class="role-box limitations">
+            <div class="role-box-title" style="color: #fda4af;"><i class="fa-solid fa-ban"></i> Scope Limitations</div>
+            <div class="role-tag-list">
+              <span class="role-tag rose">Cannot modify medical oncology systemic chemotherapy cycles</span>
+              <span class="role-tag rose">Requires MDT Tumor Board consensus for borderline resectable tumors</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NURSE PROFILE -->
+      <div id="role-view-Nurse" class="role-profile-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 1.1rem; color: #38bdf8; font-weight: 800; margin: 0;">
+              <i class="fa-solid fa-user-nurse"></i> Oncology Nurse &amp; Infusion Specialist
+            </h3>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Bedside administration, infusion flowsheets, adverse reaction triage, and patient vitals.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="selectRoleFromModal('Nurse')" style="padding: 5px 14px; font-size: 0.78rem;">
+            <i class="fa-solid fa-check"></i> Activate Nurse Role
+          </button>
+        </div>
+
+        <div class="role-card-grid">
+          <div class="role-box access">
+            <div class="role-box-title" style="color: #6ee7b7;"><i class="fa-solid fa-key"></i> Required System Access</div>
+            <div class="role-tag-list">
+              <span class="role-tag green"><a href="/hospital-dashboard" style="color:inherit; text-decoration:none;">Inpatient Census &amp; Bedside Vitals</a></span>
+              <span class="role-tag green"><a href="/patients" style="color:inherit; text-decoration:none;">EMR Medication Flowsheet</a></span>
+              <span class="role-tag green"><a href="/appointments" style="color:inherit; text-decoration:none;">Chemo Infusion Appointment Check-In</a></span>
+              <span class="role-tag green"><a href="/wellbeing" style="color:inherit; text-decoration:none;">Supportive Care Guidelines</a></span>
+            </div>
+          </div>
+
+          <div class="role-box treatment">
+            <div class="role-box-title" style="color: #67e8f9;"><i class="fa-solid fa-hand-holding-medical"></i> Authorized Treatments (What they can do)</div>
+            <div class="role-tag-list">
+              <span class="role-tag cyan">Administration of IV Chemotherapy &amp; Premedications</span>
+              <span class="role-tag cyan">Central Line (PICC / Port) Sterile Dressing &amp; Heparin Flush</span>
+              <span class="role-tag cyan">Acute Infusion Reaction &amp; Extravasation Protocol Execution</span>
+              <span class="role-tag cyan">Vital Signs Monitoring, Pain Score &amp; ECOG Performance</span>
+              <span class="role-tag cyan">Patient &amp; Caregiver Toxicity Self-Management Education</span>
+              <span class="role-tag cyan">Emergency Rapid Escalation for Neutropenic Fever / Sepsis</span>
+            </div>
+          </div>
+
+          <div class="role-box limitations">
+            <div class="role-box-title" style="color: #fda4af;"><i class="fa-solid fa-ban"></i> Scope Limitations</div>
+            <div class="role-tag-list">
+              <span class="role-tag rose">Cannot prescribe or alter antineoplastic dosages</span>
+              <span class="role-tag rose">Cannot digitally sign diagnostic radiology or pathology reports</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN PROFILE -->
+      <div id="role-view-Admin" class="role-profile-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 1.1rem; color: #38bdf8; font-weight: 800; margin: 0;">
+              <i class="fa-solid fa-hospital-user"></i> Hospital Operations &amp; Compliance Administrator
+            </h3>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">HIPAA audit forensics, enterprise AI drift surveillance, staff credentialing, and regulatory reporting.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="selectRoleFromModal('Admin')" style="padding: 5px 14px; font-size: 0.78rem;">
+            <i class="fa-solid fa-check"></i> Activate Admin Role
+          </button>
+        </div>
+
+        <div class="role-card-grid">
+          <div class="role-box access">
+            <div class="role-box-title" style="color: #6ee7b7;"><i class="fa-solid fa-key"></i> Required System Access</div>
+            <div class="role-tag-list">
+              <span class="role-tag green"><a href="/security" style="color:inherit; text-decoration:none;">Security &amp; HIPAA Audit Trail</a></span>
+              <span class="role-tag green"><a href="/analytics" style="color:inherit; text-decoration:none;">Analytics &amp; AI Drift Monitoring</a></span>
+              <span class="role-tag green">Staff Credentialing &amp; RBAC Control</span>
+              <span class="role-tag green"><a href="/api/export_excel" style="color:inherit; text-decoration:none;">Enterprise Excel &amp; HL7 Export</a></span>
+            </div>
+          </div>
+
+          <div class="role-box treatment">
+            <div class="role-box-title" style="color: #67e8f9;"><i class="fa-solid fa-hand-holding-medical"></i> Authorized Governance (What they can do)</div>
+            <div class="role-tag-list">
+              <span class="role-tag cyan">HIPAA Compliance &amp; Forensic Log Verification</span>
+              <span class="role-tag cyan">Clinical User Privilege Provisioning &amp; Revocation</span>
+              <span class="role-tag cyan">Enterprise Hospital Data Integration &amp; Backups</span>
+              <span class="role-tag cyan">Model Accuracy Calibration &amp; Drift Threshold Management</span>
+              <span class="role-tag cyan">Incident Response System Lockdown</span>
+            </div>
+          </div>
+
+          <div class="role-box limitations">
+            <div class="role-box-title" style="color: #fda4af;"><i class="fa-solid fa-ban"></i> Scope Limitations</div>
+            <div class="role-tag-list">
+              <span class="role-tag rose">Non-clinical role: strictly prohibited from prescribing patient medications</span>
+              <span class="role-tag rose">Cannot alter clinical diagnostic interpretations</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PATIENT PROFILE -->
+      <div id="role-view-Patient" class="role-profile-view">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+          <div>
+            <h3 style="font-size: 1.1rem; color: #34d399; font-weight: 800; margin: 0;">
+              <i class="fa-solid fa-person"></i> Patient &amp; Family Caregiver Portal
+            </h3>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin: 3px 0 0 0;">Plain-language test results, appointment calendar, supportive remedies, and clinical team messaging.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="selectRoleFromModal('Patient')" style="padding: 5px 14px; font-size: 0.78rem;">
+            <i class="fa-solid fa-check"></i> Activate Patient Role
+          </button>
+        </div>
+
+        <div class="role-card-grid">
+          <div class="role-box access">
+            <div class="role-box-title" style="color: #6ee7b7;"><i class="fa-solid fa-key"></i> Required System Access</div>
+            <div class="role-tag-list">
+              <span class="role-tag green"><a href="/portal/patient" style="color:inherit; text-decoration:none;">Personal Patient Health Portal</a></span>
+              <span class="role-tag green">Plain-English Diagnostic Summaries</span>
+              <span class="role-tag green">Upcoming Appointment Schedule</span>
+              <span class="role-tag green"><a href="/wellbeing" style="color:inherit; text-decoration:none;">Supportive Care &amp; Nutrition Guidelines</a></span>
+            </div>
+          </div>
+
+          <div class="role-box treatment">
+            <div class="role-box-title" style="color: #67e8f9;"><i class="fa-solid fa-hand-holding-medical"></i> Authorized Actions (What they can do)</div>
+            <div class="role-tag-list">
+              <span class="role-tag cyan">Home Care &amp; Oral Medication Adherence</span>
+              <span class="role-tag cyan">Daily Vital Signs &amp; Symptom Diary Logging</span>
+              <span class="role-tag cyan">Direct Secure Inquiries to Oncology Care Team</span>
+              <span class="role-tag cyan">Prescription Refill Requests</span>
+              <span class="role-tag cyan">Viewing Stage-Specific Nutrition &amp; Recovery Protocols</span>
+            </div>
+          </div>
+
+          <div class="role-box limitations">
+            <div class="role-box-title" style="color: #fda4af;"><i class="fa-solid fa-ban"></i> Scope Limitations</div>
+            <div class="role-tag-list">
+              <span class="role-tag rose">Read-only access to clinical health record</span>
+              <span class="role-tag rose">Cannot access other patients' confidential records</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="padding: 14px 24px; background: rgba(6, 11, 24, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <span style="font-size: 0.75rem; color: #64748b;">
+        <i class="fa-solid fa-shield-halved"></i> HIPAA Security Rule &bull; MediScan Role-Based Clinical Privilege Engine
+      </span>
+      <div style="display: flex; gap: 8px;">
+        <a href="/login" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.78rem;">
+          <i class="fa-solid fa-user-doctor"></i> Separate Doctor Login
+        </a>
+        <button type="button" class="btn btn-primary" onclick="closeRoleScopeModal()" style="padding: 6px 16px; font-size: 0.78rem;">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/js/hospital_translate.js"></script>

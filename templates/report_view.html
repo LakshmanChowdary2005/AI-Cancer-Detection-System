@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MediScan AI — Patient Report</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body { background: #0b1220; }
+    .report-sheet {
+      max-width: 860px;
+      margin: 30px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .report-header {
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      color: #fff;
+      padding: 28px 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .report-header h1 { font-size: 1.5rem; margin: 0; display: flex; align-items: center; gap: 10px; }
+    .report-header p { margin: 6px 0 0; opacity: 0.9; font-size: 0.9rem; }
+    .report-body { padding: 32px 36px; color: #0f172a; }
+    .section-title {
+      font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: #2563eb; margin: 24px 0 12px; border-bottom: 2px solid #bfdbfe; padding-bottom: 6px;
+    }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .info-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; }
+    .info-box .label { font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .info-box .value { font-size: 1rem; font-weight: 700; color: #0f172a; word-break: break-word; }
+    .result-banner {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+      background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 20px 24px; margin: 16px 0;
+    }
+    .result-banner .classification { font-size: 1.35rem; font-weight: 800; color: #0f172a; }
+    .risk-badge { padding: 8px 16px; border-radius: 999px; font-weight: 800; font-size: 0.85rem; }
+    .risk-High { background: #fee2e2; color: #b91c1c; }
+    .risk-Moderate { background: #fef3c7; color: #b45309; }
+    .risk-Low { background: #dcfce7; color: #15803d; }
+    .scan-img { border-radius: 12px; max-width: 100%; max-height: 320px; border: 1px solid #e2e8f0; }
+    .explanation { background: #f8fafc; border-left: 4px solid #2563eb; padding: 16px 18px; border-radius: 8px; font-size: 0.95rem; line-height: 1.6; }
+    .footer-note { text-align: center; color: #94a3b8; font-size: 0.8rem; padding: 20px 36px; border-top: 1px solid #e2e8f0; }
+    .report-url { background: #f1f5f9; border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; word-break: break-all; color: #334155; }
+    .btn-print { background: #2563eb; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+    .btn-print:hover { background: #1d4ed8; }
+    .danger-alert { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 14px 18px; border-radius: 10px; font-weight: 700; margin: 16px 0; }
+.qr-foot { text-align: center; margin-top: 20px; }
+    .qr-foot img { width: 110px; height: 110px; }
+    .lang-picker { position: relative; display: inline-block; }
+    .lang-picker-btn { background: #2563eb; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+    .lang-picker-btn:hover { background: #1d4ed8; }
+    .lang-picker-menu { position: absolute; right: 0; top: calc(100% + 8px); background: #ffffff; border: 1px solid #e2e8f0; min-width: 180px; box-shadow: 0 6px 18px rgba(0,0,0,0.15); border-radius: 8px; z-index: 60; display: none; }
+    .lang-option { padding: 8px 12px; cursor: pointer; font-size: 0.92rem; color: #0f172a; }
+    .lang-option:hover { background: #f1f5f9; }
+    .lang-option.active { background: #eff6ff; font-weight: 700; }
+    .btn-voice { background: #0ea5e9; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+    .btn-voice:hover { background: #0284c7; }
+    .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    {% if report %}
+    <div class="report-sheet">
+      <div class="report-header">
+        <div>
+          <div style="font-size:0.75rem; letter-spacing:1.2px; text-transform:uppercase; color:#bae6fd; font-weight:800; margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+            <i class="fa-solid fa-hospital"></i> Memorial Oncology Health System &bull; EMR Verified Record
+          </div>
+          <h1><i class="fa-solid fa-dna"></i> MediScan AI</h1>
+          <p>{{ tr.get('subtitle', 'AI-Powered Multi-Cancer Diagnostic Report') }}</p>
+        </div>
+<div class="header-actions">
+          <div class="lang-picker" id="langPicker">
+            <button type="button" class="lang-picker-btn" id="langPickerBtn"><span class="arrow">▾</span></button>
+            <div class="lang-picker-menu" id="langPickerMenu">
+              <div class="lang-option" data-lang="en">English</div>
+              <div class="lang-option" data-lang="hi">Hindi (हिन्दी)</div>
+              <div class="lang-option" data-lang="te">Telugu (తెలుగు)</div>
+              <div class="lang-option" data-lang="ta">Tamil (தமிழ்)</div>
+              <div class="lang-option" data-lang="kn">Kannada (ಕನ್ನಡ)</div>
+              <div class="lang-option" data-lang="ml">Malayalam (മലയാളം)</div>
+              <div class="lang-option" data-lang="bn">Bengali (বাংলা)</div>
+              <div class="lang-option" data-lang="ar">Arabic (العربية)</div>
+              <div class="lang-option" data-lang="es">Spanish (Español)</div>
+              <div class="lang-option" data-lang="fr">French (Français)</div>
+              <div class="lang-option" data-lang="de">German (Deutsch)</div>
+            </div>
+          </div>
+          <button class="btn-voice" id="voiceBtn" type="button"><i class="fa-solid fa-volume-high"></i> {{ tr.get('voice_assistant', 'Voice Assistant') }}</button>
+          <a href="/interactions?patient_id={{ report.patient_id }}&cancer_type={{ report.cancer_type }}" class="btn-voice" style="background:#f59e0b; text-decoration:none; display:inline-flex; align-items:center; gap:6px;"><i class="fa-solid fa-pills"></i> Drug Interactions</a>
+          <button class="btn-print" onclick="window.print()"><i class="fa-solid fa-print"></i> {{ tr.get('print_save_pdf', 'Print / Save PDF') }}</button>
+        </div>
+      </div>
+
+      <div class="report-body">
+        <div class="section-title">{{ tr.get('patient_information', 'Patient Information') }}</div>
+        <div class="info-grid">
+          <div class="info-box"><div class="label">{{ tr.get('patient_name', 'Patient Name') }}</div><div class="value">{{ report.patient_name }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('patient_id', 'Patient ID') }}</div><div class="value">{{ report.patient_id }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('age_gender', 'Age / Gender') }}</div><div class="value">{{ report.patient_age }} / {{ report.patient_gender }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('patient_email', 'Email') }}</div><div class="value">{{ report.patient_email }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('report_id', 'Report ID') }}</div><div class="value">{{ report.report_id }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('generated_on', 'Generated On') }}</div><div class="value">{{ formatted_date }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('last_visit', 'Last Visit') }}</div><div class="value">{{ report.last_visit_date }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('next_visit', 'Next Visit') }}</div><div class="value" style="color:#2563eb;">{{ report.next_visit_date }}</div></div>
+        </div>
+
+        <div class="section-title">{{ tr.get('findings_header', 'AI Diagnostic Findings') }}</div>
+        <div class="result-banner">
+          <div>
+            <div class="label" style="font-size:0.75rem; color:#64748b; text-transform:uppercase;">{{ tr.get('classification', 'Classification') }}</div>
+            <div class="classification">{{ report.label }}</div>
+            <div style="margin-top:6px; font-size:0.9rem; color:#475569;">
+              <b>{{ tr.get('confidence', 'Confidence') }}:</b> {{ report.confidence_pct }}% &nbsp;•&nbsp; <b>{{ tr.get('stage_severity', 'Stage') }}:</b> {{ report.stage }}
+            </div>
+          </div>
+          <span class="risk-badge risk-{{ report.risk }}">{{ report.risk_display }}</span>
+        </div>
+
+        {% if report.risk == 'High' %}
+        <div class="danger-alert"><i class="fa-solid fa-triangle-exclamation"></i> {{ tr.get('high_risk_alert', 'URGENT CLINICAL ALERT: High risk prediction detected. Immediate specialist review and confirmatory diagnostic workup is strongly recommended.') }}</div>
+        {% endif %}
+
+        <div class="info-grid">
+          <div class="info-box"><div class="label">{{ tr.get('scan_type', 'Scan Type') }}</div><div class="value">{{ report.cancer_type|upper }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('severity_score', 'Severity Score') }}</div><div class="value">{{ report.severity_score }}/100</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('auto_type', 'Auto Type') }}</div><div class="value">{{ report.auto_type|upper }}</div></div>
+          <div class="info-box"><div class="label">{{ tr.get('ensemble_vote', 'Ensemble Vote') }}</div><div class="value">{{ report.ensemble_type|upper }}</div></div>
+        </div>
+
+{% if report.image_path and report.image_path != 'None' %}
+        <div class="section-title">{{ tr.get('scan_attachment', 'Radiology Scan & AI Heatmap') }}</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-top:12px;">
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px; text-align:center;">
+            <div style="font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; font-weight:700;">{{ tr.get('original_scan', 'Original Scan') }}</div>
+            <img class="scan-img" src="/{{ report.image_path }}" alt="Patient scan" onerror="this.style.display='none';" />
+          </div>
+          {% if report.gradcam_image_base64 %}
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px; text-align:center;">
+            <div style="font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; font-weight:700;">{{ tr.get('ai_heatmap', 'AI Heatmap (Affected Area)') }}</div>
+            <img class="scan-img" src="data:image/png;base64,{{ report.gradcam_image_base64 }}" alt="AI heatmap" onerror="this.style.display='none';" />
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+<div class="section-title">{{ tr.get('explanation_header', 'Clinical Summary & Explainable AI Analysis') }}</div>
+        <div class="explanation">{{ report.explanation }}</div>
+
+        {% if report.multi_agent %}
+        <div id="multi-agent-report-section">
+        <div class="section-title">{{ tr.get('multi_agent_title', 'Multi-Agent AI Tumor Board — Clinical Second Opinion') }}</div>
+        {% set ma = report.multi_agent %}
+        {% set consensus = ma.consensus or {} %}
+        {% set board = ma.tumor_board or {} %}
+        {% set timeline = ma.timeline or {} %}
+        {% set plan = ma.treatment_plan or {} %}
+        {% set opinions = ma.opinions or {} %}
+
+<div style="background:#f8fafc; border:1px solid #e2e8f0; border-left:4px solid #dc2626; border-radius:10px; padding:16px 18px; margin-bottom:14px;">
+          <div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-scale-balanced" style="color:#dc2626;"></i> {{ consensus.role or tr.get('final_ai_aggregator', 'Final AI Aggregator — Consensus') }}
+            {% if consensus.urgency %}<span style="margin-left:auto; font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:999px; color:#fff; background:{{ '#dc2626' if consensus.urgency == 'URGENT' else '#d97706' if consensus.urgency == 'Prioritized' else '#16a34a' }};">{{ consensus.urgency }}</span>{% endif %}
+          </div>
+          {% if consensus.overall_recommendation %}<p style="font-size:0.92rem; line-height:1.6; margin:0 0 6px;">{{ consensus.overall_recommendation }}</p>{% endif %}
+          {% if consensus.recommended_specialist %}<p style="font-size:0.85rem; color:#475569; margin:0 0 4px;"><strong>{{ tr.get('recommended_specialist', 'Recommended Specialist') }}:</strong> {{ consensus.recommended_specialist }}</p>{% endif %}
+          {% if consensus.hospital_recommendation %}<p style="font-size:0.85rem; color:#475569; margin:0 0 4px;">{{ consensus.hospital_recommendation }}</p>{% endif %}
+          {% if consensus.agents_in_agreement is not none %}<p style="font-size:0.82rem; color:#64748b; margin:0;">{{ tr.get('agreement', 'Agreement') }}: {{ consensus.agents_in_agreement }} / {{ consensus.total_agents }} {{ tr.get('agents', 'agents') if tr.get('agents') else 'agents' }}</p>{% endif %}
+        </div>
+
+        {% for key in ['radiologist','oncologist','surgeon','pharmacologist','lifestyle'] %}
+        {% set agent = opinions.get(key) %}
+        {% if agent %}
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:12px;">
+          <div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">
+            <i class="{{ agent.icon or 'fa-solid fa-user-doctor' }}" style="color:{{ agent.color or '#2563eb' }};"></i> {{ agent.role or key }}
+          </div>
+          {% if agent.opinion %}<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px;">{{ agent.opinion }}</p>{% endif %}
+          {% if agent.findings %}
+          <ul style="margin:0 0 8px; padding-left:18px; font-size:0.85rem; color:#475569;">
+            {% for f in agent.findings %}<li style="margin-bottom:3px;">{{ f }}</li>{% endfor %}
+          </ul>
+          {% endif %}
+{% if agent.recommendations %}
+          <div style="font-size:0.85rem;">
+            <strong style="color:#2563eb;">{{ tr.get('recommendations', 'Recommendations') }}:</strong>
+            <ul style="margin:4px 0 0; padding-left:18px;">
+              {% for r in agent.recommendations %}<li style="margin-bottom:3px;">{{ r }}</li>{% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        {% if board.case_summary or board.treatment_options %}
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:12px;">
+          <div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-users" style="color:#8b5cf6;"></i> {{ tr.get('ai_tumor_board', 'AI Tumor Board') }}</div>
+          {% if board.case_summary %}<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px;">{{ board.case_summary }}</p>{% endif %}
+          {% if board.ai_opinion %}<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px; color:#475569;">{{ board.ai_opinion }}</p>{% endif %}
+          {% if board.recommended_tests %}
+          <div style="font-size:0.85rem;"><strong style="color:#2563eb;">{{ tr.get('recommended_tests', 'Recommended Tests') }}:</strong><ul style="margin:4px 0 0; padding-left:18px;">{% for t in board.recommended_tests %}<li style="margin-bottom:3px;">{{ t }}</li>{% endfor %}</ul></div>
+          {% endif %}
+          {% if board.treatment_options %}
+          <div style="font-size:0.85rem; margin-top:6px;"><strong style="color:#2563eb;">{{ tr.get('treatment_options', 'Treatment Options (informational)') }}:</strong><ul style="margin:4px 0 0; padding-left:18px;">{% for t in board.treatment_options %}<li style="margin-bottom:3px;">{{ t }}</li>{% endfor %}</ul></div>
+          {% endif %}
+          {% if board.doctor_notes %}<p style="font-size:0.85rem; margin:8px 0 0; color:#475569;"><strong>{{ tr.get('doctor_notes', 'Doctor Notes') }}:</strong> {{ board.doctor_notes }}</p>{% endif %}
+        </div>
+        {% endif %}
+
+        {% if timeline.current or timeline.milestones %}
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:12px;">
+          <div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-timeline" style="color:#0ea5e9;"></i> {{ tr.get('ai_clinical_timeline', 'AI Clinical Timeline') }}</div>
+          {% if timeline.current %}<p style="font-size:0.88rem; margin:0 0 4px;">{{ timeline.current }}</p>{% endif %}
+          {% if timeline.prediction %}<p style="font-size:0.88rem; margin:0 0 4px;">{{ timeline.prediction }}</p>{% endif %}
+          {% if timeline.treatment %}<p style="font-size:0.88rem; margin:0 0 8px;">{{ timeline.treatment }}</p>{% endif %}
+          {% if timeline.milestones %}
+          {% for m in timeline.milestones %}
+          <div style="display:flex; gap:10px; margin-bottom:4px; font-size:0.85rem;"><strong style="min-width:90px; color:#2563eb;">{{ m.period }}</strong><span style="color:#475569;">{{ m.detail }}</span></div>
+          {% endfor %}
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if plan.recommended_specialist or plan.next_appointment %}
+        <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:12px;">
+          <div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clipboard-list" style="color:#10b981;"></i> {{ tr.get('ai_treatment_planner', 'AI Treatment Planner') }}</div>
+          {% if plan.recommended_specialist %}<p style="font-size:0.88rem; margin:0 0 4px;"><strong>{{ tr.get('specialist', 'Specialist') }}:</strong> {{ plan.recommended_specialist }}</p>{% endif %}
+          {% if plan.next_appointment %}<p style="font-size:0.88rem; margin:0 0 4px;"><strong>{{ tr.get('next_appointment', 'Next Appointment') }}:</strong> {{ plan.next_appointment }}</p>{% endif %}
+          {% if plan.disclaimer %}<p style="font-size:0.78rem; margin:8px 0 0; color:#b91c1c;">{{ plan.disclaimer }}</p>{% endif %}
+        </div>
+        {% endif %}
+        </div>
+{% endif %}
+
+        {% set sg = report.stage_guidance %}
+        {% if sg %}
+        <div class="section-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <span><i class="fa-solid fa-heart-pulse text-accent"></i> {{ tr.get('stage_guidance_title', 'Stage-Based Supportive Remedies & Health Habits') }}</span>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #10b981; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 999px;">{{ report.stage or sg.stage }}</span>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #10b981; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px;">
+          <strong style="color: #0f172a; font-size: 0.95rem; display: block; margin-bottom: 4px;">{{ sg.stage_title }}</strong>
+          <p style="font-size: 0.88rem; color: #475569; line-height: 1.5; margin: 0;">{{ sg.clinical_goal }}</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 14px;">
+          <!-- Supportive Remedies -->
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; border-top: 3px solid #10b981;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: #047857; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-leaf"></i> {{ tr.get('supportive_remedies', 'Supportive Remedies') }}
+            </div>
+            <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: #334155; line-height: 1.55;">
+              {% for item in sg.remedies %}
+              <li style="margin-bottom: 6px;"><strong>{{ item.title }}:</strong> {{ item.desc }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Daily Health Habits -->
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; border-top: 3px solid #0ea5e9;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: #0284c7; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-person-walking"></i> {{ tr.get('daily_health_habits', 'Daily Health Habits') }}
+            </div>
+            <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: #334155; line-height: 1.55;">
+              {% for item in sg.health_habits %}
+              <li style="margin-bottom: 6px;"><strong>{{ item.title }}:</strong> {{ item.desc }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Nutrition & Hydration -->
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; border-top: 3px solid #f59e0b;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: #d97706; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-apple-whole"></i> {{ tr.get('nutrition_hydration', 'Nutrition & Hydration') }}
+            </div>
+            <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: #334155; line-height: 1.55;">
+              {% for item in sg.nutrition %}
+              <li style="margin-bottom: 6px;"><strong>{{ item.title }}:</strong> {{ item.desc }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Precautions & Habits to Avoid -->
+          <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; border-top: 3px solid #ef4444;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: #b91c1c; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-shield-halved"></i> {{ tr.get('precautions_avoid', 'Precautions & Habits to Strictly Avoid') }}
+            </div>
+            <ul style="margin: 0; padding-left: 18px; font-size: 0.85rem; color: #334155; line-height: 1.55;">
+              {% for item in sg.precautions %}
+              <li style="margin-bottom: 6px;"><strong>{{ item.title }}:</strong> {{ item.desc }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        {% if sg.organ_specific %}
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
+          <strong style="color: #1d4ed8; font-size: 0.88rem; display: block; margin-bottom: 6px;">
+            <i class="fa-solid fa-hospital-user"></i> {{ sg.organ_specific.title }}
+          </strong>
+          <ul style="margin: 0; padding-left: 18px; font-size: 0.84rem; color: #1e3a8a; line-height: 1.5;">
+            {% for g in sg.organ_specific.guidance %}
+            <li style="margin-bottom: 4px;">{{ g }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if sg.disclaimer %}
+        <p style="font-size: 0.78rem; color: #64748b; font-style: italic; margin: 0 0 16px; line-height: 1.4;">
+          {{ sg.disclaimer }}
+        </p>
+        {% endif %}
+        {% endif %}
+
+        <div class="section-title">{{ tr.get('verification_qr_code', 'Verification QR Code') }}</div>
+        <div class="qr-foot">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data={{ report_url|urlencode }}" alt="QR Code" />
+          <p style="font-size:0.8rem; color:#64748b; margin-top:8px;">{{ tr.get('scan_to_verify', 'Scan to verify this report online') }}</p>
+          <div class="report-url">🔗 {{ report_url }}</div>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        {{ tr.get('disclaimer', 'Disclaimer: MediScan AI is an artificial intelligence decision-support tool. It does not replace a definitive medical diagnosis by a licensed physician or pathologist.') }}
+      </div>
+    </div>
+    <script>
+    // Font map for Indic scripts
+    const fontMap = { 'te': 'sans-serif', 'hi': 'sans-serif', 'ta': 'sans-serif', 'kn': 'sans-serif', 'ml': 'sans-serif', 'bn': 'sans-serif', 'ar': 'sans-serif' };
+
+    const langPickerBtn = document.getElementById('langPickerBtn');
+    const langPickerMenu = document.getElementById('langPickerMenu');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const explanationEl = document.querySelector('.explanation');
+    let reportLang = {{ lang|tojson }};
+    let originalExplanation = '';
+
+    // Store original explanation text
+    if (explanationEl) originalExplanation = explanationEl.textContent.trim();
+
+    function getSpeechLocale(lang) {
+      const map = { en: 'en-US', hi: 'hi-IN', te: 'te-IN', ta: 'ta-IN', bn: 'bn-BD', kn: 'kn-IN', ml: 'ml-IN', ar: 'ar-SA', es: 'es-ES', fr: 'fr-FR', de: 'de-DE' };
+      return map[lang] || 'en-US';
+    }
+
+    function setActiveLang(lang) {
+      const opts = Array.from(langPickerMenu.querySelectorAll('.lang-option'));
+      opts.forEach(o => o.classList.toggle('active', o.dataset.lang === lang));
+      const btnLabel = opts.find(o => o.dataset.lang === lang)?.textContent || 'English';
+      langPickerBtn.innerHTML = btnLabel + ' <span class="arrow">▾</span>';
+    }
+
+    // Set the active language on page load (server-side rendered).
+    setActiveLang(reportLang);
+
+    // Toggle menu
+    if (langPickerBtn) {
+      langPickerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const showing = langPickerMenu.style.display === 'block';
+        langPickerMenu.style.display = showing ? 'none' : 'block';
+      });
+    }
+
+    // Option click -> reload the ENTIRE page in the selected language so ALL
+    // labels + values are server-side localized (not just the explanation).
+    langPickerMenu.addEventListener('click', (e) => {
+      const opt = e.target.closest('.lang-option');
+      if (!opt) return;
+      const lang = opt.dataset.lang;
+      if (lang === reportLang) {
+        langPickerMenu.style.display = 'none';
+        return;
+      }
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', lang);
+      window.location.href = url.toString();
+    });
+
+    // Re-render the Multi-Agent AI Tumor Board in the selected language by
+    // fetching the server-side localized bundle. Static headings/roles come
+    // from the built-in translation dictionary; dynamic text is translated at
+    // runtime (best effort, gracefully falling back to English).
+    async function translateMultiAgentReportSection(lang) {
+      const section = document.getElementById('multi-agent-report-section');
+      if (!section) return;
+      const langCode = lang || reportLang || 'en';
+      const reportId = {{ report.report_id|tojson }};
+      if (langCode === 'en') {
+        // English master copy is already rendered server-side — reload to reset.
+        window.location.reload();
+        return;
+      }
+      try {
+        const res = await fetch('/api/translate_multi_agent/' + reportId + '?lang=' + langCode);
+        if (!res.ok) throw new Error('Translation API error');
+        const j = await res.json();
+        if (!j.multi_agent) return;
+        const ma = j.multi_agent;
+        const L = ma._labels || {};
+        const lbl = (key, fallback) => L[key] || fallback;
+        const consensus = ma.consensus || {};
+        const board = ma.tumor_board || {};
+        const timeline = ma.timeline || {};
+        const plan = ma.treatment_plan || {};
+        const opinions = ma.opinions || {};
+
+        let html = '';
+        html += '<div class="section-title">' + (lbl('multi_agent_title', 'Multi-Agent AI Tumor Board — Clinical Second Opinion')) + '</div>';
+
+        // Final AI Aggregator / Consensus
+        html += '<div style="background:#f8fafc; border:1px solid #e2e8f0; border-left:4px solid #dc2626; border-radius:10px; padding:16px 18px; margin-bottom:14px;">';
+        html += '<div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">';
+        html += '<i class="fa-solid fa-scale-balanced" style="color:#dc2626;"></i> ' + (consensus.role || lbl('final_ai_aggregator', 'Final AI Aggregator — Consensus'));
+        if (consensus.urgency) {
+          const bg = consensus.urgency === 'URGENT' ? '#dc2626' : (consensus.urgency === 'Prioritized' ? '#d97706' : '#16a34a');
+          html += '<span style="margin-left:auto; font-size:0.75rem; font-weight:800; padding:3px 10px; border-radius:999px; color:#fff; background:' + bg + ';">' + consensus.urgency + '</span>';
+        }
+        html += '</div>';
+        if (consensus.overall_recommendation) html += '<p style="font-size:0.92rem; line-height:1.6; margin:0 0 6px;">' + consensus.overall_recommendation + '</p>';
+        if (consensus.recommended_specialist) html += '<p style="font-size:0.85rem; color:#475569; margin:0 0 4px;"><strong>' + lbl('recommended_specialist', 'Recommended Specialist') + ':</strong> ' + consensus.recommended_specialist + '</p>';
+        if (consensus.hospital_recommendation) html += '<p style="font-size:0.85rem; color:#475569; margin:0 0 4px;">' + consensus.hospital_recommendation + '</p>';
+        if (consensus.agents_in_agreement != null) html += '<p style="font-size:0.82rem; color:#64748b; margin:0;">' + lbl('agreement', 'Agreement') + ': ' + consensus.agents_in_agreement + ' / ' + consensus.total_agents + ' agents</p>';
+        html += '</div>';
+
+        // Five AI personas
+        ['radiologist', 'oncologist', 'surgeon', 'pharmacologist', 'lifestyle'].forEach(key => {
+          const agent = opinions[key];
+          if (!agent) return;
+          html += '<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:12px;">';
+          html += '<div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;">';
+          html += '<i class="' + (agent.icon || 'fa-solid fa-user-doctor') + '" style="color:' + (agent.color || '#2563eb') + ';"></i> ' + (agent.role || key);
+          html += '</div>';
+          if (agent.opinion) html += '<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px;">' + agent.opinion + '</p>';
+          if (agent.findings && agent.findings.length) {
+            html += '<ul style="margin:0 0 8px; padding-left:18px; font-size:0.85rem; color:#475569;">';
+            agent.findings.forEach(f => { html += '<li style="margin-bottom:3px;">' + f + '</li>'; });
+            html += '</ul>';
+          }
+          if (agent.recommendations && agent.recommendations.length) {
+            html += '<div style="font-size:0.85rem;"><strong style="color:#2563eb;">' + lbl('recommendations', 'Recommendations') + ':</strong><ul style="margin:4px 0 0; padding-left:18px;">';
+            agent.recommendations.forEach(r => { html += '<li style="margin-bottom:3px;">' + r + '</li>'; });
+            html += '</ul></div>';
+          }
+          html += '</div>';
+        });
+
+        // Tumor Board
+        if (board.case_summary || board.treatment_options) {
+          html += '<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:12px;">';
+          html += '<div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-users" style="color:#8b5cf6;"></i> ' + (board.title || lbl('ai_tumor_board', 'AI Tumor Board')) + '</div>';
+          if (board.case_summary) html += '<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px;">' + board.case_summary + '</p>';
+          if (board.ai_opinion) html += '<p style="font-size:0.9rem; line-height:1.55; margin:0 0 8px; color:#475569;">' + board.ai_opinion + '</p>';
+          if (board.recommended_tests && board.recommended_tests.length) {
+            html += '<div style="font-size:0.85rem;"><strong style="color:#2563eb;">' + lbl('recommended_tests', 'Recommended Tests') + ':</strong><ul style="margin:4px 0 0; padding-left:18px;">';
+            board.recommended_tests.forEach(t => { html += '<li style="margin-bottom:3px;">' + t + '</li>'; });
+            html += '</ul></div>';
+          }
+          if (board.treatment_options && board.treatment_options.length) {
+            html += '<div style="font-size:0.85rem; margin-top:6px;"><strong style="color:#2563eb;">' + lbl('treatment_options', 'Treatment Options (informational)') + ':</strong><ul style="margin:4px 0 0; padding-left:18px;">';
+            board.treatment_options.forEach(t => { html += '<li style="margin-bottom:3px;">' + t + '</li>'; });
+            html += '</ul></div>';
+          }
+          if (board.doctor_notes) html += '<p style="font-size:0.85rem; margin:8px 0 0; color:#475569;"><strong>' + lbl('doctor_notes', 'Doctor Notes') + ':</strong> ' + board.doctor_notes + '</p>';
+          html += '</div>';
+        }
+
+        // Clinical Timeline
+        if (timeline.current || timeline.milestones) {
+          html += '<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:12px;">';
+          html += '<div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-timeline" style="color:#0ea5e9;"></i> ' + (timeline.title || lbl('ai_clinical_timeline', 'AI Clinical Timeline')) + '</div>';
+          if (timeline.current) html += '<p style="font-size:0.88rem; margin:0 0 4px;">' + timeline.current + '</p>';
+          if (timeline.prediction) html += '<p style="font-size:0.88rem; margin:0 0 4px;">' + timeline.prediction + '</p>';
+          if (timeline.treatment) html += '<p style="font-size:0.88rem; margin:0 0 8px;">' + timeline.treatment + '</p>';
+          if (timeline.milestones && timeline.milestones.length) {
+            timeline.milestones.forEach(m => {
+              html += '<div style="display:flex; gap:10px; margin-bottom:4px; font-size:0.85rem;"><strong style="min-width:90px; color:#2563eb;">' + m.period + '</strong><span style="color:#475569;">' + m.detail + '</span></div>';
+            });
+          }
+          html += '</div>';
+        }
+
+        // Treatment Planner
+        if (plan.recommended_specialist || plan.next_appointment) {
+          html += '<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; margin-bottom:12px;">';
+          html += '<div style="font-weight:800; color:#0f172a; margin-bottom:6px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-clipboard-list" style="color:#10b981;"></i> ' + (plan.title || lbl('ai_treatment_planner', 'AI Treatment Planner')) + '</div>';
+          if (plan.recommended_specialist) html += '<p style="font-size:0.88rem; margin:0 0 4px;"><strong>' + lbl('specialist', 'Specialist') + ':</strong> ' + plan.recommended_specialist + '</p>';
+          if (plan.next_appointment) html += '<p style="font-size:0.88rem; margin:0 0 4px;"><strong>' + lbl('next_appointment', 'Next Appointment') + ':</strong> ' + plan.next_appointment + '</p>';
+          if (plan.disclaimer) html += '<p style="font-size:0.78rem; margin:8px 0 0; color:#b91c1c;">' + plan.disclaimer + '</p>';
+          html += '</div>';
+        }
+
+        section.innerHTML = html;
+      } catch (err) {
+        console.warn('Multi-agent translation failed:', err);
+      }
+    }
+
+    // Close on outside click
+    document.addEventListener('click', () => { if (langPickerMenu) langPickerMenu.style.display = 'none'; });
+
+// Voice assistant — fetch a fully-localized voice summary so the browser TTS
+    // reads the ENTIRE report in the selected language (TTS can't read mixed scripts).
+    if (voiceBtn) {
+      voiceBtn.addEventListener('click', () => {
+        if (!window.speechSynthesis) { alert('Speech synthesis not supported in this browser.'); return; }
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+          voiceBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Voice Assistant';
+          return;
+        }
+        const reportId = {{ report.report_id|tojson }};
+        const lang = reportLang || 'en';
+        const speak = (text) => {
+          const utterance = new SpeechSynthesisUtterance(text);
+          const locale = getSpeechLocale(lang);
+          utterance.lang = locale;
+          utterance.rate = 0.95;
+          const voices = window.speechSynthesis.getVoices();
+          const voice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(locale.split('-')[0].toLowerCase())) || voices.find(v => v.lang === locale);
+          if (voice) utterance.voice = voice;
+          window.speechSynthesis.speak(utterance);
+          voiceBtn.innerHTML = '<i class="fa-solid fa-stop"></i> Stop';
+          utterance.onend = () => { voiceBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Voice Assistant'; };
+          utterance.onerror = () => { voiceBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> Voice Assistant'; };
+        };
+        // Fully-localized summary from the server.
+        fetch('/api/voice_summary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ report_id: reportId, lang })
+        })
+        .then(res => res.json())
+        .then(j => {
+          if (j.voice_summary) {
+            speak(j.voice_summary);
+          } else {
+            const displayedText = explanationEl ? explanationEl.textContent.trim() : originalExplanation;
+            speak(`Report. ${displayedText}`);
+          }
+        })
+        .catch(() => {
+          const displayedText = explanationEl ? explanationEl.textContent.trim() : originalExplanation;
+          speak(`Report. ${displayedText}`);
+        });
+      });
+    }
+
+    // Warm up the native voices list (loads asynchronously in many browsers).
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+    }
+    </script>
+{% else %}
+    <div class="report-sheet">
+      <div class="report-header">
+        <div>
+          <h1><i class="fa-solid fa-dna"></i> MediScan AI</h1>
+          <p>{{ tr.get('scan_to_verify', 'Report Verification') }}</p>
+        </div>
+      </div>
+      <div class="report-body" style="text-align:center; padding:60px 36px;">
+        <i class="fa-solid fa-circle-exclamation" style="font-size:3rem; color:#dc2626; margin-bottom:16px;"></i>
+        <h2 style="margin:0 0 10px;">{{ tr.get('invalid_or_expired', 'Invalid or Expired Report') }}</h2>
+        <p style="color:#64748b;">{{ tr.get('invalid_or_expired_message', 'The QR code you scanned does not match any active report in our system. Please contact your healthcare provider.') }}</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <script src="/static/js/hospital_live.js"></script>
+  <script src="/static/js/accessibility.js"></script>
+</body>
+</html>

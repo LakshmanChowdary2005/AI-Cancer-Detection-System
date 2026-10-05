@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Psycho-Oncology Hub & Cancer Coping Companion — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container">
+
+    <!-- Universal Header Navigation Bar -->
+    <header class="header-bar">
+      <a href="/" class="brand-section">
+        <div class="brand-logo" style="background: linear-gradient(135deg, #ec4899 0%, #f43f5e 100%);">
+          <i class="fa-solid fa-heart-pulse"></i>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1>Psycho-Oncology &amp; Supportive Palliative Suite</h1>
+            <span class="brand-status-chip" style="color: #ec4899; background: rgba(236, 72, 153, 0.12); border-color: rgba(236, 72, 153, 0.3);"><span class="dot" style="background: #ec4899; box-shadow: 0 0 8px #ec4899;"></span> 24/7 CRISIS CARE &bull; ON-CALL</span>
+          </div>
+          <p>NCCN Cancer Distress Thermometer, Scanxiety Pacer &amp; Clinical Psycho-Oncology Counseling</p>
+        </div>
+      </a>
+      <div class="header-nav-wrap">
+        <nav class="nav-actions">
+          <a class="nav-link" href="/"><i class="fa-solid fa-stethoscope"></i> <span>Diagnostic</span></a>
+          <a class="nav-link" href="/preventive"><i class="fa-solid fa-shield-halved"></i> <span>Preventive</span></a>
+          <a class="nav-link" href="/monitoring"><i class="fa-solid fa-chart-line"></i> <span>Monitoring</span></a>
+          <a class="nav-link" href="/workflows"><i class="fa-solid fa-network-wired"></i> <span>Workflows</span></a>
+          <a class="nav-link active" href="/wellbeing"><i class="fa-solid fa-heart-pulse"></i> <span>Wellbeing</span></a>
+          <a class="nav-link" href="/interactions"><i class="fa-solid fa-pills"></i> <span>Interactions</span></a>
+        </nav>
+        <button class="theme-toggle-btn" id="themeToggle" type="button" title="Switch Theme (Light / Dark)">
+          <i class="fa-solid fa-moon"></i> <span>Dark</span>
+        </button>
+        {% if session.get('doctor_logged_in') %}
+          <a class="nav-portal-btn active" href="/dashboard"><i class="fa-solid fa-user-doctor"></i> <span>Dashboard</span></a>
+          <a class="nav-portal-btn" href="/logout" style="color: var(--danger); border-color: rgba(255, 77, 109, 0.4);" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></a>
+        {% else %}
+          <a class="nav-portal-btn" href="/login"><i class="fa-solid fa-user-doctor"></i> <span>Doctor Portal</span></a>
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- Target Cancer Filter Selector Bar -->
+    <div style="background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.85rem; font-weight: 700; color: #ec4899; text-transform: uppercase;">
+          <i class="fa-solid fa-ribbon"></i> Psycho-Oncology Cancer Focus:
+        </span>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="wellbeingCancerPills">
+        <button class="a11y-opt-btn wb-pill active" data-cancer="all"><i class="fa-solid fa-dna"></i> All Oncology</button>
+        <button class="a11y-opt-btn wb-pill" data-cancer="lung"><i class="fa-solid fa-lungs"></i> Lung Cancer</button>
+        <button class="a11y-opt-btn wb-pill" data-cancer="breast"><i class="fa-solid fa-ribbon"></i> Breast Cancer</button>
+        <button class="a11y-opt-btn wb-pill" data-cancer="skin"><i class="fa-solid fa-sun"></i> Skin / Melanoma</button>
+        <button class="a11y-opt-btn wb-pill" data-cancer="brain"><i class="fa-solid fa-brain"></i> Brain Tumors</button>
+      </div>
+    </div>
+
+    <!-- Top KPI Highlights -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;">
+          <i class="fa-solid fa-heart-circle-bolt"></i>
+        </div>
+        <div class="stat-info">
+          <h3>NCCN Oncology</h3>
+          <p>Validated Cancer Distress Scale</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(53, 208, 184, 0.15); color: #35d0b8;">
+          <i class="fa-solid fa-wind"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Box Breathing</h3>
+          <p>Scanxiety Vagal Deceleration Pacer</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+          <i class="fa-solid fa-hand-holding-heart"></i>
+        </div>
+        <div class="stat-info">
+          <h3>Cancer Coping AI</h3>
+          <p>Brain, Breast, Lung & Skin Guidance</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+          <i class="fa-solid fa-phone-volume"></i>
+        </div>
+        <div class="stat-info">
+          <h3>24/7 Cancer Lines</h3>
+          <p>Free Psycho-Oncology Navigators</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Two-Column Layout -->
+    <div class="main-grid">
+
+      <!-- Column Left: NCCN Cancer Distress Screener & Mindful Breath Pacer -->
+      <div>
+        
+        <!-- NCCN Distress Thermometer (Cancer-Specific) -->
+        <div class="panel-card mb-4">
+          <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="panel-tag" style="background:rgba(236,72,153,0.15); color:#ec4899;">NCCN Oncology Instrument</span>
+              <h2 class="panel-heading"><i class="fa-solid fa-temperature-three-quarters text-danger"></i> NCCN Cancer Distress Thermometer</h2>
+              <p class="panel-subtext">How much distress have you felt regarding your cancer diagnosis, scan results, or treatment this past week?</p>
+            </div>
+            <button class="speak-text-btn" id="speakDistressBtn" type="button"><i class="fa-solid fa-volume-high"></i> Read</button>
+          </div>
+
+          <div class="panel-body">
+            <div class="distress-slider-wrapper">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span style="font-size:0.88rem; font-weight:600; color:var(--text-secondary);">Reported Oncology Distress:</span>
+                <span id="distressValueDisplay" style="font-size:1.8rem; font-weight:800; font-family:'Outfit',sans-serif; color:#fbbf24;">3 / 10</span>
+              </div>
+              <input type="range" min="0" max="10" value="3" class="custom-range-slider" id="distressRangeInput" />
+              <div class="distress-meter-bar">
+                <span>0 (No Distress)</span>
+                <span>4 (Moderate)</span>
+                <span>7 (Clinical Referral)</span>
+                <span>10 (Extreme)</span>
+              </div>
+            </div>
+
+            <!-- Specific Cancer Problem Domains Checklist -->
+            <div style="margin-top:16px;">
+              <label class="form-label"><i class="fa-solid fa-list-check text-accent"></i> Identify Oncology-Specific Concerns Contributing to Your Distress:</label>
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:8px;">
+                <label class="caution-item" style="padding:8px 12px; font-size:0.84rem;">
+                  <input type="checkbox" name="distressProblem" value="Scanxiety / Fear of Scan & Biopsy Results" checked /> 
+                  <span><strong>Scanxiety:</strong> Fear of Upcoming Scan/Biopsy</span>
+                </label>
+                <label class="caution-item" style="padding:8px 12px; font-size:0.84rem;">
+                  <input type="checkbox" name="distressProblem" value="Chemotherapy & Radiation Exhaustion" /> 
+                  <span><strong>Chemo Exhaustion:</strong> Intractable Fatigue</span>
+                </label>
+                <label class="caution-item" style="padding:8px 12px; font-size:0.84rem;">
+                  <input type="checkbox" name="distressProblem" value="Fear of Cancer Recurrence (FCR)" /> 
+                  <span><strong>Recurrence Fear:</strong> Fear of Tumor Return</span>
+                </label>
+                <label class="caution-item" style="padding:8px 12px; font-size:0.84rem;">
+                  <input type="checkbox" name="distressProblem" value="Brain Tumor Cognitive Shifts / Memory" /> 
+                  <span><strong>Brain Fog / Cognition:</strong> Memory Strain</span>
+                </label>
+                <label class="caution-item" style="padding:8px 12px; font-size:0.84rem;">
+                  <input type="checkbox" name="distressProblem" value="Body Image / Mastectomy / Surgical Scars" /> 
+                  <span><strong>Body Image:</strong> Mastectomy / Surgical Scars</span>
+                </label>
+                <label class="caution-item" style="padding:8px 12px; font-size:0.84rem;">
+                  <input type="checkbox" name="distressProblem" value="Caregiver Burnout in Oncology" /> 
+                  <span><strong>Caregiver Burnout:</strong> Compassion Fatigue</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="evaluateDistressBtn" style="width:100%; margin-top:16px; padding:12px;">
+              <i class="fa-solid fa-stethoscope"></i> Evaluate Cancer Distress & Generate Psycho-Oncology Plan
+            </button>
+
+            <!-- Distress Recommendation Result Box -->
+            <div id="distressResultBox" style="display:none; margin-top:16px; padding:14px; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(255,255,255,0.02);">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong style="font-size:0.9rem;" id="distressOutcomeTitle">Psycho-Oncology Triage Level</strong>
+                <span class="badge badge-warning" id="distressOutcomeBadge">Moderate</span>
+              </div>
+              <p style="font-size:0.82rem; color:var(--text-secondary); margin-top:6px;" id="distressOutcomeText"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mindful Breathing Pacer for "Scanxiety" -->
+        <div class="panel-card">
+          <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="panel-tag" style="background:rgba(53,208,184,0.15); color:var(--accent);">Somatic Grounding</span>
+              <h2 class="panel-heading"><i class="fa-solid fa-wind text-accent"></i> Mindful Breath Pacer for "Scanxiety"</h2>
+              <p class="panel-subtext">Calibrate autonomic vagal tone before MRI/CT scanner entry or while awaiting biopsy results.</p>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="a11y-opt-btn breath-mode-btn active" data-mode="box">Box (4-4-4-4)</button>
+              <button class="a11y-opt-btn breath-mode-btn" data-mode="calm">4-7-8 Deep Calm</button>
+            </div>
+          </div>
+
+          <div class="panel-body breath-pacer-box">
+            <div class="mandala-circle" id="breathCircle">
+              <div class="breath-phase-text" id="breathPhaseText">Ready</div>
+              <div class="breath-timer-count" id="breathCount">--</div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:10px;">
+              <button class="btn btn-primary" id="startBreathBtn" style="padding:10px 24px;">
+                <i class="fa-solid fa-play"></i> Start Breath Pacing
+              </button>
+              <button class="btn btn-secondary" id="stopBreathBtn" style="padding:10px 20px;">
+                <i class="fa-solid fa-stop"></i> Stop
+              </button>
+            </div>
+
+            <p style="font-size:0.78rem; color:var(--muted-light); margin-top:16px; max-width:440px;">
+              <i class="fa-solid fa-circle-info text-accent"></i> Inhale deeply through the nose as the circle expands; hold without straining; exhale slowly through pursed lips as it contracts.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column Right: AI Psycho-Oncology Coping Companion & Helplines -->
+      <div>
+        
+        <!-- AI Compassionate Coping Assistant -->
+        <div class="panel-card mb-4">
+          <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="panel-tag" style="background:rgba(59,130,246,0.15); color:#3b82f6;">Psycho-Oncology AI</span>
+              <h2 class="panel-heading"><i class="fa-solid fa-hand-holding-heart text-accent"></i> Cancer Coping AI Companion</h2>
+            </div>
+            <button class="speak-text-btn" id="speakChatReplyBtn" type="button"><i class="fa-solid fa-volume-high"></i> Read Reply</button>
+          </div>
+
+          <div class="coping-chat-container">
+            <div class="coping-chat-messages" id="chatMessages">
+              <div class="chat-bubble bot">
+                <strong>MediScan Psycho-Oncology Companion:</strong><br />
+                Hello. Facing cancer—whether Brain, Breast, Lung, or Skin—evokes profound vulnerability, fear, and fatigue. I am here to offer evidence-based psycho-oncology coping strategies, scanxiety mitigation, and validating reassurance. What feels heaviest today?
+              </div>
+            </div>
+
+            <!-- Cancer Topic Quick Select Buttons -->
+            <div class="chat-quick-tags">
+              <button class="quick-tag-btn" data-msg="I am terrified while waiting for my scan results (Scanxiety)">
+                💙 Waiting for Scan Results (Scanxiety)
+              </button>
+              <button class="quick-tag-btn" data-msg="How do I cope with Brain Tumor cognitive shifts and uncertainty?">
+                🧠 Brain Tumor & Cognitive Fatigue
+              </button>
+              <button class="quick-tag-btn" data-msg="How do I manage body image changes and scars after breast cancer surgery?">
+                🎗️ Breast Cancer Surgery & Body Image
+              </button>
+              <button class="quick-tag-btn" data-msg="How do I cope with Lung Cancer breathlessness, stigma, and anxiety?">
+                🫁 Lung Cancer Stigma & Breathlessness
+              </button>
+              <button class="quick-tag-btn" data-msg="How do I overcome constant fear of melanoma recurrence and sun anxiety?">
+                ☀️ Melanoma Recurrence Fear
+              </button>
+              <button class="quick-tag-btn" data-msg="How can I manage severe chemotherapy fatigue?">
+                🌿 Chemotherapy Exhaustion
+              </button>
+            </div>
+
+            <!-- Input Bar -->
+            <div class="chat-input-bar">
+              <input type="text" id="chatInput" class="form-input" placeholder="Ask for oncology coping advice, scan anxiety management..." />
+              <button class="btn btn-primary" id="chatSendBtn" type="button" style="padding:10px 18px;">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 24/7 Cancer Support Helplines Directory -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <span class="panel-tag" style="background:rgba(251,191,36,0.15); color:#fbbf24;">Verified Oncology Helplines</span>
+            <h2 class="panel-heading"><i class="fa-solid fa-phone-volume text-warning"></i> 24/7 Cancer Crisis & Support Lines</h2>
+            <p class="panel-subtext">Free, confidential professional psycho-oncology counseling available 24 hours a day.</p>
+          </div>
+
+          <div class="panel-body" style="display:flex; flex-direction:column; gap:10px;">
+            {% for h in helplines %}
+              <div style="padding:12px 14px; border-radius:var(--radius-sm); background:rgba(255,255,255,0.02); border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size:0.75rem; color:var(--muted-light);"><i class="fa-solid fa-globe"></i> {{ h.region }}</div>
+                  <strong style="font-size:0.9rem; color:var(--text);">${{ h.name }}</strong>
+                  <div style="font-size:0.82rem; color:var(--accent); font-weight:600; margin-top:2px;">{{ h.contact }}</div>
+                </div>
+                <span class="badge badge-success" style="font-size:0.7rem;">{{ h.badge }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/accessibility.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Cancer focus selector pills
+      const cancerPills = document.querySelectorAll('.wb-pill');
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCancer = urlParams.get('cancer_type');
+
+      if (urlCancer) {
+        cancerPills.forEach(p => p.classList.toggle('active', p.dataset.cancer === urlCancer));
+      }
+
+      cancerPills.forEach(p => {
+        p.addEventListener('click', () => {
+          cancerPills.forEach(b => b.classList.remove('active'));
+          p.classList.add('active');
+          const ctype = p.dataset.cancer;
+          if (ctype === 'brain') {
+            sendChatMessage("How do I cope with Brain Tumor cognitive shifts and uncertainty?");
+          } else if (ctype === 'breast') {
+            sendChatMessage("How do I manage body image changes and scars after breast cancer surgery?");
+          } else if (ctype === 'lung') {
+            sendChatMessage("How do I cope with Lung Cancer breathlessness, stigma, and anxiety?");
+          } else if (ctype === 'skin') {
+            sendChatMessage("How do I overcome constant fear of melanoma recurrence and sun anxiety?");
+          }
+        });
+      });
+
+      // 1. Distress Thermometer
+      const range = document.getElementById('distressRangeInput');
+      const display = document.getElementById('distressValueDisplay');
+      const evalBtn = document.getElementById('evaluateDistressBtn');
+      const resultBox = document.getElementById('distressResultBox');
+      const outcomeBadge = document.getElementById('distressOutcomeBadge');
+      const outcomeText = document.getElementById('distressOutcomeText');
+
+      range.addEventListener('input', () => {
+        const val = parseInt(range.value);
+        display.innerText = `${val} / 10`;
+        if (val >= 7) display.style.color = '#ff4d6d';
+        else if (val >= 4) display.style.color = '#fbbf24';
+        else display.style.color = '#10b981';
+      });
+
+      evalBtn.addEventListener('click', async () => {
+        const score = parseInt(range.value);
+        const problems = Array.from(document.querySelectorAll('input[name="distressProblem"]:checked')).map(c => c.value);
+
+        try {
+          const res = await fetch('/api/wellbeing/assess', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ distress_score: score, problems: problems })
+          });
+          const data = await res.json();
+          if (data.success) {
+            const ev = data.result;
+            resultBox.style.display = 'block';
+            outcomeBadge.className = `badge ${ev.badge_class}`;
+            outcomeBadge.innerText = `${ev.severity} (${ev.score}/10)`;
+            outcomeText.innerText = ev.recommendation;
+
+            document.getElementById('speakDistressBtn').dataset.text = 
+              `Cancer distress thermometer score is ${ev.score} out of 10. ${ev.severity}. ${ev.recommendation}`;
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      // 2. Mindful Breath Pacer
+      const circle = document.getElementById('breathCircle');
+      const phaseText = document.getElementById('breathPhaseText');
+      const countText = document.getElementById('breathCount');
+      const startBtn = document.getElementById('startBreathBtn');
+      const stopBtn = document.getElementById('stopBreathBtn');
+
+      let breathInterval = null;
+      let breathMode = 'box';
+      let phaseIdx = 0;
+      let counter = 4;
+
+      const BOX_PHASES = [
+        { name: 'Inhale', duration: 4, cls: 'inhale' },
+        { name: 'Hold', duration: 4, cls: 'hold' },
+        { name: 'Exhale', duration: 4, cls: 'exhale' },
+        { name: 'Hold', duration: 4, cls: 'hold' }
+      ];
+
+      const CALM_PHASES = [
+        { name: 'Inhale', duration: 4, cls: 'inhale' },
+        { name: 'Hold Deeply', duration: 7, cls: 'hold' },
+        { name: 'Exhale Slowly', duration: 8, cls: 'exhale' }
+      ];
+
+      function tickBreath() {
+        const phases = breathMode === 'box' ? BOX_PHASES : CALM_PHASES;
+        const currentPhase = phases[phaseIdx];
+
+        phaseText.innerText = currentPhase.name;
+        countText.innerText = counter;
+        circle.className = `mandala-circle ${currentPhase.cls}`;
+
+        counter--;
+        if (counter < 1) {
+          phaseIdx = (phaseIdx + 1) % phases.length;
+          counter = phases[phaseIdx].duration;
+        }
+      }
+
+      startBtn.addEventListener('click', () => {
+        if (breathInterval) clearInterval(breathInterval);
+        const phases = breathMode === 'box' ? BOX_PHASES : CALM_PHASES;
+        phaseIdx = 0;
+        counter = phases[0].duration;
+        tickBreath();
+        breathInterval = setInterval(tickBreath, 1000);
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-flex';
+      });
+
+      stopBtn.addEventListener('click', () => {
+        if (breathInterval) clearInterval(breathInterval);
+        breathInterval = null;
+        circle.className = 'mandala-circle';
+        phaseText.innerText = 'Ready';
+        countText.innerText = '--';
+        startBtn.style.display = 'inline-flex';
+        stopBtn.style.display = 'none';
+      });
+
+      document.querySelectorAll('.breath-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.breath-mode-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          breathMode = btn.dataset.mode;
+          if (breathInterval) {
+            stopBtn.click();
+            startBtn.click();
+          }
+        });
+      });
+
+      // 3. AI Coping Companion Chat
+      const chatMessages = document.getElementById('chatMessages');
+      const chatInput = document.getElementById('chatInput');
+      const chatSendBtn = document.getElementById('chatSendBtn');
+
+      async function sendChatMessage(msgText) {
+        if (!msgText.trim()) return;
+
+        const uBubble = document.createElement('div');
+        uBubble.className = 'chat-bubble user';
+        uBubble.innerText = msgText;
+        chatMessages.appendChild(uBubble);
+        chatInput.value = '';
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        const botBubble = document.createElement('div');
+        botBubble.className = 'chat-bubble bot';
+        botBubble.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Reflecting with compassionate psycho-oncology care...';
+        chatMessages.appendChild(botBubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        try {
+          const res = await fetch('/api/wellbeing/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msgText })
+          });
+          const data = await res.json();
+          if (data.success) {
+            const r = data.reply;
+            botBubble.innerHTML = `<strong>${r.title}:</strong><br />${r.response.replace(/\n/g, '<br />')}`;
+            document.getElementById('speakChatReplyBtn').dataset.text = `${r.title}. ${r.response}`;
+          } else {
+            botBubble.innerText = "I am listening. Please reach out to your oncology care team or helpline for immediate assistance.";
+          }
+        } catch (err) {
+          botBubble.innerText = "Network connection interrupted. Please try again or call the 24/7 helplines.";
+        }
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      chatSendBtn.addEventListener('click', () => sendChatMessage(chatInput.value));
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendChatMessage(chatInput.value);
+      });
+
+      document.querySelectorAll('.quick-tag-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sendChatMessage(btn.dataset.msg);
+        });
+      });
+    });
+  </script>
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_live.js"></script>
+</body>
+</html>

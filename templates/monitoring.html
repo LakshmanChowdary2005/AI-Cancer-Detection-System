@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oncology Telemetry & Biomarker Monitoring — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container">
+
+    <!-- Universal Header Navigation Bar -->
+    <header class="header-bar">
+      <a href="/" class="brand-section">
+        <div class="brand-logo" style="background: linear-gradient(135deg, #3b82f6 0%, #00f2fe 100%);">
+          <i class="fa-solid fa-chart-line"></i>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1>Oncology ICU &amp; Inpatient Telemetry Suite</h1>
+            <span class="brand-status-chip" style="color: #38bdf8; background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.3);"><span class="dot" style="background: #38bdf8; box-shadow: 0 0 8px #38bdf8;"></span> BEDSIDE ICU STREAM LIVE</span>
+          </div>
+          <p>Real-Time Bedside Tumor Markers (CEA, CA 15-3, S100B, KPS) &amp; Chemotherapy Toxicity Surveillance</p>
+        </div>
+      </a>
+      <div class="header-nav-wrap">
+        <nav class="nav-actions">
+          <a class="nav-link" href="/"><i class="fa-solid fa-stethoscope"></i> <span>Diagnostic</span></a>
+          <a class="nav-link" href="/preventive"><i class="fa-solid fa-shield-halved"></i> <span>Preventive</span></a>
+          <a class="nav-link active" href="/monitoring"><i class="fa-solid fa-chart-line"></i> <span>Monitoring</span></a>
+          <a class="nav-link" href="/workflows"><i class="fa-solid fa-network-wired"></i> <span>Workflows</span></a>
+          <a class="nav-link" href="/wellbeing"><i class="fa-solid fa-heart-pulse"></i> <span>Wellbeing</span></a>
+          <a class="nav-link" href="/interactions"><i class="fa-solid fa-pills"></i> <span>Interactions</span></a>
+        </nav>
+        <button class="theme-toggle-btn" id="themeToggle" type="button" title="Switch Theme (Light / Dark)">
+          <i class="fa-solid fa-moon"></i> <span>Dark</span>
+        </button>
+        {% if session.get('doctor_logged_in') %}
+          <a class="nav-portal-btn active" href="/dashboard"><i class="fa-solid fa-user-doctor"></i> <span>Dashboard</span></a>
+          <a class="nav-portal-btn" href="/logout" style="color: var(--danger); border-color: rgba(255, 77, 109, 0.4);" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></a>
+        {% else %}
+          <a class="nav-portal-btn" href="/login"><i class="fa-solid fa-user-doctor"></i> <span>Doctor Portal</span></a>
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- Top Controls & Cancer Filter Bar -->
+    <div style="background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <label style="font-size: 0.85rem; font-weight: 700; color: var(--accent);"><i class="fa-solid fa-hospital-user"></i> Oncology Patient:</label>
+        <select id="monitoringPatientFilter" class="form-select" style="min-width: 260px;">
+          <option value="">All Monitored Cancer Patients</option>
+          {% for p in patients %}
+            <option value="{{ p.patient_id }}">{{ p.patient_name }} (ID: {{ p.patient_id }} | {{ p.cancer_type|title }} Cancer)</option>
+          {% endfor %}
+        </select>
+
+        <select id="monitoringCancerFilter" class="form-select" style="min-width: 170px;">
+          <option value="all">All Cancers</option>
+          <option value="lung">🫁 Lung Cancer</option>
+          <option value="breast">🎗️ Breast Cancer</option>
+          <option value="skin">☀️ Skin Cancer</option>
+          <option value="brain">🧠 Brain Tumor</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="speak-text-btn" id="speakVitalsSummaryBtn" type="button">
+          <i class="fa-solid fa-volume-high"></i> Read Summary Aloud
+        </button>
+        <a href="/api/monitoring/export_csv" id="exportCsvBtn" class="btn btn-secondary" style="padding: 8px 14px; font-size: 0.85rem;">
+          <i class="fa-solid fa-file-csv"></i> Export Oncology CSV
+        </a>
+        <button class="btn btn-primary" id="openLogModalBtn" type="button" style="padding: 8px 16px; font-size: 0.85rem;">
+          <i class="fa-solid fa-plus"></i> Log Cancer Vitals
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Critical Oncology Alerts Banner -->
+    <div id="activeAlertsContainer" style="margin-bottom: 24px;"></div>
+
+    <!-- Strict Oncology Biomarker & Chemo-Toxicity Live Cards -->
+    <div class="vitals-grid" id="vitalsCardsGrid">
+      
+      <!-- CEA (Lung) -->
+      <div class="vital-metric-card" id="cardCEA">
+        <div class="vital-metric-header">
+          <span class="vital-title">CEA Tumor Marker (Lung)</span>
+          <i class="fa-solid fa-flask text-primary-blue"></i>
+        </div>
+        <div class="vital-metric-val" id="metricCEA">-- <span>ng/mL</span></div>
+        <div class="vital-metric-status" id="statusCEA" style="color: var(--success);"><i class="fa-solid fa-check"></i> Normal Baseline (&lt;3.0)</div>
+      </div>
+
+      <!-- CA 15-3 (Breast) -->
+      <div class="vital-metric-card" id="cardCA15">
+        <div class="vital-metric-header">
+          <span class="vital-title">CA 15-3 Marker (Breast)</span>
+          <i class="fa-solid fa-ribbon" style="color: #ec4899;"></i>
+        </div>
+        <div class="vital-metric-val" id="metricCA15">-- <span>U/mL</span></div>
+        <div class="vital-metric-status" id="statusCA15" style="color: var(--success);"><i class="fa-solid fa-check"></i> Normal Target (&lt;30)</div>
+      </div>
+
+      <!-- S100B (Melanoma) -->
+      <div class="vital-metric-card" id="cardS100">
+        <div class="vital-metric-header">
+          <span class="vital-title">S100B Burden (Melanoma)</span>
+          <i class="fa-solid fa-sun text-accent"></i>
+        </div>
+        <div class="vital-metric-val" id="metricS100">-- <span>μg/L</span></div>
+        <div class="vital-metric-status" id="statusS100" style="color: var(--success);"><i class="fa-solid fa-check"></i> Non-Elevated (&lt;0.10)</div>
+      </div>
+
+      <!-- KPS % (Brain) -->
+      <div class="vital-metric-card" id="cardKPS">
+        <div class="vital-metric-header">
+          <span class="vital-title">Karnofsky KPS (Brain)</span>
+          <i class="fa-solid fa-brain" style="color: #8b5cf6;"></i>
+        </div>
+        <div class="vital-metric-val" id="metricKPS">-- <span>%</span></div>
+        <div class="vital-metric-status" id="statusKPS" style="color: var(--success);"><i class="fa-solid fa-check"></i> High Functional Autonomy</div>
+      </div>
+
+      <!-- WBC & Absolute Neutrophil Watch -->
+      <div class="vital-metric-card">
+        <div class="vital-metric-header">
+          <span class="vital-title">WBC / Chemo Neutrophil</span>
+          <i class="fa-solid fa-shield-virus text-danger"></i>
+        </div>
+        <div class="vital-metric-val" id="metricWBC">-- <span>k/μL</span></div>
+        <div class="vital-metric-status" id="statusWBC" style="color: var(--success);"><i class="fa-solid fa-check"></i> Non-Neutropenic</div>
+      </div>
+
+      <!-- Platelets (Chemo Thrombocytopenia) -->
+      <div class="vital-metric-card">
+        <div class="vital-metric-header">
+          <span class="vital-title">Platelets (Hemostasis)</span>
+          <i class="fa-solid fa-droplet text-warning"></i>
+        </div>
+        <div class="vital-metric-val" id="metricPlatelets">-- <span>k/μL</span></div>
+        <div class="vital-metric-status" id="statusPlatelets" style="color: var(--success);"><i class="fa-solid fa-check"></i> Safe Coagulation</div>
+      </div>
+
+      <!-- SpO2 (Radiation Pneumonitis) -->
+      <div class="vital-metric-card">
+        <div class="vital-metric-header">
+          <span class="vital-title">SpO2 (Radiation Watch)</span>
+          <i class="fa-solid fa-lungs text-primary-blue"></i>
+        </div>
+        <div class="vital-metric-val" id="metricSpO2">-- <span>%</span></div>
+        <div class="vital-metric-status" id="statusSpO2" style="color: var(--success);"><i class="fa-solid fa-check"></i> Normal Aeration</div>
+      </div>
+
+      <!-- Cancer Breakthrough Pain -->
+      <div class="vital-metric-card">
+        <div class="vital-metric-header">
+          <span class="vital-title">Cancer Pain Score</span>
+          <i class="fa-solid fa-face-frown text-warning"></i>
+        </div>
+        <div class="vital-metric-val" id="metricPain">-- <span>/10</span></div>
+        <div class="vital-metric-status" id="statusPain" style="color: var(--success);"><i class="fa-solid fa-check"></i> Controlled Analgesia</div>
+      </div>
+    </div>
+
+    <!-- Longitudinal Oncology Biomarker Trajectory Chart -->
+    <div class="panel-card mb-4">
+      <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <span class="panel-tag">Oncology Telemetry Trajectory</span>
+          <h2 class="panel-heading">Longitudinal Cancer Biomarker & Toxicity Timeline</h2>
+          <p class="panel-subtext">Correlate response to chemotherapy cycles, targeted therapy, and surgical resection.</p>
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button class="a11y-opt-btn chart-metric-btn active" data-metric="cea" type="button">CEA (Lung)</button>
+          <button class="a11y-opt-btn chart-metric-btn" data-metric="ca15_3" type="button">CA 15-3 (Breast)</button>
+          <button class="a11y-opt-btn chart-metric-btn" data-metric="s100b" type="button">S100B (Skin)</button>
+          <button class="a11y-opt-btn chart-metric-btn" data-metric="kps_score" type="button">KPS % (Brain)</button>
+          <button class="a11y-opt-btn chart-metric-btn" data-metric="wbc" type="button">WBC (Neutrophil)</button>
+          <button class="a11y-opt-btn chart-metric-btn" data-metric="spo2" type="button">SpO2</button>
+        </div>
+      </div>
+
+      <div class="panel-body">
+        <div class="chart-container" id="svgChartWrapper">
+          <svg id="vitalsSvgChart" width="100%" height="100%" viewBox="0 0 800 240" preserveAspectRatio="none" style="overflow: visible;">
+            <!-- Rendered dynamically -->
+          </svg>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted-light); margin-top: 10px;">
+          <span>← 30 Days Ago (Baseline)</span>
+          <span id="chartRangeIndicator">Normal Clinical Oncology Reference Band Displayed in Dashed Line</span>
+          <span>Today (Recent Oncology Check) →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historical Telemetry Log Table -->
+    <div class="panel-card">
+      <div class="panel-header">
+        <span class="panel-tag">Oncology Chart</span>
+        <h2 class="panel-heading">Cancer Telemetry & Treatment Response Records</h2>
+      </div>
+
+      <div class="panel-body" style="padding: 0; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--muted-light);">
+              <th style="padding: 12px 16px;">Date / Time</th>
+              <th style="padding: 12px 16px;">Patient</th>
+              <th style="padding: 12px 16px;">Cancer Type</th>
+              <th style="padding: 12px 16px;">Tumor Marker</th>
+              <th style="padding: 12px 16px;">WBC / Platelets</th>
+              <th style="padding: 12px 16px;">SpO2</th>
+              <th style="padding: 12px 16px;">Temp</th>
+              <th style="padding: 12px 16px;">Pain</th>
+              <th style="padding: 12px 16px;">Oncology Alerts</th>
+            </tr>
+          </thead>
+          <tbody id="vitalsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Log New Cancer Vitals -->
+  <div class="a11y-modal-overlay" id="logVitalsModal">
+    <div class="a11y-modal-content" style="max-width: 540px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-heart-circle-plus text-accent"></i> Log Oncology Vitals & Biomarkers
+        </h3>
+        <button id="closeLogModalBtn" type="button" class="btn btn-secondary" style="padding: 4px 10px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="newVitalForm">
+        <div class="form-row-2">
+          <div>
+            <label class="form-label">Patient</label>
+            <select id="modalPatientId" class="form-select" required>
+              {% for p in patients %}
+                <option value="{{ p.patient_id }}" data-name="{{ p.patient_name }}" data-cancer="{{ p.cancer_type }}">
+                  {{ p.patient_name }} (ID: {{ p.patient_id }} | {{ p.cancer_type|title }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Cancer Type</label>
+            <select id="modalCancerType" class="form-select">
+              <option value="lung">Lung Cancer</option>
+              <option value="breast">Breast Cancer</option>
+              <option value="skin">Skin Cancer (Melanoma)</option>
+              <option value="brain">Brain Tumor</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Cancer Biomarker Fields -->
+        <div class="form-row-2" style="margin-top: 10px;">
+          <div>
+            <label class="form-label">CEA (Lung, ng/mL)</label>
+            <input type="number" step="0.1" id="vCEA" class="form-input" placeholder="e.g. 2.1" />
+          </div>
+          <div>
+            <label class="form-label">CA 15-3 (Breast, U/mL)</label>
+            <input type="number" step="0.1" id="vCA15" class="form-input" placeholder="e.g. 22.0" />
+          </div>
+        </div>
+
+        <div class="form-row-2" style="margin-top: 10px;">
+          <div>
+            <label class="form-label">S100B (Melanoma, μg/L)</label>
+            <input type="number" step="0.01" id="vS100" class="form-input" placeholder="e.g. 0.05" />
+          </div>
+          <div>
+            <label class="form-label">KPS Score (Brain, %)</label>
+            <input type="number" id="vKPS" class="form-input" placeholder="e.g. 90" min="0" max="100" />
+          </div>
+        </div>
+
+        <!-- Chemo-Toxicity Fields -->
+        <div class="form-row-2" style="margin-top: 10px;">
+          <div>
+            <label class="form-label">WBC Count (x10³/μL)</label>
+            <input type="number" step="0.1" id="vWBC" class="form-input" value="6.0" required />
+          </div>
+          <div>
+            <label class="form-label">Platelet Count (x10³/μL)</label>
+            <input type="number" id="vPlatelets" class="form-input" value="220" required />
+          </div>
+        </div>
+
+        <div class="form-row-2" style="margin-top: 10px;">
+          <div>
+            <label class="form-label">Oxygen SpO2 (%)</label>
+            <input type="number" id="vSpO2" class="form-input" value="98" min="70" max="100" required />
+          </div>
+          <div>
+            <label class="form-label">Temperature (°F)</label>
+            <input type="number" step="0.1" id="vTemp" class="form-input" value="98.4" required />
+          </div>
+        </div>
+
+        <div class="form-row-2" style="margin-top: 10px;">
+          <div>
+            <label class="form-label">Cancer Pain (0 - 10)</label>
+            <input type="number" id="vPain" class="form-input" min="0" max="10" value="2" />
+          </div>
+          <div>
+            <label class="form-label">ECOG Performance (0 - 4)</label>
+            <select id="vECOG" class="form-select">
+              <option value="0">0 - Fully Active</option>
+              <option value="1">1 - Restricted in strenuous</option>
+              <option value="2">2 - Capable of all self-care</option>
+              <option value="3">3 - Capable of limited self-care</option>
+              <option value="4">4 - Completely disabled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label class="form-label">Oncology Treatment Notes</label>
+          <input type="text" id="vNotes" class="form-input" placeholder="e.g. Cycle 3 adjuvant chemotherapy review" />
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px; padding: 12px;">
+          <i class="fa-solid fa-floppy-disk"></i> Record Reading & Check Oncology Alerts
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/accessibility.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let allVitals = [];
+      let currentMetric = 'cea';
+
+      const patientFilter = document.getElementById('monitoringPatientFilter');
+      const cancerFilter = document.getElementById('monitoringCancerFilter');
+      const tableBody = document.getElementById('vitalsTableBody');
+      const alertsContainer = document.getElementById('activeAlertsContainer');
+      const exportCsvBtn = document.getElementById('exportCsvBtn');
+
+      // Metric elements
+      const mCEA = document.getElementById('metricCEA');
+      const mCA15 = document.getElementById('metricCA15');
+      const mS100 = document.getElementById('metricS100');
+      const mKPS = document.getElementById('metricKPS');
+      const mWBC = document.getElementById('metricWBC');
+      const mPlatelets = document.getElementById('metricPlatelets');
+      const mSpO2 = document.getElementById('metricSpO2');
+      const mPain = document.getElementById('metricPain');
+
+      // Modal elements
+      const logModal = document.getElementById('logVitalsModal');
+      const openModalBtn = document.getElementById('openLogModalBtn');
+      const closeModalBtn = document.getElementById('closeLogModalBtn');
+      const vitalForm = document.getElementById('newVitalForm');
+
+      openModalBtn.addEventListener('click', () => logModal.classList.add('open'));
+      closeModalBtn.addEventListener('click', () => logModal.classList.remove('open'));
+      logModal.addEventListener('click', (e) => {
+        if (e.target === logModal) logModal.classList.remove('open');
+      });
+
+      // Handle URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCancer = urlParams.get('cancer_type');
+      const urlPatient = urlParams.get('patient_id');
+      if (urlCancer) cancerFilter.value = urlCancer;
+      if (urlPatient) patientFilter.value = urlPatient;
+
+      // Load Vitals
+      async function loadVitals() {
+        const pid = patientFilter.value;
+        const ctype = cancerFilter.value;
+        const query = new URLSearchParams();
+        if (pid) query.append('patient_id', pid);
+        if (ctype && ctype !== 'all') query.append('cancer_type', ctype);
+
+        exportCsvBtn.href = `/api/monitoring/export_csv?${query.toString()}`;
+        
+        try {
+          const res = await fetch(`/api/monitoring/vitals?${query.toString()}`);
+          const data = await res.json();
+          if (data.success) {
+            allVitals = data.vitals;
+            renderVitals();
+          }
+        } catch (err) {
+          console.error("Failed to load vitals", err);
+        }
+      }
+
+      function renderVitals() {
+        tableBody.innerHTML = '';
+        if (allVitals.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--muted);">No oncology telemetry records found for this filter.</td></tr>';
+          return;
+        }
+
+        const latest = allVitals[allVitals.length - 1];
+        if (latest) {
+          mCEA.innerHTML = `${latest.cea !== undefined && latest.cea !== null ? latest.cea : '--'} <span>ng/mL</span>`;
+          mCA15.innerHTML = `${latest.ca15_3 !== undefined && latest.ca15_3 !== null ? latest.ca15_3 : '--'} <span>U/mL</span>`;
+          mS100.innerHTML = `${latest.s100b !== undefined && latest.s100b !== null ? latest.s100b : '--'} <span>μg/L</span>`;
+          mKPS.innerHTML = `${latest.kps_score !== undefined && latest.kps_score !== null ? latest.kps_score : '--'} <span>%</span>`;
+          mWBC.innerHTML = `${latest.wbc || '--'} <span>k/μL</span>`;
+          mPlatelets.innerHTML = `${latest.platelets || '--'} <span>k/μL</span>`;
+          mSpO2.innerHTML = `${latest.spo2 || '--'} <span>%</span>`;
+          mPain.innerHTML = `${latest.pain_score !== undefined ? latest.pain_score : '--'} <span>/10</span>`;
+
+          // Speech text
+          document.getElementById('speakVitalsSummaryBtn').dataset.text = 
+            `Oncology telemetry summary for ${latest.patient_name} (${(latest.cancer_type || 'cancer').toUpperCase()}). WBC is ${latest.wbc}, platelets ${latest.platelets}, SpO2 ${latest.spo2} percent, reported pain ${latest.pain_score} out of 10.`;
+        }
+
+        // Active Alerts Banner
+        alertsContainer.innerHTML = '';
+        const allAlerts = [];
+        allVitals.slice(-5).forEach(v => {
+          (v.alerts || []).forEach(a => allAlerts.push({ ...a, patient_name: v.patient_name, cancer_type: v.cancer_type }));
+        });
+
+        if (allAlerts.length > 0) {
+          const alertSection = document.createElement('div');
+          alertSection.style.cssText = 'padding: 16px; border-radius: 12px; background: rgba(255, 77, 109, 0.08); border: 1px solid var(--danger);';
+          alertSection.innerHTML = `<h3 style="font-size:0.95rem; color:var(--danger); margin-bottom:10px;"><i class="fa-solid fa-triangle-exclamation"></i> Critical Oncology Alerts (${allAlerts.length})</h3>`;
+          
+          allAlerts.slice(0, 3).forEach(al => {
+            const item = document.createElement('div');
+            item.className = `alert-card-item ${al.severity}`;
+            item.innerHTML = `
+              <i class="fa-solid ${al.severity === 'critical' ? 'fa-triangle-exclamation text-danger' : 'fa-circle-exclamation text-warning'}" style="font-size:1.2rem; margin-top:2px;"></i>
+              <div>
+                <strong style="font-size:0.86rem; color:var(--text);">${al.title} — ${al.patient_name} (${(al.cancer_type || '').toUpperCase()})</strong>
+                <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">${al.message}</p>
+                <div style="font-size:0.75rem; color:var(--accent); margin-top:4px;"><strong>Immediate Oncology Action:</strong> ${al.action}</div>
+              </div>
+            `;
+            alertSection.appendChild(item);
+          });
+          alertsContainer.appendChild(alertSection);
+        }
+
+        // Table Rows
+        [...allVitals].reverse().forEach(v => {
+          const tr = document.createElement('tr');
+          tr.style.cssText = 'border-bottom: 1px solid var(--border);';
+          
+          const alertBadges = (v.alerts || []).map(a => 
+            `<span class="badge ${a.severity === 'critical' ? 'badge-danger' : 'badge-warning'}" style="font-size:0.7rem;">${a.title}</span>`
+          ).join(' ') || '<span class="badge badge-success" style="font-size:0.7rem;">Stable</span>';
+
+          let tumorMarkerDisplay = 'N/A';
+          if (v.cancer_type === 'lung' && v.cea) tumorMarkerDisplay = `CEA: ${v.cea} ng/mL`;
+          else if (v.cancer_type === 'breast' && v.ca15_3) tumorMarkerDisplay = `CA 15-3: ${v.ca15_3} U/mL`;
+          else if (v.cancer_type === 'skin' && v.s100b) tumorMarkerDisplay = `S100B: ${v.s100b} μg/L`;
+          else if (v.cancer_type === 'brain' && v.kps_score) tumorMarkerDisplay = `KPS: ${v.kps_score}%`;
+          else if (v.cea) tumorMarkerDisplay = `CEA: ${v.cea}`;
+
+          tr.innerHTML = `
+            <td style="padding: 12px 16px; color: var(--muted-light);">${v.recorded_at}</td>
+            <td style="padding: 12px 16px; font-weight:600;">${v.patient_name} <span style="font-size:0.75rem; color:var(--muted);">(${v.patient_id})</span></td>
+            <td style="padding: 12px 16px;"><span class="badge" style="background:rgba(255,255,255,0.06); text-transform:uppercase;">${v.cancer_type || 'Oncology'}</span></td>
+            <td style="padding: 12px 16px; font-weight:600; color:var(--accent);">${tumorMarkerDisplay}</td>
+            <td style="padding: 12px 16px;">${v.wbc || '--'} / ${v.platelets || '--'}</td>
+            <td style="padding: 12px 16px; font-weight:700; color:${v.spo2 < 95 ? 'var(--danger)' : 'var(--accent)'};">${v.spo2}%</td>
+            <td style="padding: 12px 16px;">${v.temperature}°F</td>
+            <td style="padding: 12px 16px;">${v.pain_score}/10</td>
+            <td style="padding: 12px 16px;">${alertBadges}</td>
+          `;
+          tableBody.appendChild(tr);
+        });
+
+        renderChart();
+      }
+
+      // Dynamic SVG Trend Chart
+      function renderChart() {
+        const svg = document.getElementById('vitalsSvgChart');
+        svg.innerHTML = '';
+        if (allVitals.length < 2) return;
+
+        const w = 800;
+        const h = 240;
+        const padX = 40;
+        const padY = 30;
+
+        const values = allVitals.map(v => v[currentMetric] !== undefined && v[currentMetric] !== null ? v[currentMetric] : 0);
+        let minVal = Math.min(...values);
+        let maxVal = Math.max(...values);
+        if (minVal === maxVal) { minVal -= 1; maxVal += 5; }
+
+        let normalMin = 0, normalMax = 3.0;
+        if (currentMetric === 'ca15_3') { normalMin = 0; normalMax = 30.0; }
+        else if (currentMetric === 's100b') { normalMin = 0; normalMax = 0.10; }
+        else if (currentMetric === 'kps_score') { normalMin = 80; normalMax = 100; }
+        else if (currentMetric === 'wbc') { normalMin = 4.0; normalMax = 11.0; }
+        else if (currentMetric === 'spo2') { normalMin = 95; normalMax = 100; }
+
+        minVal = Math.min(minVal, normalMin);
+        maxVal = Math.max(maxVal, normalMax * 1.2);
+
+        function getY(val) {
+          return h - padY - ((val - minVal) / (maxVal - minVal)) * (h - 2 * padY);
+        }
+
+        // Draw Normal Corridor
+        const yNormTop = getY(normalMax);
+        const yNormBottom = getY(normalMin);
+        const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        rect.setAttribute("x", padX);
+        rect.setAttribute("y", Math.min(yNormTop, yNormBottom));
+        rect.setAttribute("width", w - 2 * padX);
+        rect.setAttribute("height", Math.max(4, Math.abs(yNormBottom - yNormTop)));
+        rect.setAttribute("fill", "rgba(16, 185, 129, 0.08)");
+        rect.setAttribute("stroke", "rgba(16, 185, 129, 0.25)");
+        rect.setAttribute("stroke-dasharray", "4,4");
+        svg.appendChild(rect);
+
+        // Draw Points & Line
+        const stepX = (w - 2 * padX) / (allVitals.length - 1);
+        let pathD = "";
+        allVitals.forEach((v, i) => {
+          const val = v[currentMetric] !== undefined && v[currentMetric] !== null ? v[currentMetric] : 0;
+          const px = padX + i * stepX;
+          const py = getY(val);
+          pathD += (i === 0 ? `M ${px} ${py}` : ` L ${px} ${py}`);
+
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("cx", px);
+          circle.setAttribute("cy", py);
+          circle.setAttribute("r", 5);
+          circle.setAttribute("fill", "#35d0b8");
+          circle.setAttribute("stroke", "#060a17");
+          circle.setAttribute("stroke-width", "2");
+
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", px);
+          text.setAttribute("y", py - 10);
+          text.setAttribute("fill", "#cbd5e1");
+          text.setAttribute("font-size", "10");
+          text.setAttribute("text-anchor", "middle");
+          text.textContent = val;
+          svg.appendChild(text);
+
+          svg.appendChild(circle);
+        });
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathD);
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "#35d0b8");
+        path.setAttribute("stroke-width", "3");
+        svg.insertBefore(path, svg.firstChild);
+      }
+
+      // Chart Metric Selector Buttons
+      document.querySelectorAll('.chart-metric-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.chart-metric-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentMetric = btn.dataset.metric;
+          renderChart();
+        });
+      });
+
+      // Filter Handlers
+      patientFilter.addEventListener('change', loadVitals);
+      cancerFilter.addEventListener('change', loadVitals);
+
+      // Submit New Vital Reading
+      vitalForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const pSelect = document.getElementById('modalPatientId');
+        const selectedOpt = pSelect.selectedOptions[0];
+
+        const payload = {
+          patient_id: pSelect.value,
+          patient_name: selectedOpt.dataset.name,
+          cancer_type: document.getElementById('modalCancerType').value,
+          cea: document.getElementById('vCEA').value,
+          ca15_3: document.getElementById('vCA15').value,
+          s100b: document.getElementById('vS100').value,
+          kps_score: document.getElementById('vKPS').value,
+          wbc: document.getElementById('vWBC').value,
+          platelets: document.getElementById('vPlatelets').value,
+          spo2: document.getElementById('vSpO2').value,
+          temperature: document.getElementById('vTemp').value,
+          pain_score: document.getElementById('vPain').value,
+          ecog_status: document.getElementById('vECOG').value,
+          notes: document.getElementById('vNotes').value
+        };
+
+        try {
+          const res = await fetch('/api/monitoring/add_vital', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            logModal.classList.remove('open');
+            vitalForm.reset();
+            loadVitals();
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      // Initial load
+      loadVitals();
+    });
+  </script>
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_live.js"></script>
+</body>
+</html>

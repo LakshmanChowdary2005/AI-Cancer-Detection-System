@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hospital Appointment Management — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="/static/css/hospital_system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container" style="max-width: 1440px;">
+
+    <!-- Top Hospital Navigation Header -->
+    {% include 'hospital_header.html' %}
+
+    <!-- Top Heading Row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-calendar-check text-accent"></i> Appointment Scheduling &amp; Clinic Management
+        </h2>
+        <p style="font-size: 0.82rem; color: var(--muted); margin: 3px 0 0 0;">
+          Department scheduling &bull; Inpatient consultation tracking &bull; OR surgical reservation
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button id="openNewApptModalBtn" class="btn btn-primary" style="padding: 7px 16px; font-size: 0.82rem;">
+          <i class="fa-solid fa-calendar-plus"></i> New Appointment
+        </button>
+      </div>
+    </div>
+
+    <!-- Appointments Overview Cards -->
+    <div class="kpi-grid-6" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <div class="kpi-card blue">
+        <div class="kpi-header"><span class="kpi-label">Today's Visits</span><i class="fa-solid fa-calendar-day"></i></div>
+        <div class="kpi-value">18</div>
+        <div class="kpi-footer">12 oncology consultations</div>
+      </div>
+      <div class="kpi-card emerald">
+        <div class="kpi-header"><span class="kpi-label">Confirmed</span><i class="fa-solid fa-circle-check"></i></div>
+        <div class="kpi-value">15</div>
+        <div class="kpi-footer">Automated SMS/Email sent</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-header"><span class="kpi-label">Follow-ups Due</span><i class="fa-solid fa-clock"></i></div>
+        <div class="kpi-value">19</div>
+        <div class="kpi-footer">Within next 72 hours</div>
+      </div>
+      <div class="kpi-card rose">
+        <div class="kpi-header"><span class="kpi-label">Surgical OR</span><i class="fa-solid fa-syringe"></i></div>
+        <div class="kpi-value">4</div>
+        <div class="kpi-footer">Thoracic &amp; Neuro suites</div>
+      </div>
+    </div>
+
+    <!-- Appointment Schedule Table (Requirement #12) -->
+    <div class="panel-card" style="padding: 0; overflow: hidden;">
+      <div class="panel-header" style="padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #fff;">
+          <i class="fa-solid fa-list-ul text-accent"></i> Master Clinical Schedule
+        </h3>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table" style="margin: 0;">
+          <thead>
+            <tr>
+              <th>Time / Date</th>
+              <th>Patient</th>
+              <th>Appointment Type</th>
+              <th>Physician</th>
+              <th>Department</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for apt in appointments %}
+            <tr>
+              <td>
+                <strong style="color: #38bdf8; font-size: 0.9rem;">{{ apt.appointment_time }}</strong>
+                <div style="font-size: 0.72rem; color: var(--muted); font-family: monospace;">{{ apt.appointment_date }}</div>
+              </td>
+              <td>
+                <div style="font-weight: 700; color: #fff;">{{ apt.patient_name }}</div>
+                <span class="pacs-patient-id-badge" style="font-size: 0.7rem; padding: 1px 5px;">{{ apt.patient_id }}</span>
+              </td>
+              <td>
+                <strong>{{ apt.type }}</strong>
+                <div style="font-size: 0.72rem; color: var(--muted); max-width: 200px;">{{ apt.notes }}</div>
+              </td>
+              <td>{{ apt.doctor }}</td>
+              <td><span class="badge badge-primary">{{ apt.department }}</span></td>
+              <td>
+                {% if apt.priority == 'Urgent' %}
+                  <span class="badge badge-danger">Urgent</span>
+                {% elif apt.priority == 'High' %}
+                  <span class="badge badge-warning">High</span>
+                {% else %}
+                  <span class="badge badge-success">Routine</span>
+                {% endif %}
+              </td>
+              <td>
+                <span class="badge badge-success"><i class="fa-solid fa-check"></i> {{ apt.status }}</span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.74rem;" onclick="showToast('Appointment {{ apt.id }} Rescheduled', 'info')">
+                    Reschedule
+                  </button>
+                  <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.74rem; color: #f87171; border-color: rgba(239,68,68,0.4);" onclick="showToast('Appointment {{ apt.id }} Cancelled', 'danger')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- New Appointment Modal (Requirement #12) -->
+  <div id="newApptModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: #091326; border: 1px solid var(--hospital-card-border); border-radius: 16px; width: 90%; max-width: 520px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #fff;">
+          <i class="fa-solid fa-calendar-plus text-accent"></i> Book Hospital Consultation
+        </h3>
+        <button id="closeApptModalBtn" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="newApptForm">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="font-size: 0.78rem;">Select Registered Patient *</label>
+          <select id="apptPatientSelect" class="form-select" required>
+            {% for p in patients %}
+            <option value="{{ p.patient_id }}" data-name="{{ p.name }}">{{ p.name }} ({{ p.patient_id }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Appointment Date *</label>
+            <input type="date" id="apptDate" class="form-input" value="2026-10-08" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Appointment Time *</label>
+            <input type="text" id="apptTime" class="form-input" value="11:30 AM" required />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Consultation Type</label>
+            <select id="apptType" class="form-select">
+              <option value="Oncology Consultation">Oncology Consultation</option>
+              <option value="CT/MRI Imaging Scan">CT/MRI Imaging Scan</option>
+              <option value="MDT Tumor Board Review">MDT Tumor Board Review</option>
+              <option value="Post-Op Follow-Up">Post-Op Follow-Up</option>
+              <option value="Chemotherapy Planning">Chemotherapy Planning</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Department</label>
+            <select id="apptDept" class="form-select">
+              <option value="Oncology" selected>Oncology</option>
+              <option value="Radiology">Radiology</option>
+              <option value="Surgery">Surgery</option>
+              <option value="Dermatology">Dermatology</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="font-size: 0.78rem;">Attending Doctor</label>
+          <input type="text" id="apptDoctor" class="form-input" value="Dr. Sarah Sharma, MD" />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" style="font-size: 0.78rem;">Clinical Notes / Instructions</label>
+          <textarea id="apptNotes" class="form-input" rows="2">Pre-operative imaging correlation and family consultation.</textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="cancelApptBtn" class="btn btn-outline" style="padding: 7px 16px;">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="padding: 7px 20px;">
+            <i class="fa-solid fa-save"></i> Confirm Appointment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_system.js"></script>
+  <script>
+    const openApptBtn = document.getElementById('openNewApptModalBtn');
+    const apptModal = document.getElementById('newApptModal');
+    const closeApptBtn = document.getElementById('closeApptModalBtn');
+    const cancelApptBtn = document.getElementById('cancelApptBtn');
+    const apptForm = document.getElementById('newApptForm');
+
+    if (openApptBtn && apptModal) openApptBtn.addEventListener('click', () => apptModal.style.display = 'flex');
+    if (closeApptBtn && apptModal) closeApptBtn.addEventListener('click', () => apptModal.style.display = 'none');
+    if (cancelApptBtn && apptModal) cancelApptBtn.addEventListener('click', () => apptModal.style.display = 'none');
+
+    if (apptForm) {
+      apptForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const pSelect = document.getElementById('apptPatientSelect');
+        const selectedOpt = pSelect.options[pSelect.selectedIndex];
+
+        const payload = {
+          patient_id: pSelect.value,
+          patient_name: selectedOpt.getAttribute('data-name'),
+          appointment_date: document.getElementById('apptDate').value,
+          appointment_time: document.getElementById('apptTime').value,
+          type: document.getElementById('apptType').value,
+          department: document.getElementById('apptDept').value,
+          doctor: document.getElementById('apptDoctor').value,
+          notes: document.getElementById('apptNotes').value
+        };
+
+        fetch('/api/appointments/new', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            apptModal.style.display = 'none';
+            showToast('Appointment successfully scheduled and synced to hospital calendar!', 'success');
+            setTimeout(() => window.location.reload(), 800);
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

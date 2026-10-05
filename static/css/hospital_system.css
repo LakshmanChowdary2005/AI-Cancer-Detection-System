@@ -1,0 +1,1081 @@
+/* ==========================================================================
+   MEDISCAN AI — HOSPITAL CLINICAL SUITE & PACS SYSTEM STYLES
+   Enterprise Hospital Dashboard, DICOM Imaging Workspace, EMR & Tumor Board
+   ========================================================================== */
+
+:root {
+  --hospital-navy: #060b18;
+  --hospital-card-bg: rgba(13, 22, 45, 0.75);
+  --hospital-card-border: rgba(56, 189, 248, 0.18);
+  --hospital-card-hover: rgba(56, 189, 248, 0.3);
+  --hospital-blue: #3b82f6;
+  --hospital-cyan: #06b6d4;
+  --hospital-teal: #14b8a6;
+  --hospital-emerald: #10b981;
+  --hospital-rose: #f43f5e;
+  --hospital-amber: #f59e0b;
+  --hospital-purple: #8b5cf6;
+  --pacs-viewport-bg: #030712;
+  --pacs-hud-color: #38bdf8;
+}
+
+body.light-mode {
+  --hospital-navy: #f8fafc;
+  --hospital-card-bg: rgba(255, 255, 255, 0.95);
+  --hospital-card-border: rgba(203, 213, 225, 0.8);
+  --hospital-card-hover: rgba(37, 99, 235, 0.3);
+  --pacs-viewport-bg: #0f172a;
+}
+
+/* --------------------------------------------------------------------------
+   Top Hospital Header Strip & Role/Department Switcher
+   -------------------------------------------------------------------------- */
+.hospital-nav-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: rgba(10, 18, 38, 0.92);
+  border: 1px solid var(--hospital-card-border);
+  border-radius: 12px;
+  padding: 10px 18px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.hospital-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hospital-badge-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #fff;
+  letter-spacing: 0.4px;
+}
+
+body.light-mode .hospital-badge-brand {
+  color: #0f172a;
+}
+
+.hospital-badge-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2563eb, #00f2fe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+}
+
+.hospital-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.role-pill-select, .dept-pill-select {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--hospital-card-border);
+  color: #38bdf8;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 20px;
+  padding: 5px 12px;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.role-pill-select:hover, .dept-pill-select:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   Command Center KPI Metrics Grid
+   -------------------------------------------------------------------------- */
+.kpi-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.kpi-card {
+  background: var(--hospital-card-bg);
+  border: 1px solid var(--hospital-card-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--hospital-card-hover);
+  box-shadow: 0 8px 25px rgba(56, 189, 248, 0.15);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.kpi-card.blue::before { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+.kpi-card.cyan::before { background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
+.kpi-card.amber::before { background: #f59e0b; box-shadow: 0 0 10px #f59e0b; }
+.kpi-card.rose::before { background: #f43f5e; box-shadow: 0 0 10px #f43f5e; }
+.kpi-card.emerald::before { background: #10b981; box-shadow: 0 0 10px #10b981; }
+.kpi-card.purple::before { background: #8b5cf6; box-shadow: 0 0 10px #8b5cf6; }
+
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+
+.kpi-icon {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.kpi-value {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+body.light-mode .kpi-value {
+  color: #0f172a;
+}
+
+.kpi-footer {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* --------------------------------------------------------------------------
+   Critical Findings Alert Banner
+   -------------------------------------------------------------------------- */
+.critical-alert-bar {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.12);
+  animation: pulseSubtle 3s infinite;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { border-color: rgba(239, 68, 68, 0.35); }
+  50% { border-color: rgba(239, 68, 68, 0.6); }
+}
+
+.critical-alert-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.critical-alert-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  animation: shakeAlert 4s infinite ease-in-out;
+}
+
+@keyframes shakeAlert {
+  0%, 90%, 100% { transform: rotate(0deg); }
+  92% { transform: rotate(-8deg); }
+  94% { transform: rotate(8deg); }
+  96% { transform: rotate(-5deg); }
+  98% { transform: rotate(5deg); }
+}
+
+.critical-alert-text h4 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #f87171;
+  margin: 0 0 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.critical-alert-text p {
+  font-size: 0.82rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.critical-alert-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   DICOM / PACS-Style Imaging Workspace
+   -------------------------------------------------------------------------- */
+.pacs-workspace {
+  background: #030712;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  margin-bottom: 24px;
+}
+
+.pacs-top-bar {
+  background: #0b1329;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pacs-patient-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pacs-patient-id-badge {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  font-family: monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.pacs-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 4px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pacs-tool-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pacs-tool-btn:hover {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.pacs-tool-btn.active {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.pacs-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 4px;
+}
+
+.pacs-main-viewport {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  min-height: 520px;
+}
+
+@media (max-width: 1024px) {
+  .pacs-main-viewport {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pacs-canvas-area {
+  position: relative;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  min-height: 480px;
+}
+
+.pacs-image-container {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  transition: filter 0.1s ease;
+}
+
+.pacs-image-container:active {
+  cursor: grabbing;
+}
+
+.pacs-scan-image {
+  max-width: 440px;
+  max-height: 440px;
+  border-radius: 8px;
+  display: block;
+}
+
+.pacs-heatmap-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+/* PACS HUD Telemetry Overlays */
+.pacs-hud {
+  position: absolute;
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: #38bdf8;
+  line-height: 1.4;
+  text-shadow: 0 1px 4px #000;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.pacs-hud-tl { top: 14px; left: 16px; }
+.pacs-hud-tr { top: 14px; right: 16px; text-align: right; }
+.pacs-hud-bl { bottom: 14px; left: 16px; }
+.pacs-hud-br { bottom: 14px; right: 16px; text-align: right; }
+
+/* PACS Findings & AI Telemetry Sidebar */
+.pacs-sidebar {
+  background: #091024;
+  border-left: 1px solid rgba(56, 189, 248, 0.15);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.pacs-finding-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+}
+
+.pacs-finding-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #38bdf8;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pacs-metric-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.pacs-metric-badge .lbl {
+  color: var(--muted);
+}
+
+.pacs-metric-badge .val {
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Slice Navigation Bar */
+.pacs-slice-bar {
+  background: #080e1e;
+  border-top: 1px solid rgba(56, 189, 248, 0.15);
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.pacs-slice-slider {
+  flex: 1;
+  accent-color: #38bdf8;
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   Patient EMR Longitudinal Timeline
+   -------------------------------------------------------------------------- */
+.timeline-container {
+  position: relative;
+  padding: 20px 0 20px 24px;
+}
+
+.timeline-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 9px;
+  width: 2px;
+  background: linear-gradient(180deg, #3b82f6 0%, #00f2fe 50%, #8b5cf6 100%);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #060b18;
+  box-shadow: 0 0 10px #3b82f6;
+}
+
+.timeline-item.ai .timeline-dot {
+  background: #00f2fe;
+  box-shadow: 0 0 10px #00f2fe;
+}
+
+.timeline-item.surgery .timeline-dot {
+  background: #f43f5e;
+  box-shadow: 0 0 10px #f43f5e;
+}
+
+.timeline-item.review .timeline-dot {
+  background: #8b5cf6;
+  box-shadow: 0 0 10px #8b5cf6;
+}
+
+.timeline-card {
+  background: var(--hospital-card-bg);
+  border: 1px solid var(--hospital-card-border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  transition: all 0.2s ease;
+}
+
+.timeline-card:hover {
+  border-color: var(--hospital-card-hover);
+  transform: translateX(4px);
+}
+
+.timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.timeline-date {
+  font-size: 0.76rem;
+  font-family: monospace;
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.timeline-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.timeline-badge.consultation { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+.timeline-badge.imaging { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
+.timeline-badge.ai { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+.timeline-badge.followup { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+.timeline-badge.review { background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+/* --------------------------------------------------------------------------
+   Medical Records Section Tabs
+   -------------------------------------------------------------------------- */
+.med-tabs-nav {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--hospital-card-border);
+  padding-bottom: 2px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.med-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.med-tab-btn:hover {
+  color: #fff;
+}
+
+body.light-mode .med-tab-btn:hover {
+  color: #0f172a;
+}
+
+.med-tab-btn.active {
+  color: #38bdf8;
+  border-bottom-color: #38bdf8;
+}
+
+/* --------------------------------------------------------------------------
+   Multidisciplinary Tumor Board (MDT) Panel
+   -------------------------------------------------------------------------- */
+.mdt-consensus-box {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(139, 92, 246, 0.12));
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+
+.mdt-consensus-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mdt-meter-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.mdt-meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #06b6d4, #8b5cf6);
+  border-radius: 999px;
+}
+
+.mdt-departments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mdt-dept-card {
+  background: var(--hospital-card-bg);
+  border: 1px solid var(--hospital-card-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+
+.mdt-dept-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* --------------------------------------------------------------------------
+   Doctor Review & Sign-Off Section
+   -------------------------------------------------------------------------- */
+.signoff-box {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.signoff-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.signoff-action-btn {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.signoff-action-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.signoff-action-btn.confirm.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #34d399;
+}
+
+.signoff-action-btn.modify.active {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.signoff-action-btn.reject.active {
+  background: rgba(244, 63, 94, 0.2);
+  border-color: #f43f5e;
+  color: #f87171;
+}
+
+.signature-stamp {
+  border: 2px dashed rgba(56, 189, 248, 0.35);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  font-family: 'Brush Script MT', cursive, sans-serif;
+  font-size: 1.5rem;
+  color: #38bdf8;
+  margin-top: 12px;
+  background: rgba(56, 189, 248, 0.04);
+}
+
+/* --------------------------------------------------------------------------
+   Notifications Drawer
+   -------------------------------------------------------------------------- */
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 360px;
+  background: #0b1329;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: none;
+  overflow: hidden;
+}
+
+.notif-dropdown.show {
+  display: block;
+}
+
+.notif-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notif-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.notif-item.unread {
+  background: rgba(56, 189, 248, 0.06);
+}
+
+/* --------------------------------------------------------------------------
+   Patient Portal Specific Styles
+   -------------------------------------------------------------------------- */
+.patient-friendly-view {
+  background: linear-gradient(180deg, #091326 0%, #050b17 100%);
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.welcome-patient-banner {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+/* --------------------------------------------------------------------------
+   Doctor Login CTA & Role Scope Header Controls
+   -------------------------------------------------------------------------- */
+.doctor-login-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.25) 0%, rgba(6, 182, 212, 0.25) 100%);
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+.doctor-login-cta-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+  color: #fff;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+  transform: translateY(-1px);
+}
+
+.doctor-badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+}
+
+.doctor-badge-status .doctor-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #6ee7b7;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.doctor-badge-status .doctor-role-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.18);
+  padding: 1px 7px;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.doctor-badge-status .logout-btn {
+  color: #f87171;
+  font-size: 0.75rem;
+  text-decoration: none;
+  margin-left: 2px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.doctor-badge-status .logout-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+/* Role Scope & Treatments Pill */
+.role-scope-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #e2e8f0;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.role-scope-btn:hover {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.role-scope-btn .scope-icon {
+  color: #06b6d4;
+  font-size: 0.85rem;
+}
+
+.role-scope-btn .scope-badge {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------------
+   Role & Treatment Scope Modal
+   -------------------------------------------------------------------------- */
+.role-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.82);
+  backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.role-modal-overlay.active {
+  display: flex;
+}
+
+.role-modal-container {
+  width: 100%;
+  max-width: 960px;
+  max-height: 90vh;
+  background: #091326;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 18px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.role-modal-header {
+  padding: 18px 24px;
+  background: rgba(13, 22, 45, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.role-modal-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(6, 11, 24, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+}
+
+.role-tab-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.role-tab-btn:hover {
+  color: #fff;
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.role-tab-btn.active {
+  background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+}
+
+.role-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.role-profile-view {
+  display: none;
+}
+
+.role-profile-view.active {
+  display: block;
+}
+
+.role-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.role-box {
+  background: rgba(13, 22, 45, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.role-box.access {
+  border-left: 3px solid #10b981;
+}
+
+.role-box.treatment {
+  border-left: 3px solid #06b6d4;
+}
+
+.role-box.limitations {
+  border-left: 3px solid #f43f5e;
+}
+
+.role-box-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.role-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.role-tag {
+  font-size: 0.73rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.role-tag.green {
+  background: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.role-tag.cyan {
+  background: rgba(6, 182, 212, 0.15);
+  color: #67e8f9;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.role-tag.amber {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.role-tag.rose {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fda4af;
+  border: 1px solid rgba(244, 63, 94, 0.3);
+}

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oncology MDT Tumor Board & Cancer Staging — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container">
+
+    <!-- Universal Header Navigation Bar -->
+    <header class="header-bar">
+      <a href="/" class="brand-section">
+        <div class="brand-logo" style="background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);">
+          <i class="fa-solid fa-network-wired"></i>
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1>Multidisciplinary Tumor Board &bull; Room 4A</h1>
+            <span class="brand-status-chip" style="color: #a855f7; background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.3);"><span class="dot" style="background: #a855f7; box-shadow: 0 0 8px #a855f7;"></span> QUORUM SESSION ACTIVE &bull; HL7/FHIR</span>
+          </div>
+          <p>Multidisciplinary Staging (AJCC TNM 8th, WHO Brain, Breslow Melanoma) &amp; Electronic Order Sets</p>
+        </div>
+      </a>
+      <div class="header-nav-wrap">
+        <nav class="nav-actions">
+          <a class="nav-link" href="/"><i class="fa-solid fa-stethoscope"></i> <span>Diagnostic</span></a>
+          <a class="nav-link" href="/preventive"><i class="fa-solid fa-shield-halved"></i> <span>Preventive</span></a>
+          <a class="nav-link" href="/monitoring"><i class="fa-solid fa-chart-line"></i> <span>Monitoring</span></a>
+          <a class="nav-link active" href="/workflows"><i class="fa-solid fa-network-wired"></i> <span>Workflows</span></a>
+          <a class="nav-link" href="/wellbeing"><i class="fa-solid fa-heart-pulse"></i> <span>Wellbeing</span></a>
+          <a class="nav-link" href="/interactions"><i class="fa-solid fa-pills"></i> <span>Interactions</span></a>
+        </nav>
+        <button class="theme-toggle-btn" id="themeToggle" type="button" title="Switch Theme (Light / Dark)">
+          <i class="fa-solid fa-moon"></i> <span>Dark</span>
+        </button>
+        {% if session.get('doctor_logged_in') %}
+          <a class="nav-portal-btn active" href="/dashboard"><i class="fa-solid fa-user-doctor"></i> <span>Dashboard</span></a>
+          <a class="nav-portal-btn" href="/logout" style="color: var(--danger); border-color: rgba(255, 77, 109, 0.4);" title="Sign Out"><i class="fa-solid fa-right-from-bracket"></i></a>
+        {% else %}
+          <a class="nav-portal-btn" href="/login"><i class="fa-solid fa-user-doctor"></i> <span>Doctor Portal</span></a>
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- Cancer Filter Selector Bar -->
+    <div style="background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 0.85rem; font-weight: 700; color: var(--accent); text-transform: uppercase;">
+          <i class="fa-solid fa-filter"></i> Filter Tumor Board Cases:
+        </span>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="workflowCancerPills">
+        <button class="a11y-opt-btn wf-pill active" data-cancer="all"><i class="fa-solid fa-dna"></i> All 4 Cancers</button>
+        <button class="a11y-opt-btn wf-pill" data-cancer="lung"><i class="fa-solid fa-lungs"></i> Lung Cancer</button>
+        <button class="a11y-opt-btn wf-pill" data-cancer="breast"><i class="fa-solid fa-ribbon"></i> Breast Cancer</button>
+        <button class="a11y-opt-btn wf-pill" data-cancer="skin"><i class="fa-solid fa-sun"></i> Skin / Melanoma</button>
+        <button class="a11y-opt-btn wf-pill" data-cancer="brain"><i class="fa-solid fa-brain"></i> Brain Tumors</button>
+      </div>
+    </div>
+
+    <!-- Quick Oncology Tools Row -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin-bottom: 24px;">
+      
+      <!-- Tool 1: Cancer Staging Calculator -->
+      <div class="panel-card">
+        <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <span class="panel-tag" style="background:rgba(139,92,246,0.15); color:#8b5cf6;">Clinical Oncology Staging</span>
+            <h2 class="panel-heading" style="font-size:1.1rem;"><i class="fa-solid fa-calculator text-accent"></i> Cancer Staging Engine</h2>
+          </div>
+          <button class="speak-text-btn" id="speakTnmBtn" type="button"><i class="fa-solid fa-volume-high"></i> Read</button>
+        </div>
+        <div class="panel-body">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Cancer Category</label>
+            <select id="stagingCancerSelect" class="form-select">
+              <option value="lung">🫁 Lung Cancer (AJCC TNM)</option>
+              <option value="breast">🎗️ Breast Cancer (AJCC TNM)</option>
+              <option value="brain">🧠 Brain Tumor (WHO CNS Grade)</option>
+              <option value="skin">☀️ Skin Cancer (Breslow Depth)</option>
+            </select>
+          </div>
+
+          <!-- Staging parameter selectors (toggled dynamically) -->
+          <div id="tnmParamBox" class="tnm-selector-grid">
+            <div>
+              <label class="form-label">T (Primary Tumor)</label>
+              <select id="tnm_t" class="form-select">
+                <option value="Tis">Tis - In Situ</option>
+                <option value="T1" selected>T1 - ≤ 2 cm</option>
+                <option value="T2">T2 - 2 to 5 cm</option>
+                <option value="T3">T3 - > 5 cm</option>
+                <option value="T4">T4 - Chest Wall / Skin</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">N (Regional Nodes)</label>
+              <select id="tnm_n" class="form-select">
+                <option value="N0" selected>N0 - Negative nodes</option>
+                <option value="N1">N1 - 1 to 3 nodes</option>
+                <option value="N2">N2 - 4 to 9 nodes</option>
+                <option value="N3">N3 - ≥ 10 nodes</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">M (Metastasis)</label>
+              <select id="tnm_m" class="form-select">
+                <option value="M0" selected>M0 - No metastasis</option>
+                <option value="M1">M1 - Distant spread</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="brainParamBox" style="display:none; margin-bottom:12px;">
+            <label class="form-label">WHO CNS Histopathological Grade</label>
+            <select id="brain_who_grade" class="form-select">
+              <option value="grade1">Grade 1 - Benign Pilocytic Astrocytoma / Meningioma</option>
+              <option value="grade2" selected>Grade 2 - Low-Grade Diffuse Infiltrative Glioma</option>
+              <option value="grade3">Grade 3 - Anaplastic Proliferative Glioma</option>
+              <option value="grade4">Grade 4 - Glioblastoma Multiforme (GBM)</option>
+            </select>
+          </div>
+
+          <div id="skinParamBox" style="display:none; margin-bottom:12px;">
+            <div class="form-row-2">
+              <div>
+                <label class="form-label">Breslow Depth (mm)</label>
+                <input type="number" step="0.1" id="skin_breslow" class="form-input" value="1.2" min="0.1" />
+              </div>
+              <div>
+                <label class="form-label">Ulceration</label>
+                <select id="skin_ulcer" class="form-select">
+                  <option value="no">Non-Ulcerated</option>
+                  <option value="yes">Ulcerated</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="tnmResultBox" style="padding: 12px 16px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.03); border: 1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:0.85rem; color:var(--muted-light);">Clinical Staging:</span>
+              <span class="badge badge-success" id="tnmStageBadge" style="font-size:0.88rem;">Stage I</span>
+            </div>
+            <p id="tnmSummaryText" style="font-size:0.8rem; color:var(--text-secondary); margin-top:6px;"></p>
+            <div style="font-size:0.75rem; color:var(--accent); margin-top:4px; font-weight:600;" id="tnmPathwayText"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tool 2: Precision Oncology Clinical Requisitions -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <span class="panel-tag" style="background:rgba(59,130,246,0.15); color:#3b82f6;">Precision Orders</span>
+          <h2 class="panel-heading" style="font-size:1.1rem;"><i class="fa-solid fa-file-signature text-accent"></i> Cancer Biopsy & Molecular Requisitions</h2>
+        </div>
+        <div class="panel-body">
+          <form id="orderGenForm">
+            <div class="form-row-2">
+              <div>
+                <label class="form-label">Target Patient Case</label>
+                <select id="orderCaseSelect" class="form-select" required>
+                  {% for c in cases %}
+                    <option value="{{ c.case_id }}" data-cancer="{{ c.cancer_type }}">
+                      {{ c.patient_name }} ({{ c.cancer_type|title }} | {{ c.case_id }})
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Oncology Requisition</label>
+                <select id="orderTypeSelect" class="form-select">
+                  <option value="CT-Guided Lung Biopsy & NGS">🫁 CT-Guided Lung Biopsy + EGFR/ALK NGS</option>
+                  <option value="Core Needle Breast Biopsy & IHC">🎗️ Core Needle Breast Biopsy + ER/PR/HER2</option>
+                  <option value="Stereotactic Brain Biopsy">🧠 Stereotactic Brain Biopsy + IDH1/2</option>
+                  <option value="Melanoma Excision & SLNB">☀️ Melanoma Wide Excision + Sentinel Node Biopsy</option>
+                  <option value="Restaging PET-CT Whole Body">🌐 Whole-Body 18F-FDG PET-CT Staging</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:10px;">
+              <label class="form-label">Oncologic Instructions</label>
+              <input type="text" id="orderInstructions" class="form-input" placeholder="e.g. Include immunohistochemistry and next-generation sequencing" required />
+            </div>
+
+            <button type="submit" class="btn btn-secondary" style="width: 100%; margin-top: 10px; padding: 10px; font-size: 0.85rem;">
+              <i class="fa-solid fa-paper-plane"></i> Submit Requisition to MDT File
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- MDT Tumor Board Pipeline Kanban -->
+    <div class="panel-card">
+      <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <span class="panel-tag">Multidisciplinary Review</span>
+          <h2 class="panel-heading"><i class="fa-solid fa-users-viewfinder text-accent"></i> MDT Oncology Tumor Board Pipeline</h2>
+          <p class="panel-subtext">Review and advance active Brain, Breast, Lung, and Skin cancer cases through multidisciplinary stages.</p>
+        </div>
+        <button class="speak-text-btn" id="speakPipelineBtn" type="button"><i class="fa-solid fa-volume-high"></i> Read Status</button>
+      </div>
+
+      <div class="panel-body">
+        <div class="kanban-board" id="kanbanBoard">
+          {% for stage in stages %}
+            <div class="kanban-lane" data-stage="{{ stage.id }}">
+              <div class="kanban-lane-header" style="border-top: 3px solid {{ stage.color }};">
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <i class="fa-solid {{ stage.icon }}" style="color: {{ stage.color }};"></i>
+                  {{ stage.name }}
+                </span>
+                <span class="badge" style="background: rgba(255,255,255,0.08);" id="count-{{ stage.id }}">0</span>
+              </div>
+              <div class="kanban-lane-cards" id="lane-{{ stage.id }}"></div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Case Detail & Tumor Board Notes -->
+  <div class="a11y-modal-overlay" id="caseDetailModal">
+    <div class="a11y-modal-content" style="max-width: 680px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+        <h3 id="modalCaseTitle" style="font-size:1.2rem; display:flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-folder-open text-accent"></i> Oncology Case Details
+        </h3>
+        <button id="closeCaseModalBtn" type="button" class="btn btn-secondary" style="padding:4px 10px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="modalCaseBody"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/accessibility.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let cases = {{ cases|tojson }};
+      const stages = {{ stages|tojson }};
+      let currentCancerFilter = 'all';
+
+      // Check URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCancer = urlParams.get('cancer_type');
+      if (urlCancer) currentCancerFilter = urlCancer;
+
+      const caseModal = document.getElementById('caseDetailModal');
+      const closeCaseModalBtn = document.getElementById('closeCaseModalBtn');
+      closeCaseModalBtn.addEventListener('click', () => caseModal.classList.remove('open'));
+      caseModal.addEventListener('click', (e) => { if (e.target === caseModal) caseModal.classList.remove('open'); });
+
+      // Cancer Filter Pills
+      const pills = document.querySelectorAll('.wf-pill');
+      pills.forEach(p => {
+        if (p.dataset.cancer === currentCancerFilter) p.classList.add('active');
+        else p.classList.remove('active');
+
+        p.addEventListener('click', () => {
+          pills.forEach(b => b.classList.remove('active'));
+          p.classList.add('active');
+          currentCancerFilter = p.dataset.cancer;
+          renderBoard();
+        });
+      });
+
+      function renderBoard() {
+        stages.forEach(s => {
+          const lane = document.getElementById(`lane-${s.id}`);
+          const countBadge = document.getElementById(`count-${s.id}`);
+          lane.innerHTML = '';
+
+          const matching = cases.filter(c => {
+            const matchesStage = c.current_stage === s.id;
+            const matchesCancer = (currentCancerFilter === 'all' || (c.cancer_type || '').toLowerCase() === currentCancerFilter);
+            return matchesStage && matchesCancer;
+          });
+
+          countBadge.innerText = matching.length;
+
+          if (matching.length === 0) {
+            lane.innerHTML = '<div style="padding: 18px; text-align:center; font-size:0.75rem; color:var(--muted); border:1px dashed var(--border); border-radius:8px;">No active cases</div>';
+          } else {
+            matching.forEach(c => {
+              const card = document.createElement('div');
+              card.className = 'case-card';
+              
+              let cancerIcon = 'fa-lungs';
+              if (c.cancer_type === 'brain') cancerIcon = 'fa-brain';
+              else if (c.cancer_type === 'breast') cancerIcon = 'fa-ribbon';
+              else if (c.cancer_type === 'skin') cancerIcon = 'fa-sun';
+
+              card.innerHTML = `
+                <div class="case-card-header">
+                  <div>
+                    <strong style="font-size:0.9rem; color:var(--text);">${c.patient_name}</strong>
+                    <div style="font-size:0.75rem; color:var(--muted);">${c.case_id} • ID: ${c.patient_id}</div>
+                  </div>
+                  <span class="badge ${c.risk === 'High' ? 'badge-danger' : (c.risk === 'Moderate' ? 'badge-warning' : 'badge-success')}" style="font-size:0.7rem;">${c.risk} Risk</span>
+                </div>
+
+                <div style="font-size:0.8rem; margin: 8px 0; color:var(--text-secondary);">
+                  <div><i class="fa-solid ${cancerIcon} text-accent"></i> <strong>${(c.cancer_type || 'Cancer').toUpperCase()}</strong>: ${c.cancer_label || ''}</div>
+                  <div style="font-size:0.74rem; color:var(--accent); font-weight:600; margin-top:2px;">${c.staging?.stage || 'Stage I'}</div>
+                  <div style="font-size:0.72rem; color:var(--muted-light); margin-top:2px;"><i class="fa-solid fa-user-doctor"></i> ${c.lead_oncologist || 'Attending Oncologist'}</div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
+                  <button class="btn btn-secondary view-case-btn" data-id="${c.case_id}" style="padding:4px 8px; font-size:0.75rem;">
+                    <i class="fa-solid fa-notes-medical"></i> Notes (${c.tumor_board_notes?.length || 0})
+                  </button>
+
+                  <select class="stage-advance-btn change-stage-select" data-id="${c.case_id}">
+                    ${stages.map(st => `<option value="${st.id}" ${st.id === c.current_stage ? 'selected' : ''}>Move: ${st.name.split(' ')[0]}</option>`).join('')}
+                  </select>
+                </div>
+              `;
+              lane.appendChild(card);
+            });
+          }
+        });
+      }
+
+      // Event Delegation
+      document.getElementById('kanbanBoard').addEventListener('change', async (e) => {
+        if (e.target.classList.contains('change-stage-select')) {
+          const caseId = e.target.dataset.id;
+          const newStage = e.target.value;
+          try {
+            const res = await fetch('/api/workflows/update_stage', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ case_id: caseId, new_stage: newStage })
+            });
+            const data = await res.json();
+            if (data.success) {
+              const targetCase = cases.find(c => c.case_id === caseId);
+              if (targetCase) targetCase.current_stage = newStage;
+              renderBoard();
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        }
+      });
+
+      document.getElementById('kanbanBoard').addEventListener('click', (e) => {
+        const btn = e.target.closest('.view-case-btn');
+        if (btn) openCaseModal(btn.dataset.id);
+      });
+
+      function openCaseModal(caseId) {
+        const c = cases.find(item => item.case_id === caseId);
+        if (!c) return;
+
+        document.getElementById('modalCaseTitle').innerHTML = `
+          <i class="fa-solid fa-folder-open text-accent"></i> ${c.patient_name} — ${(c.cancer_type || '').toUpperCase()} (${c.case_id})
+        `;
+
+        const notesListHtml = (c.tumor_board_notes || []).map(n => `
+          <div style="padding:10px 14px; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid var(--border); margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--muted-light); margin-bottom:4px;">
+              <strong>${n.author}</strong> <span>${n.timestamp}</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text);">${n.note}</p>
+          </div>
+        `).join('') || '<p style="font-size:0.8rem; color:var(--muted);">No notes logged yet.</p>';
+
+        const ordersListHtml = (c.clinical_orders || []).map(o => `
+          <div style="padding:8px 12px; border-radius:6px; background:rgba(53,208,184,0.06); border:1px solid rgba(53,208,184,0.2); margin-bottom:6px; font-size:0.8rem;">
+            <div style="display:flex; justify-content:space-between; font-weight:600;">
+              <span>${o.order_type} (${o.order_id})</span>
+              <span class="badge badge-success" style="font-size:0.68rem;">${o.status}</span>
+            </div>
+            <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">${o.instructions}</p>
+          </div>
+        `).join('') || '<p style="font-size:0.8rem; color:var(--muted);">No active orders.</p>';
+
+        document.getElementById('modalCaseBody').innerHTML = `
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
+            <div style="padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border);">
+              <div style="font-size:0.75rem; color:var(--muted-light);">Histopathological Classification:</div>
+              <strong style="font-size:0.95rem; color:var(--accent);">${c.cancer_label || c.cancer_type}</strong>
+              <div style="font-size:0.8rem; margin-top:4px;">Staging: <strong>${c.staging?.stage || 'Stage I'}</strong></div>
+            </div>
+            <div style="padding:12px; background:rgba(255,255,255,0.02); border-radius:8px; border:1px solid var(--border);">
+              <div style="font-size:0.75rem; color:var(--muted-light);">Clinical Requisitions & EHR:</div>
+              <a href="/api/workflows/export_fhir/${c.case_id}" class="btn btn-secondary" style="padding:6px 12px; font-size:0.78rem; margin-top:4px; display:inline-flex; align-items:center; gap:6px;">
+                <i class="fa-solid fa-download"></i> Export HL7 FHIR Bundle
+              </a>
+            </div>
+          </div>
+
+          <h4 style="font-size:0.9rem; margin-bottom:8px; color:var(--accent);"><i class="fa-solid fa-file-signature"></i> Precision Oncology Orders</h4>
+          ${ordersListHtml}
+
+          <h4 style="font-size:0.9rem; margin:16px 0 8px; color:var(--accent);"><i class="fa-solid fa-comments"></i> MDT Tumor Board Case Notes</h4>
+          <div id="modalNotesContainer">${notesListHtml}</div>
+
+          <div style="margin-top:14px; display:flex; gap:8px;">
+            <input type="text" id="newCaseNoteInput" class="form-input" placeholder="Add Tumor Board recommendation..." />
+            <button class="btn btn-primary" id="saveCaseNoteBtn" type="button" style="padding:10px 16px;">
+              <i class="fa-solid fa-plus"></i> Post
+            </button>
+          </div>
+        `;
+
+        document.getElementById('saveCaseNoteBtn').addEventListener('click', async () => {
+          const input = document.getElementById('newCaseNoteInput');
+          if (!input.value.trim()) return;
+
+          try {
+            const res = await fetch('/api/workflows/add_note', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ case_id: c.case_id, note: input.value.trim() })
+            });
+            const data = await res.json();
+            if (data.success) {
+              c.tumor_board_notes = data.notes;
+              openCaseModal(c.case_id);
+              renderBoard();
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        });
+
+        caseModal.classList.add('open');
+      }
+
+      // Cancer Staging Calculator Logic
+      const stagingCancerSelect = document.getElementById('stagingCancerSelect');
+      const tnmParamBox = document.getElementById('tnmParamBox');
+      const brainParamBox = document.getElementById('brainParamBox');
+      const skinParamBox = document.getElementById('skinParamBox');
+
+      stagingCancerSelect.addEventListener('change', () => {
+        const val = stagingCancerSelect.value;
+        tnmParamBox.style.display = (val === 'lung' || val === 'breast') ? 'grid' : 'none';
+        brainParamBox.style.display = (val === 'brain') ? 'block' : 'none';
+        skinParamBox.style.display = (val === 'skin') ? 'block' : 'none';
+        calculateCurrentStaging();
+      });
+
+      async function calculateCurrentStaging() {
+        const ctype = stagingCancerSelect.value;
+        let params = {};
+        if (ctype === 'brain') {
+          params.who_grade = document.getElementById('brain_who_grade').value;
+        } else if (ctype === 'skin') {
+          params.breslow_mm = document.getElementById('skin_breslow').value;
+          params.ulcerated = (document.getElementById('skin_ulcer').value === 'yes');
+        } else {
+          params.t = document.getElementById('tnm_t').value;
+          params.n = document.getElementById('tnm_n').value;
+          params.m = document.getElementById('tnm_m').value;
+        }
+
+        try {
+          const res = await fetch('/api/workflows/calculate_staging', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cancer_type: ctype, params: params })
+          });
+          const data = await res.json();
+          if (data.success) {
+            const st = data.staging;
+            document.getElementById('tnmStageBadge').innerText = st.stage;
+            document.getElementById('tnmSummaryText').innerText = st.summary;
+            document.getElementById('tnmPathwayText').innerText = `Recommended Pathway: ${st.pathway}`;
+
+            document.getElementById('speakTnmBtn').dataset.text = 
+              `Calculated oncology staging is ${st.stage}. Recommended clinical pathway: ${st.pathway}`;
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      document.querySelectorAll('#tnmParamBox select, #brainParamBox select, #skinParamBox input, #skinParamBox select').forEach(el => {
+        el.addEventListener('change', calculateCurrentStaging);
+      });
+
+      // Order Generator
+      document.getElementById('orderGenForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const cid = document.getElementById('orderCaseSelect').value;
+        const oType = document.getElementById('orderTypeSelect').value;
+        const inst = document.getElementById('orderInstructions').value;
+
+        try {
+          const res = await fetch('/api/workflows/generate_order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ case_id: cid, order_type: oType, instructions: inst })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(`Oncology Requisition ${data.order.order_id} attached to Case!`);
+            document.getElementById('orderInstructions').value = '';
+            const c = cases.find(item => item.case_id === cid);
+            if (c) c.clinical_orders.push(data.order);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+
+      // Initial Render
+      renderBoard();
+      calculateCurrentStaging();
+    });
+  </script>
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_live.js"></script>
+</body>
+</html>

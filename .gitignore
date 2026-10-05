@@ -1,0 +1,36 @@
+# Environment & Credentials
+.env
+service_account.json
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Large Datasets & Model Weights (> 100MB / local training)
+dataset/
+data/
+models/
+*.h5
+*.keras
+
+# Logs & Temporary Outputs
+*.log
+*.tmp
+*.pdf
+test_gradcam_*.png
+*_output.txt
+
+# IDE & OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

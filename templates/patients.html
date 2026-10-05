@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient EMR &amp; Longitudinal Timeline — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="/static/css/hospital_system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container" style="max-width: 1440px;">
+
+    <!-- Top Hospital Navigation Header -->
+    {% include 'hospital_header.html' %}
+
+    <!-- Top Breadcrumb & Action Row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-hospital-user text-accent"></i> Patient Longitudinal EMR &amp; History
+        </h2>
+        <p style="font-size: 0.82rem; color: var(--muted); margin: 3px 0 0 0;">
+          Comprehensive electronic medical record, multi-modality timelines, clinical notes, and informed consent
+        </p>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button id="openRegisterModalBtn" class="btn btn-primary" style="padding: 7px 16px; font-size: 0.82rem; border-radius: 9999px;">
+          <i class="fa-solid fa-user-plus"></i> Register New Patient
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Layout: Left Patient Selector & Demographics / Right EMR Tabs & Timeline -->
+    <div style="display: grid; grid-template-columns: 340px 1fr; gap: 20px;">
+
+      <!-- Left Column: Patient Directory & Demographics Profile (Requirement #2) -->
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        
+        <!-- Patient Directory Selector -->
+        <div class="panel-card" style="margin-bottom: 0;">
+          <div class="panel-header" style="padding: 14px 18px 8px;">
+            <span class="panel-tag">EMR Directory</span>
+            <h4 style="margin: 4px 0 0 0; font-size: 0.95rem; font-weight: 700;">Select Patient Profile</h4>
+          </div>
+          <div style="padding: 10px 14px; max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+            {% for p in patients %}
+            <a href="/patients/{{ p.patient_id }}" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-radius: 8px; border: 1px solid {% if patient and patient.patient_id == p.patient_id %}#38bdf8{% else %}rgba(255,255,255,0.06){% endif %}; background: {% if patient and patient.patient_id == p.patient_id %}rgba(56,189,248,0.12){% else %}rgba(15,23,42,0.4){% endif %}; transition: all 0.15s ease;">
+              <div>
+                <div style="font-weight: 700; font-size: 0.86rem; color: #fff;">{{ p.name }}</div>
+                <div style="font-size: 0.72rem; color: var(--muted); font-family: monospace;">{{ p.patient_id }}</div>
+              </div>
+              <span class="badge {% if 'High' in p.status or 'Critical' in p.status %}badge-danger{% else %}badge-success{% endif %}" style="font-size: 0.68rem;">
+                {{ p.department }}
+              </span>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        {% if patient %}
+        <!-- Comprehensive Patient Profile Card (Requirement #2) -->
+        <div class="panel-card" style="margin-bottom: 0;">
+          <div class="panel-header" style="padding: 16px 18px 10px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <span class="pacs-patient-id-badge" style="font-size: 0.85rem;">{{ patient.patient_id }}</span>
+                <h3 style="font-size: 1.2rem; font-weight: 800; margin: 8px 0 2px 0;">{{ patient.name }}</h3>
+                <div style="font-size: 0.76rem; color: var(--muted);">{{ patient.age }} Years &bull; {{ patient.gender }} &bull; DOB: {{ patient.dob }}</div>
+              </div>
+              <span class="badge badge-primary" style="font-size: 0.72rem;">{{ patient.blood_group }}</span>
+            </div>
+          </div>
+
+          <div style="padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem;">
+            <div>
+              <span style="color: var(--muted); font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block;">Contact &bull; Phone</span>
+              <strong style="color: #fff;">{{ patient.phone }}</strong>
+            </div>
+
+            <div>
+              <span style="color: var(--muted); font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block;">Emergency Contact</span>
+              <strong style="color: #fff;">{{ patient.emergency_contact }}</strong>
+            </div>
+
+            <div>
+              <span style="color: var(--muted); font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block;">Residential Address</span>
+              <span style="color: #cbd5e1;">{{ patient.address }}</span>
+            </div>
+
+            <div>
+              <span style="color: #f87171; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block;"><i class="fa-solid fa-triangle-exclamation"></i> Allergies</span>
+              {% for allergy in patient.allergies %}
+                <span class="badge badge-danger" style="margin-right: 4px; margin-top: 4px; font-size: 0.7rem;">{{ allergy }}</span>
+              {% endfor %}
+            </div>
+
+            <div>
+              <span style="color: var(--muted); font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block;">Existing Conditions</span>
+              {% for cond in patient.existing_conditions %}
+                <span class="badge" style="background: rgba(255,255,255,0.08); margin-right: 4px; margin-top: 4px; font-size: 0.7rem;">{{ cond }}</span>
+              {% endfor %}
+            </div>
+
+            <div>
+              <span style="color: var(--muted); font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block;">Previous Cancer History</span>
+              <span style="color: #cbd5e1; font-style: italic;">{{ patient.cancer_history }}</span>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+              <span style="color: #38bdf8; font-size: 0.72rem; text-transform: uppercase; font-weight: 700; display: block;">Assigned Attending</span>
+              <strong style="color: #fff;">{{ patient.assigned_doctor }}</strong>
+              <div style="font-size: 0.72rem; color: var(--muted);">Department of {{ patient.department }}</div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <a href="/imaging?patient_id={{ patient.patient_id }}" class="btn btn-primary" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; text-align: center;">
+                <i class="fa-solid fa-x-ray"></i> PACS Scan
+              </a>
+              <a href="/tumor-board?patient_id={{ patient.patient_id }}" class="btn btn-outline" style="flex: 1; padding: 6px 10px; font-size: 0.78rem; text-align: center;">
+                <i class="fa-solid fa-users-viewfinder"></i> Tumor Board
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informed Consent Management Panel (Requirement #22) -->
+        <div class="panel-card" style="margin-bottom: 0;">
+          <div class="panel-header" style="padding: 14px 18px 8px;">
+            <span class="panel-tag" style="background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.3);">Consent Verified</span>
+            <h4 style="margin: 4px 0 0 0; font-size: 0.92rem; font-weight: 700;">
+              <i class="fa-solid fa-clipboard-check text-accent"></i> Patient Consent Tracking
+            </h4>
+          </div>
+          <div style="padding: 12px 18px; display: flex; flex-direction: column; gap: 8px; font-size: 0.78rem;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" checked disabled style="accent-color: #10b981;" />
+              <span>Medical Imaging Analysis</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" checked disabled style="accent-color: #10b981;" />
+              <span>AI Diagnostic &amp; Report Generation</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" checked disabled style="accent-color: #10b981;" />
+              <span>Secure Encrypted Report Sharing</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" {% if patient.consent.research_usage %}checked{% endif %} disabled style="accent-color: #10b981;" />
+              <span>De-identified Research / Study Usage</span>
+            </label>
+            <div style="border-top: 1px solid rgba(255,255,255,0.06); padding-top: 6px; font-size: 0.7rem; color: var(--muted);">
+              Signed: <strong>{{ patient.consent.signed_by }}</strong> &bull; {{ patient.consent.timestamp }}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <!-- Right Column: Medical Records Section Tabs (Requirement #4) & Longitudinal Timeline (Requirement #3) -->
+      {% if patient %}
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <div class="panel-card" style="margin-bottom: 0;">
+          
+          <!-- Medical Records Tabs Navigation (Requirement #4) -->
+          <div class="med-tabs-nav" style="padding: 16px 20px 0 20px;">
+            <button class="med-tab-btn active" data-tab="timeline">
+              <i class="fa-solid fa-timeline"></i> Patient Timeline ⭐
+            </button>
+            <button class="med-tab-btn" data-tab="overview">
+              <i class="fa-solid fa-chart-pie"></i> Overview
+            </button>
+            <button class="med-tab-btn" data-tab="visits">
+              <i class="fa-solid fa-stethoscope"></i> Visits ({{ patient.visits|length }})
+            </button>
+            <button class="med-tab-btn" data-tab="scans">
+              <i class="fa-solid fa-x-ray"></i> Scans ({{ patient.scans|length }})
+            </button>
+            <button class="med-tab-btn" data-tab="medications">
+              <i class="fa-solid fa-pills"></i> Medications ({{ patient.medications|length }})
+            </button>
+            <button class="med-tab-btn" data-tab="labs">
+              <i class="fa-solid fa-flask-vial"></i> Lab Results ({{ patient.lab_results|length }})
+            </button>
+            <button class="med-tab-btn" data-tab="notes">
+              <i class="fa-solid fa-clipboard-user"></i> Clinical Notes ({{ patient.notes|length }})
+            </button>
+          </div>
+
+          <div style="padding: 20px;">
+            
+            <!-- Tab 1: Patient Longitudinal Timeline ⭐ (Requirement #3) -->
+            <div id="tab-timeline" class="med-tab-content" style="display: block;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div>
+                  <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0;">
+                    <i class="fa-solid fa-timeline text-accent"></i> Longitudinal Care &amp; Diagnostic Journey
+                  </h3>
+                  <p style="font-size: 0.8rem; color: var(--muted); margin: 3px 0 0 0;">
+                    Complete unified chronological record from initial intake, imaging, AI predictions, follow-ups, and tumor board review.
+                  </p>
+                </div>
+                <span class="badge badge-primary">Longitudinal Sync Active</span>
+              </div>
+
+              <div class="timeline-container">
+                {% for event in patient.timeline %}
+                <div class="timeline-item {{ event.type }}">
+                  <div class="timeline-dot"></div>
+                  <div class="timeline-card">
+                    <div class="timeline-header">
+                      <div>
+                        <span class="timeline-date">{{ event.date }}</span>
+                        <h4 style="font-size: 0.95rem; font-weight: 800; margin: 3px 0 0 0; color: #fff;">
+                          {{ event.title }}
+                        </h4>
+                      </div>
+                      <span class="timeline-badge {{ event.type }}">{{ event.badge }}</span>
+                    </div>
+                    <p style="font-size: 0.82rem; color: var(--text); line-height: 1.5; margin: 6px 0;">
+                      {{ event.notes }}
+                    </p>
+                    <div style="font-size: 0.72rem; color: var(--muted); display: flex; gap: 12px; margin-top: 6px;">
+                      <span><i class="fa-solid fa-user-doctor text-accent"></i> {{ event.doctor }}</span>
+                      <span><i class="fa-solid fa-building text-accent"></i> {{ event.department }}</span>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Tab 2: Overview -->
+            <div id="tab-overview" class="med-tab-content" style="display: none;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                <div class="kpi-card blue">
+                  <div class="kpi-header"><span class="kpi-label">Diagnosis</span><i class="fa-solid fa-stethoscope"></i></div>
+                  <div style="font-size: 1.2rem; font-weight: 800; color: #fff;">{{ patient.scans[0].finding if patient.scans else 'Under Evaluation' }}</div>
+                  <div class="kpi-footer">Staged via AI &amp; Pathology</div>
+                </div>
+                <div class="kpi-card rose">
+                  <div class="kpi-header"><span class="kpi-label">Risk Category</span><i class="fa-solid fa-triangle-exclamation"></i></div>
+                  <div style="font-size: 1.2rem; font-weight: 800; color: #f87171;">{{ patient.scans[0].risk if patient.scans else 'Low' }} Risk</div>
+                  <div class="kpi-footer">Priority Triage Assigned</div>
+                </div>
+                <div class="kpi-card emerald">
+                  <div class="kpi-header"><span class="kpi-label">Active Regimen</span><i class="fa-solid fa-pills"></i></div>
+                  <div style="font-size: 1.2rem; font-weight: 800; color: #34d399;">{{ patient.medications[0].drug if patient.medications else 'None' }}</div>
+                  <div class="kpi-footer">Daily adherence verified</div>
+                </div>
+              </div>
+
+              <div style="background: rgba(15,23,42,0.6); border: 1px solid var(--hospital-card-border); border-radius: 12px; padding: 18px;">
+                <h4 style="font-size: 0.95rem; font-weight: 800; margin: 0 0 10px 0; color: #38bdf8;">
+                  <i class="fa-solid fa-clipboard-check"></i> Clinical Status Summary
+                </h4>
+                <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text);">
+                  Patient {{ patient.name }} ({{ patient.patient_id }}) is currently under multidisciplinary cancer care.
+                  Diagnostic imaging and pathology confirm localized neoplasm with high AI confidence correlation.
+                  Treatment plan has been reviewed and signed off by attending oncologist {{ patient.assigned_doctor }}.
+                </p>
+              </div>
+            </div>
+
+            <!-- Tab 3: Visits -->
+            <div id="tab-visits" class="med-tab-content" style="display: none;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Visit Date</th>
+                    <th>Clinical Reason</th>
+                    <th>Physician</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for v in patient.visits %}
+                  <tr>
+                    <td><strong>{{ v.date }}</strong></td>
+                    <td>{{ v.reason }}</td>
+                    <td>{{ v.doctor }}</td>
+                    <td>{{ v.dept }}</td>
+                    <td><span class="badge badge-success">{{ v.status }}</span></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Tab 4: Scans -->
+            <div id="tab-scans" class="med-tab-content" style="display: none;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                {% for scan in patient.scans %}
+                <div style="background: rgba(15,23,42,0.7); border: 1px solid var(--hospital-card-border); border-radius: 12px; padding: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="badge badge-primary">{{ scan.modality }}</span>
+                    <span style="font-size: 0.72rem; color: var(--muted); font-family: monospace;">{{ scan.scan_id }}</span>
+                  </div>
+                  <img src="{{ scan.image_url }}" alt="Scan preview" style="width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);" />
+                  <div style="font-weight: 700; font-size: 0.88rem; color: #fff;">{{ scan.finding }}</div>
+                  <div style="font-size: 0.74rem; color: var(--muted); margin: 4px 0 10px 0;">
+                    AI Confidence: <strong style="color: #34d399;">{{ scan.confidence }}</strong> &bull; Risk: <strong>{{ scan.risk }}</strong>
+                  </div>
+                  <a href="/imaging?patient_id={{ patient.patient_id }}" class="btn btn-primary" style="width: 100%; text-align: center; padding: 6px; font-size: 0.78rem;">
+                    <i class="fa-solid fa-x-ray"></i> Open in PACS Viewer
+                  </a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Tab 5: Medications -->
+            <div id="tab-medications" class="med-tab-content" style="display: none;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Medication Name</th>
+                    <th>Dosage &amp; Frequency</th>
+                    <th>Start Date</th>
+                    <th>Prescriber</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for med in patient.medications %}
+                  <tr>
+                    <td><strong>{{ med.drug }}</strong></td>
+                    <td>{{ med.dose }}</td>
+                    <td>{{ med.start_date }}</td>
+                    <td>{{ med.prescriber }}</td>
+                    <td>
+                      <span class="badge {% if med.status == 'Active' %}badge-success{% else %}badge-warning{% endif %}">
+                        {{ med.status }}
+                      </span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Tab 6: Lab Results -->
+            <div id="tab-labs" class="med-tab-content" style="display: none;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Diagnostic Test</th>
+                    <th>Recorded Value</th>
+                    <th>Reference Range</th>
+                    <th>Collection Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for lab in patient.lab_results %}
+                  <tr>
+                    <td><strong>{{ lab.test }}</strong></td>
+                    <td style="font-weight: 700; color: #fff;">{{ lab.value }}</td>
+                    <td style="color: var(--muted); font-size: 0.78rem;">{{ lab.normal_range }}</td>
+                    <td>{{ lab.date }}</td>
+                    <td>
+                      {% if lab.status == 'High' or lab.status == 'Abnormal' %}
+                        <span class="badge badge-danger">{{ lab.status }}</span>
+                      {% else %}
+                        <span class="badge badge-success">{{ lab.status }}</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Tab 7: Clinical Notes -->
+            <div id="tab-notes" class="med-tab-content" style="display: none;">
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                {% for note in patient.notes %}
+                <div style="background: rgba(15,23,42,0.6); border: 1px solid var(--hospital-card-border); border-radius: 10px; padding: 14px 18px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <div>
+                      <strong style="color: #fff; font-size: 0.9rem;">{{ note.author }}</strong>
+                      <span style="font-size: 0.72rem; color: #38bdf8; margin-left: 8px;">{{ note.role }}</span>
+                    </div>
+                    <span style="font-size: 0.72rem; color: var(--muted); font-family: monospace;">{{ note.date }}</span>
+                  </div>
+                  <p style="font-size: 0.82rem; color: var(--text); line-height: 1.5; margin: 0;">
+                    {{ note.text }}
+                  </p>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+  <!-- Patient Registration Modal (Requirement #2) -->
+  <div id="registerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: #091326; border: 1px solid var(--hospital-card-border); border-radius: 16px; width: 90%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.8);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #fff;">
+          <i class="fa-solid fa-user-plus text-accent"></i> Hospital Patient Registration &bull; EMR Intake
+        </h3>
+        <button id="closeRegisterModalBtn" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">&times;</button>
+      </div>
+
+      <form id="newPatientForm">
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="font-size: 0.78rem;">Generated Hospital Patient ID</label>
+          <input type="text" id="regPatientId" class="form-input" value="MS-2026-004821" readonly style="background: rgba(15,23,42,0.8); color: #38bdf8; font-family: monospace; font-weight: 700;" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Full Legal Name *</label>
+            <input type="text" id="regName" class="form-input" placeholder="e.g. Robert H. Vance" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Age (Years) *</label>
+            <input type="number" id="regAge" class="form-input" min="1" max="120" value="52" required />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Gender *</label>
+            <select id="regGender" class="form-select">
+              <option value="Female">Female</option>
+              <option value="Male" selected>Male</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Blood Group *</label>
+            <select id="regBlood" class="form-select">
+              <option value="O+" selected>O Positive (O+)</option>
+              <option value="A+">A Positive (A+)</option>
+              <option value="B+">B Positive (B+)</option>
+              <option value="AB+">AB Positive (AB+)</option>
+              <option value="O-">O Negative (O-)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Phone Number *</label>
+            <input type="text" id="regPhone" class="form-input" placeholder="+1 (555) 000-0000" value="+1 (555) 839-2104" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Emergency Contact *</label>
+            <input type="text" id="regEmergency" class="form-input" placeholder="Name &amp; Phone" value="Sarah Vance - +1 (555) 839-2105" required />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="font-size: 0.78rem;">Residential Address</label>
+          <input type="text" id="regAddress" class="form-input" value="450 Medical Heights Blvd, Sector 8" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Allergies (comma separated)</label>
+            <input type="text" id="regAllergies" class="form-input" placeholder="e.g. Penicillin, Sulfa" value="Penicillin" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Existing Conditions</label>
+            <input type="text" id="regConditions" class="form-input" placeholder="e.g. Hypertension" value="Hypertension" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label" style="font-size: 0.78rem;">Previous Cancer History</label>
+          <input type="text" id="regHistory" class="form-input" value="No prior personal history of malignancy" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Assigned Doctor</label>
+            <input type="text" id="regDoctor" class="form-input" value="Dr. Sarah Sharma, MD" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.78rem;">Hospital Department</label>
+            <select id="regDept" class="form-select">
+              <option value="Oncology" selected>Oncology</option>
+              <option value="Radiology">Radiology</option>
+              <option value="Surgery">Surgery</option>
+              <option value="Dermatology">Dermatology</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="cancelRegisterBtn" class="btn btn-outline" style="padding: 7px 16px;">Cancel</button>
+          <button type="submit" class="btn btn-primary" style="padding: 7px 20px;">
+            <i class="fa-solid fa-save"></i> Register Patient &amp; Create EMR
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_system.js"></script>
+  <script>
+    // Registration Modal Logic
+    const openBtn = document.getElementById('openRegisterModalBtn');
+    const modal = document.getElementById('registerModal');
+    const closeBtn = document.getElementById('closeRegisterModalBtn');
+    const cancelBtn = document.getElementById('cancelRegisterBtn');
+    const regForm = document.getElementById('newPatientForm');
+    const regIdInput = document.getElementById('regPatientId');
+
+    function randomPatientId() {
+      const num = Math.floor(1000 + Math.random() * 9000);
+      return `MS-2026-00${num}`;
+    }
+
+    if (openBtn && modal) {
+      openBtn.addEventListener('click', () => {
+        regIdInput.value = randomPatientId();
+        modal.style.display = 'flex';
+      });
+    }
+
+    if (closeBtn && modal) closeBtn.addEventListener('click', () => modal.style.display = 'none');
+    if (cancelBtn && modal) cancelBtn.addEventListener('click', () => modal.style.display = 'none');
+
+    if (regForm) {
+      regForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const payload = {
+          patient_id: regIdInput.value,
+          name: document.getElementById('regName').value,
+          age: document.getElementById('regAge').value,
+          gender: document.getElementById('regGender').value,
+          blood_group: document.getElementById('regBlood').value,
+          phone: document.getElementById('regPhone').value,
+          emergency_contact: document.getElementById('regEmergency').value,
+          address: document.getElementById('regAddress').value,
+          allergies: document.getElementById('regAllergies').value,
+          existing_conditions: document.getElementById('regConditions').value,
+          cancer_history: document.getElementById('regHistory').value,
+          assigned_doctor: document.getElementById('regDoctor').value,
+          department: document.getElementById('regDept').value
+        };
+
+        fetch('/api/patients/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            modal.style.display = 'none';
+            showToast(`Patient ${payload.name} registered with ID ${payload.patient_id}!`, 'success');
+            setTimeout(() => {
+              window.location.href = `/patients/${payload.patient_id}`;
+            }, 800);
+          }
+        });
+      });
+    }
+  </script>
+</body>
+</html>

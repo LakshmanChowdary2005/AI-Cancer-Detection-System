@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Worklist &amp; Triage — MediScan AI</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="stylesheet" href="/static/css/health_suite.css" />
+  <link rel="stylesheet" href="/static/css/hospital_portal.css" />
+  <link rel="stylesheet" href="/static/css/hospital_system.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div class="page-container" style="max-width: 1440px;">
+
+    <!-- Top Hospital Navigation Header -->
+    {% include 'hospital_header.html' %}
+
+    <!-- Top Heading Row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-list-check text-accent"></i> My Doctor Worklist &amp; Clinical Triage
+        </h2>
+        <p style="font-size: 0.82rem; color: var(--muted); margin: 3px 0 0 0;">
+          Prioritized review queue &bull; AI abnormality severity scoring &bull; Rapid PACS diagnostic workflow
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <a href="/api/export_excel" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem;">
+          <i class="fa-solid fa-file-excel text-accent"></i> Export Worklist
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter Tabs Bar (Requirement #11) -->
+    <div class="panel-card" style="margin-bottom: 20px; padding: 12px 18px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <a href="/worklist?filter=all" class="btn {% if current_filter == 'all' %}btn-primary{% else %}btn-outline{% endif %}" style="padding: 6px 14px; font-size: 0.8rem;">
+            All Studies ({{ worklist|length }})
+          </a>
+          <a href="/worklist?filter=pending" class="btn {% if current_filter == 'pending' %}btn-primary{% else %}btn-outline{% endif %}" style="padding: 6px 14px; font-size: 0.8rem;">
+            <i class="fa-solid fa-clock"></i> Pending Review
+          </a>
+          <a href="/worklist?filter=critical" class="btn {% if current_filter == 'critical' %}btn-primary{% else %}btn-outline{% endif %}" style="padding: 6px 14px; font-size: 0.8rem; border-color: rgba(239,68,68,0.5); color: #f87171;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Critical Priority
+          </a>
+          <a href="/worklist?filter=reviewed" class="btn {% if current_filter == 'reviewed' %}btn-primary{% else %}btn-outline{% endif %}" style="padding: 6px 14px; font-size: 0.8rem;">
+            <i class="fa-solid fa-circle-check"></i> Doctor Reviewed
+          </a>
+          <a href="/worklist?filter=follow-up" class="btn {% if current_filter == 'follow-up' %}btn-primary{% else %}btn-outline{% endif %}" style="padding: 6px 14px; font-size: 0.8rem;">
+            <i class="fa-solid fa-calendar-days"></i> Follow-Up Surveillance
+          </a>
+        </div>
+
+        <div style="font-size: 0.78rem; color: var(--muted);">
+          Showing <strong>{{ worklist|length }}</strong> triaged medical scans
+        </div>
+      </div>
+    </div>
+
+    <!-- Worklist Data Table (Requirement #11) -->
+    <div class="panel-card" style="padding: 0; overflow: hidden;">
+      <div class="table-responsive">
+        <table class="data-table" style="margin: 0;">
+          <thead>
+            <tr>
+              <th>Priority</th>
+              <th>Patient Details</th>
+              <th>Study Modality</th>
+              <th>Acquisition Date</th>
+              <th>AI Diagnostic Finding</th>
+              <th>AI Reliability</th>
+              <th>Review Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in worklist %}
+            <tr>
+              <td>
+                {% if item.priority == 'Critical' %}
+                  <span class="badge badge-danger" style="animation: pulseSubtle 2s infinite;">🔴 Critical</span>
+                {% elif item.priority == 'High' %}
+                  <span class="badge badge-danger" style="background: rgba(239,68,68,0.15); color: #f87171;">🟠 High</span>
+                {% elif item.priority == 'Medium' %}
+                  <span class="badge badge-warning">🟡 Medium</span>
+                {% else %}
+                  <span class="badge badge-success">🟢 Low</span>
+                {% endif %}
+              </td>
+              <td>
+                <div style="font-weight: 700; color: #fff;">{{ item.patient_name }}</div>
+                <div style="font-size: 0.72rem; color: var(--muted);">
+                  <span class="pacs-patient-id-badge" style="font-size: 0.7rem; padding: 1px 5px;">{{ item.patient_id }}</span>
+                  &bull; {{ item.age }}y / {{ item.gender }}
+                </div>
+              </td>
+              <td>
+                <strong>{{ item.study }}</strong>
+                <div style="font-size: 0.72rem; color: #38bdf8;">{{ item.body_part }}</div>
+              </td>
+              <td>
+                <span style="font-size: 0.78rem; font-family: monospace;">{{ item.date }}</span>
+              </td>
+              <td style="max-width: 220px;">
+                <div style="font-weight: 600; color: #fff; font-size: 0.85rem;">{{ item.finding }}</div>
+                <div style="font-size: 0.7rem; color: var(--muted);">Attending: {{ item.doctor }}</div>
+              </td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="dot" style="background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
+                  <strong style="color: #34d399;">{{ item.confidence }}</strong>
+                </div>
+                <div style="font-size: 0.7rem; color: var(--muted);">Image: Optimal</div>
+              </td>
+              <td>
+                {% if item.status == 'Reviewed' %}
+                  <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Certified</span>
+                {% else %}
+                  <span class="badge badge-warning"><i class="fa-solid fa-clock"></i> Awaiting Sign-off</span>
+                {% endif %}
+              </td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  <a href="/imaging?patient_id={{ item.patient_id }}" class="btn btn-primary" style="padding: 4px 10px; font-size: 0.76rem;" title="Open in PACS DICOM Workstation">
+                    <i class="fa-solid fa-x-ray"></i> Review
+                  </a>
+                  <a href="/patients/{{ item.patient_id }}" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.76rem;" title="View Complete EMR Profile">
+                    <i class="fa-solid fa-address-card"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/js/accessibility.js"></script>
+  <script src="/static/js/hospital_system.js"></script>
+</body>
+</html>
