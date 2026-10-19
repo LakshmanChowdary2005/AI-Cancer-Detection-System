@@ -26,6 +26,7 @@ models/
 *.log
 *.tmp
 *.pdf
+!docs/*.pdf
 test_gradcam_*.png
 *_output.txt
 
